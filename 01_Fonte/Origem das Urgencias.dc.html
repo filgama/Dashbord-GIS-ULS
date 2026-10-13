@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/broadsheet-45911d68-1bc4-4b65-a0f0-180c7b2e3563/styles.css">
+<script src="_ds/broadsheet-45911d68-1bc4-4b65-a0f0-180c7b2e3563/_ds_bundle.js"></script>
+<script src="urgencias-data.js"></script>
+<style>
+body{margin:0;background:#f3f2f2;-webkit-font-smoothing:antialiased}
+a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-800)}
+input[type=range]{accent-color:#0088b0}
+</style>
+</helmet>
+<div style="max-width:1560px;margin:0 auto;padding:var(--space-6) 32px 64px;font-family:var(--font-body);color:var(--color-text);box-sizing:border-box">
+
+  <div style="position:sticky;top:0;z-index:100;height:0">
+    <nav id="ctxbar" aria-label="Contexto e secções" style="position:absolute;left:0;right:0;top:0;box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:2px 24px;padding:6px 0;background:#f3f2f2;border-bottom:1px solid rgba(32,30,29,.25);font-size:13px;opacity:{{ cxOp }};visibility:{{ cxVis }};transition:opacity .15s">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px 0;min-width:0;flex:1 1 420px">
+        <sc-for list="{{ cxParts }}" as="p" hint-placeholder-count="3"><span style="white-space:pre-wrap;font-weight:{{ p.fw }}">{{ p.sep }}{{ p.txt }}</span></sc-for>
+        <sc-if value="{{ cxHasSel }}" hint-placeholder-val="{{ false }}"><span style="white-space:pre-wrap"> · {{ cxSelName }}</span><button class="btn btn-ghost" style="padding:0 6px;font-size:15px;line-height:1.2" onClick="{{ cxClear }}" aria-label="Limpar freguesia selecionada" title="Limpar freguesia selecionada">×</button></sc-if>
+        <button class="btn btn-ghost" style="padding:2px 8px;margin-left:8px;font-size:13px" onClick="{{ cxFilters }}">Alterar filtros</button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;min-width:0">
+        <sc-for list="{{ cxItems }}" as="s" hint-placeholder-count="6"><button onClick="{{ s.go }}" style="border:0;background:transparent;font:inherit;font-size:13px;font-weight:{{ s.fw }};color:{{ s.color }};padding:4px 6px;border-bottom:2px solid {{ s.bc }};cursor:pointer">{{ s.label }}</button></sc-for>
+      </div>
+    </nav>
+  </div>
+
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <div style="height:4px;background:var(--color-text)"></div>
+    <div style="height:1px;background:var(--color-text)"></div>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:10px 0 8px;flex-wrap:wrap">
+      <span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase">ULS Amadora/Sintra · Serviço de Urgência</span>
+      <span style="font-size:13px;font-style:italic">Origem e prioridade das admissões · 1.º trimestre de 2026</span>
+    </div>
+    <div style="height:1px;background:var(--color-text)"></div>
+    <div style="display:flex;gap:28px;padding:7px 0;font-size:12px;flex-wrap:wrap">
+      <span>31 dez 2025 – 31 mar 2026</span><span>{{ totalLabel }} admissões</span><span>5 locais de entrada</span><span>Triagem de Manchester</span><span style="margin-left:auto;font-style:italic">Fonte: BD_Urgencia_Admissoes.csv</span>
+    </div>
+    <div style="height:1px;background:var(--color-text)"></div>
+  </header>
+
+  <section style="display:flex;flex-wrap:wrap;gap:30px 56px;padding:40px 0 32px;align-items:flex-end">
+    <div style="flex:1 1 560px;min-width:0">
+      <h1 style="font-size:clamp(38px,4vw,52px);line-height:1.05;letter-spacing:-.015em;margin:0 0 16px;max-width:16em;text-wrap:balance">De onde vêm os doentes da urgência, e com que prioridade chegam</h1>
+      <p style="font-size:18px;line-height:1.5;margin:0;max-width:46em;text-wrap:pretty">{{ lede }}</p>
+    </div>
+    <div style="flex:1 1 360px;max-width:560px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:22px 26px">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <span style="font-size:12px;color:var(--color-neutral-700)">{{ k.label }}</span>
+          <span style="font-size:34px;line-height:1.05;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em">{{ k.value }}</span>
+          <span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ k.sub }}</span>
+          <span style="font-size:12px;font-weight:600;color:{{ k.dc }}">{{ k.delta }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start">
+
+    <aside style="flex:0 0 310px;min-width:0;display:flex;flex-direction:column;gap:34px">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Opções do mapa</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:13px;color:var(--color-neutral-700)">Tratamento</span>
+          <div class="seg" style="align-self:flex-start"><sc-for list="{{ modes }}" as="o" hint-placeholder-count="4"><label class="seg-opt"><input type="radio" name="modo" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+        </div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:13px;color:var(--color-neutral-700)">Medir</span>
+            <div class="seg"><sc-for list="{{ metrics }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="metrica" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:13px;color:var(--color-neutral-700)">Fundo</span>
+            <div class="seg"><sc-for list="{{ fundos }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="fundo" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:13px;color:var(--color-neutral-700)">Vista</span>
+            <div class="seg"><sc-for list="{{ zooms }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="zoom" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:13px;color:var(--color-neutral-700)">Escala de cor</span>
+            <div class="seg"><sc-for list="{{ scales }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="escala" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:13px;color:var(--color-neutral-700)">Origem <span style="font-style:italic">· pode escolher várias</span></span>
+          <div class="seg" style="align-self:flex-start"><sc-for list="{{ origens }}" as="o" hint-placeholder-count="4"><label class="seg-opt"><input type="checkbox" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <span style="font-size:13px;color:var(--color-neutral-700)">Local de entrada</span>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px">
+            <sc-for list="{{ locais }}" as="o" hint-placeholder-count="6"><label class="radio"><input type="radio" name="local" checked="{{ o.on }}" onChange="{{ o.pick }}"><span class="dot"></span>{{ o.label }}</label></sc-for>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Triagem de Manchester</div>
+          <h2 style="font-size:26px;line-height:1.15;margin:0">{{ panelTitle }}</h2>
+          <div style="display:flex;gap:10px;align-items:baseline;margin-top:4px;font-size:13px;flex-wrap:wrap">
+            <span style="font-style:italic;color:var(--color-neutral-700)">{{ panelSub }}</span>
+            <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" style="padding:2px 5px;font-size:13px" onClick="{{ clearSel }}">Ver toda a área</button></sc-if>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px">
+          <div style="display:flex;height:22px;border-radius:var(--radius-md);overflow:hidden">
+            <sc-for list="{{ bar }}" as="s" hint-placeholder-count="7"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }};opacity:{{ s.op }}"></i></sc-for>
+          </div>
+          <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;height:6px;border-radius:1px;overflow:hidden;opacity:.6">
+              <sc-for list="{{ barRef }}" as="s" hint-placeholder-count="7"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for>
+            </div>
+            <span style="font-size:11px;font-style:italic;color:var(--color-neutral-700)">Barra fina: toda a área de influência, para comparação</span>
+          </sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column">
+          <sc-for list="{{ prios }}" as="p" hint-placeholder-count="7">
+            <button onClick="{{ p.toggle }}" style="display:grid;grid-template-columns:14px minmax(0,1fr) 58px 50px;align-items:center;gap:10px;padding:7px 6px;margin:0 -6px;border:0;background:{{ p.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md);opacity:{{ p.op }}" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
+              <i style="display:block;width:12px;height:12px;border-radius:50%;background:{{ p.c }};box-shadow:inset 0 0 0 1px rgba(32,30,29,.25)"></i>
+              <span style="display:flex;flex-direction:column;gap:3px;min-width:0">
+                <span>{{ p.name }} <span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ p.hint }}</span></span>
+                <span style="display:block;height:3px;background:var(--color-neutral-200)"><i style="display:block;height:3px;width:{{ p.w }}%;background:{{ p.c }}"></i></span>
+              </span>
+              <span style="text-align:right;font-variant-numeric:tabular-nums">{{ p.n }}</span>
+              <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ p.pct }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:4px 14px;flex-wrap:wrap;font-size:13px;align-items:center">
+          <span style="color:var(--color-neutral-700)">Mostrar no mapa:</span>
+          <sc-for list="{{ presets }}" as="q" hint-placeholder-count="3"><button class="btn btn-ghost" style="padding:2px 5px;font-size:13px;text-decoration:{{ q.deco }};text-underline-offset:3px" onClick="{{ q.pick }}">{{ q.label }}</button></sc-for>
+        </div>
+      </div>
+
+    </aside>
+
+    <div style="flex:1 1 420px;display:flex;flex-direction:column;gap:14px;min-width:0">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Mapa · {{ rangeLabel }}</div>
+          <h2 style="font-size:28px;line-height:1.15;margin:0">{{ mapTitle }}</h2>
+        </div>
+      </div>
+
+      <div ref="{{ mapRef }}" style="position:relative;background:var(--color-surface);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm)">
+        {{ tileLayer }}
+        <svg viewBox="{{ viewBox }}" style="position:relative;display:block;width:100%;height:auto;aspect-ratio:{{ aspect }};cursor:grab;touch-action:none;user-select:none" preserveAspectRatio="xMidYMid slice" onMouseLeave="{{ clearHover }}" onPointerDown="{{ onDown }}">
+          <defs>
+            <filter id="heat-c" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="{{ blur }}"></feGaussianBlur>
+              <feColorMatrix type="matrix" values="0 0 0 1 0  0 0 0 1 0  0 0 0 1 0  0 0 0 1 0"></feColorMatrix>
+              <feComponentTransfer>
+                <feFuncR type="table" tableValues="0.80 0.38 0.07 0.00 0.04"></feFuncR>
+                <feFuncG type="table" tableValues="0.93 0.77 0.53 0.29 0.19"></feFuncG>
+                <feFuncB type="table" tableValues="1.00 0.93 0.67 0.38 0.24"></feFuncB>
+                <feFuncA type="table" tableValues="0 0.6 0.8 0.9 0.95"></feFuncA>
+              </feComponentTransfer>
+            </filter>
+            <filter id="heat-m" x="-10%" y="-10%" width="120%" height="120%" color-interpolation-filters="sRGB">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="{{ blur }}"></feGaussianBlur>
+              <feColorMatrix type="matrix" values="0 0 0 1 0  0 0 0 1 0  0 0 0 1 0  0 0 0 1 0"></feColorMatrix>
+              <feComponentTransfer>
+                <feFuncR type="table" tableValues="1.00 1.00 0.85 0.47 0.29"></feFuncR>
+                <feFuncG type="table" tableValues="0.87 0.56 0.13 0.05 0.08"></feFuncG>
+                <feFuncB type="table" tableValues="0.90 0.69 0.44 0.24 0.16"></feFuncB>
+                <feFuncA type="table" tableValues="0 0.6 0.8 0.9 0.95"></feFuncA>
+              </feComponentTransfer>
+            </filter>
+            <filter id="paper" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0.15"></feColorMatrix></filter>
+          </defs>
+                    <g style="mix-blend-mode:multiply" pointer-events="none">
+            <sc-for list="{{ parishes }}" as="f" hint-placeholder-count="0">
+              <path d="{{ f.p }}" fill="{{ f.fill }}" fill-opacity="{{ landOp }}" stroke="{{ landStroke }}" stroke-opacity="{{ landStrokeOp }}" stroke-width="{{ hair }}" stroke-linejoin="round"></path>
+            </sc-for>
+          </g>
+          <sc-if value="{{ showHeat }}" hint-placeholder-val="{{ false }}">
+            <g filter="{{ heatFilter }}" style="mix-blend-mode:multiply" pointer-events="none">
+              <sc-for list="{{ heat }}" as="f" hint-placeholder-count="0"><path d="{{ f.p }}" fill="#000" fill-opacity="{{ f.op }}"></path></sc-for>
+            </g>
+          </sc-if>
+          <sc-if value="{{ showDots }}" hint-placeholder-val="{{ false }}">
+            <g pointer-events="none">
+              <sc-for list="{{ dots }}" as="f" hint-placeholder-count="0"><path d="{{ f.p }}" fill="{{ dotInk }}"></path></sc-for>
+            </g>
+          </sc-if>
+          <g fill="none" stroke="#201e1d" stroke-width="{{ conStroke }}" stroke-opacity="0.6" stroke-linejoin="round" pointer-events="none">
+            <sc-for list="{{ concelhos }}" as="c" hint-placeholder-count="0"><path d="{{ c.p }}"></path></sc-for>
+          </g>
+          <sc-if value="{{ showCircles }}" hint-placeholder-val="{{ false }}">
+            <g pointer-events="none">
+              <sc-for list="{{ circles }}" as="c" hint-placeholder-count="0"><circle cx="{{ c.x }}" cy="{{ c.y }}" r="{{ c.r }}" fill="{{ c.fill }}" fill-opacity="0.72" stroke="#f3f2f2" stroke-width="{{ hair }}"></circle></sc-for>
+            </g>
+          </sc-if>
+                    <g pointer-events="none" font-family="Source Serif 4, serif" fill="#201e1d">
+            <sc-for list="{{ hosps }}" as="h" hint-placeholder-count="0">
+              <rect x="{{ h.rx }}" y="{{ h.ry }}" width="{{ h.s }}" height="{{ h.s }}" fill="#201e1d" stroke="#f3f2f2" stroke-width="{{ h.sw }}"><title>{{ h.t }}</title></rect>
+            </sc-for>
+          </g>
+          <g pointer-events="none" font-family="Source Serif 4, serif" font-style="italic" text-anchor="middle" fill="#201e1d">
+            <sc-for list="{{ conLabels }}" as="c" hint-placeholder-count="0"><text x="{{ c.x }}" y="{{ c.y }}" font-size="{{ labelSize }}" stroke="#f3f2f2" stroke-width="{{ labelHalo }}" paint-order="stroke" stroke-linejoin="round">{{ c.n }}</text></sc-for>
+          </g>
+          <g>
+            <sc-for list="{{ hits }}" as="f" hint-placeholder-count="0">
+              <path d="{{ f.p }}" fill="transparent" stroke="{{ f.stroke }}" stroke-width="{{ f.sw }}" style="cursor:pointer" onMouseMove="{{ f.move }}" onClick="{{ f.click }}"></path>
+            </sc-for>
+          </g>
+        </svg>
+
+        {{ labelLayer }}
+        {{ hospLayer }}
+        <div style="position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:4px">
+          <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:20px;width:34px;height:34px" onClick="{{ zoomIn }}" aria-label="Aproximar" title="Aproximar">+</button>
+          <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:20px;width:34px;height:34px" onClick="{{ zoomOut }}" aria-label="Afastar" title="Afastar">−</button>
+          <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:12px;width:34px;height:34px" onClick="{{ zoomReset }}" aria-label="Repor vista" title="Repor vista">⟲</button>
+        </div>
+        <div style="position:absolute;right:12px;top:12px;width:min(250px,38%);background:color-mix(in srgb,var(--color-bg) 94%,transparent);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;pointer-events:none">
+          <div style="font-size:clamp(26px,3vw,38px);line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent-700)">{{ ov.n }}</div>
+          <div style="font-size:12px;font-style:italic;color:var(--color-neutral-700);margin:4px 0 12px">{{ ov.sub }}</div>
+          <div style="font-size:12px;font-weight:600;margin-bottom:4px">{{ ov.topLabel }}</div>
+          <sc-for list="{{ ov.top }}" as="r" hint-placeholder-count="6">
+            <div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;line-height:1.55"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ r.n }}</span></div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ tip.show }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;left:{{ tip.x }}px;top:{{ tip.y }}px;transform:translate(14px,-50%);pointer-events:none;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:10px 12px;min-width:190px;max-width:260px;font-size:13px;line-height:1.35">
+            <div style="font-weight:600;font-size:15px;margin-bottom:2px">{{ tip.name }}</div>
+            <div style="font-style:italic;color:var(--color-neutral-700);margin-bottom:6px">{{ tip.con }}</div>
+            <div style="display:flex;justify-content:space-between;gap:12px"><span>Admissões</span><span style="font-variant-numeric:tabular-nums">{{ tip.n }}</span></div>
+            <div style="display:flex;justify-content:space-between;gap:12px"><span>{{ tip.pctLabel }}</span><span style="font-variant-numeric:tabular-nums">{{ tip.pct }}</span></div>
+            <sc-for list="{{ tip.extra }}" as="x" hint-placeholder-count="0"><div style="display:flex;justify-content:space-between;gap:12px"><span>{{ x.k }}</span><span style="font-variant-numeric:tabular-nums">{{ x.v }}</span></div></sc-for>
+            <div style="display:flex;height:6px;margin-top:8px;border-radius:1px;overflow:hidden">
+              <sc-for list="{{ tip.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <div style="position:absolute;left:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;background:color-mix(in srgb,var(--color-bg) 94%,transparent);box-shadow:var(--shadow-sm);padding:10px 12px;border-radius:var(--radius-md);font-size:12px">
+          <span>{{ legendTitle }}</span>
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="font-variant-numeric:tabular-nums">{{ legendLo }}</span>
+            <div style="display:flex;gap:2px"><sc-for list="{{ legend }}" as="l" hint-placeholder-count="7"><i style="display:block;width:22px;height:10px;background:{{ l.c }}"></i></sc-for></div>
+            <span style="font-variant-numeric:tabular-nums">{{ legendHi }}</span>
+          </div>
+          <span style="font-style:italic;color:var(--color-neutral-700)">{{ legendNote }}</span>
+        </div>
+        <sc-if value="{{ showAttr }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:0;bottom:0;font-size:10px;padding:1px 6px;background:color-mix(in srgb,var(--color-bg) 85%,transparent)">{{ attr }}</div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;padding-top:6px">
+        <div style="display:flex;align-items:center;gap:14px 22px;flex-wrap:wrap">
+          <button class="btn btn-primary" style="min-width:128px" onClick="{{ togglePlay }}">{{ playLabel }}</button>
+          <span style="font-size:20px;font-weight:600;font-variant-numeric:tabular-nums">{{ rangeLabel }}</span>
+          <div style="display:flex;align-items:center;gap:8px;margin-left:auto;font-size:13px;flex-wrap:wrap">
+            <span style="color:var(--color-neutral-700)">Janela</span>
+            <div class="seg"><sc-for list="{{ wins }}" as="w" hint-placeholder-count="5"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="janela" checked="{{ w.on }}" onChange="{{ w.pick }}">{{ w.label }}</label></sc-for></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+            <span style="color:var(--color-neutral-700)">Velocidade</span>
+            <div class="seg"><sc-for list="{{ speeds }}" as="o" hint-placeholder-count="3"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="vel" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+          </div>
+        </div>
+        <svg viewBox="{{ tlBox }}" preserveAspectRatio="none" style="display:block;width:100%;height:84px">
+          <sc-for list="{{ months }}" as="m" hint-placeholder-count="0">
+            <line x1="{{ m.x }}" x2="{{ m.x }}" y1="0" y2="84" stroke="#201e1d" stroke-opacity="0.35" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+          </sc-for>
+          <sc-for list="{{ bars }}" as="b" hint-placeholder-count="0">
+            <rect x="{{ b.x }}" y="{{ b.y }}" width="{{ b.w }}" height="{{ b.h }}" fill="{{ b.fill }}" style="cursor:pointer" onClick="{{ b.pick }}"><title>{{ b.t }}</title></rect>
+          </sc-for>
+        </svg>
+        <div style="position:relative;height:0">
+          <sc-for list="{{ months }}" as="m" hint-placeholder-count="0"><span style="position:absolute;left:{{ m.pct }}%;top:-104px;font-size:11px;font-style:italic;padding-left:4px;color:var(--color-neutral-700)">{{ m.label }}</span></sc-for>
+        </div>
+        <input type="range" min="0" max="{{ maxIdx }}" step="1" value="{{ sliderVal }}" disabled="{{ sliderOff }}" onChange="{{ onSlide }}" style="width:100%;margin:0" aria-label="Último dia da janela">
+        <p style="margin:0;font-size:12.5px;font-style:italic;color:var(--color-neutral-700)">{{ tlNote }}</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:32px 48px;padding-top:28px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <h3 style="font-size:18px;margin:0">Por origem</h3>
+          <sc-for list="{{ agRows }}" as="r" hint-placeholder-count="3">
+            <button onClick="{{ r.pick }}" style="display:flex;flex-direction:column;gap:4px;opacity:{{ r.op }};border:0;background:transparent;padding:0;font:inherit;color:var(--color-text);text-align:left;cursor:pointer">
+              <span style="display:flex;justify-content:space-between;font-size:13px;gap:8px;width:100%"><span>{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700);white-space:nowrap">{{ r.n }} · <span style="color:var(--color-text);font-weight:600">{{ r.ur }}</span> urg.</span></span>
+              <span style="display:flex;width:100%;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></span>
+            </button>
+          </sc-for>
+        </div>
+  
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <h3 style="font-size:18px;margin:0">Por local de entrada</h3>
+          <sc-for list="{{ locRows }}" as="r" hint-placeholder-count="5">
+            <div style="display:flex;flex-direction:column;gap:4px;opacity:{{ r.op }}">
+              <div style="display:flex;justify-content:space-between;font-size:13px;gap:8px"><span>{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ r.n }} · <span style="color:var(--color-text);font-weight:600">{{ r.ur }}</span> urgentes</span></div>
+              <div style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)">
+                <sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        </div>
+    </div>
+
+    
+  </section>
+
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Freguesias · {{ rangeLabel }}</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">{{ rankTitle }}</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span style="font-size:13px;font-style:italic;color:var(--color-neutral-700)">Clique numa linha para a ver no mapa e no painel de triagem</span>
+        <button class="btn btn-secondary" style="font-size:13px;padding:4px 10px" onClick="{{ exportCsv }}" title="Todas as freguesias com admissões no recorte atual, com população e taxas">↓ CSV · todas as freguesias</button>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
+      <sc-for list="{{ rank }}" as="r" hint-placeholder-count="12">
+        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
+          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
+          <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Dias e locais atípicos · período completo</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">Fora do padrão</h2>
+      </div>
+      <span style="font-size:13px;font-style:italic;color:var(--color-neutral-700)">Segue a origem, o local e as prioridades, não a janela · clique numa linha para a ver no mapa</span>
+    </div>
+    <p style="margin:0 0 18px;font-size:14px;line-height:1.5;max-width:52em;color:var(--color-neutral-800)">{{ alLede }}</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
+      <sc-for list="{{ alRows }}" as="r" hint-placeholder-count="10">
+        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:84px minmax(0,1.4fr) 44px 76px 52px 96px;gap:10px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:transparent;font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
+          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ r.dt }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.v }}</span>
+          <span style="text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">normal {{ r.m }}</span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.dev }}</span>
+          <span style="justify-self:end;font-size:12px;line-height:1.3;padding:2px 8px;border-radius:2px;white-space:nowrap;background:{{ r.tb }};color:{{ r.tc }};box-shadow:inset 0 0 0 1px {{ r.tr }}">{{ r.tag }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <sc-if value="{{ alMore }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:12px"><button class="btn btn-ghost" style="font-size:13px" onClick="{{ alToggle }}">{{ alToggleLabel }}</button></div>
+    </sc-if>
+    <p style="margin:10px 0 0;font-size:12.5px;font-style:italic;color:var(--color-neutral-700)">Por linha: dia, onde, admissões observadas, o que seria normal, desvio face ao normal e gravidade (muito acima: pelo menos 3 desvios padrão; acima ou abaixo: a partir de 2 para a área e de 2,5 para cada freguesia).</p>
+  </section>
+
+  <sc-if value="{{ hasCs }}" hint-placeholder-val="{{ false }}">
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Unidades de cuidados primários · período completo</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">Por unidade de cuidados primários</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <span style="font-size:13px;font-style:italic;color:var(--color-neutral-700)">Não segue a janela nem os filtros</span>
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+          <span style="color:var(--color-neutral-700)">Ordenar por</span>
+          <div class="seg"><sc-for list="{{ csOpts }}" as="o" hint-placeholder-count="3"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="cssort" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+        </div>
+      </div>
+    </div>
+    <p style="margin:0 0 18px;font-size:14px;line-height:1.5;max-width:52em;color:var(--color-neutral-800)">{{ csLede }}</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
+      <sc-for list="{{ csRows }}" as="r" hint-placeholder-count="12">
+        <div style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;font:inherit;font-size:14px;color:var(--color-text);text-align:left;border-radius:var(--radius-md)">
+          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
+          <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{ csMore }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:12px"><button class="btn btn-ghost" style="font-size:13px" onClick="{{ csToggle }}">{{ csToggleLabel }}</button></div>
+    </sc-if>
+    <p style="margin:10px 0 0;font-size:12.5px;font-style:italic;color:var(--color-neutral-700)">{{ csNote }}</p>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ hasFq }}" hint-placeholder-val="{{ false }}">
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Utentes · período completo</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">Quem volta muitas vezes</h2>
+      </div>
+      <span style="font-size:13px;font-style:italic;color:var(--color-neutral-700)">Não segue a janela nem os filtros · clique numa linha para a ver no mapa</span>
+    </div>
+    <p style="margin:0 0 18px;font-size:14px;line-height:1.5;max-width:52em;color:var(--color-neutral-800)">{{ fqLede }}</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
+      <sc-for list="{{ fqRows }}" as="r" hint-placeholder-count="12">
+        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
+          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
+          <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><i title="{{ r.t }}" style="display:block;width:{{ r.w }}%;background:#0088b0"></i></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <p style="margin:10px 0 0;font-size:12.5px;font-style:italic;color:var(--color-neutral-700)">Por linha: utentes frequentes, peso das suas idas nas admissões da freguesia (barra) e percentagem dos utentes da freguesia que são frequentes.</p>
+  </section>
+  </sc-if>
+
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Hora × dia da semana · {{ rangeLabel }}</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">Quando chegam</h2>
+      </div>
+    </div>
+    <p style="margin:0 0 18px;font-size:14px;line-height:1.5;max-width:52em;color:var(--color-neutral-800)">{{ hmNote }}</p>
+    <div style="overflow-x:auto">
+      <div style="display:grid;grid-template-columns:36px repeat(24,minmax(30px,1fr)) 64px;gap:3px;min-width:900px;font-variant-numeric:tabular-nums">
+        <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="7">
+          <span style="font-size:13px;font-style:italic;align-self:center">{{ r.dia }}</span>
+          <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="24">
+            <span title="{{ c.t }}" style="display:flex;align-items:center;justify-content:center;height:28px;font-size:12px;background:{{ c.bg }};color:{{ c.fg }};border-radius:1px">{{ c.v }}</span>
+          </sc-for>
+          <span style="font-size:14px;font-weight:600;text-align:right;align-self:center">{{ r.tot }}</span>
+        </sc-for>
+        <span></span>
+        <sc-for list="{{ hmHours }}" as="h" hint-placeholder-count="24"><span style="font-size:12px;text-align:center;color:var(--color-neutral-700);padding-top:4px">{{ h }}</span></sc-for>
+        <span style="font-size:12px;text-align:right;font-style:italic;color:var(--color-neutral-700);padding-top:4px">total/dia</span>
+      </div>
+    </div>
+  </section>
+
+  <footer style="padding-top:48px;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--color-neutral-700);max-width:70em">
+    <span>{{ foot }}</span>
+    <span>Urgentes = vermelho, laranja e amarelo. Proporções por freguesia só são coloridas com pelo menos 30 admissões no recorte. Limites de freguesia: CAOP. {{ foot2 }} O mapa de fundo (Esri ou OpenStreetMap) só descarrega imagens; nenhum dado de doentes sai deste computador.</span>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const PRIO = [['Vermelho','#d6342c','emergente'],['Laranja','#ef8a22','muito urgente'],['Amarelo','#edbb00','urgente'],['Verde','#3a9d4a','pouco urgente'],['Azul','#2f6fc6','não urgente'],['Branco','#ffffff','fora da triagem'],['Não triado','#9b9797','']];
+const RAMP_C = ['#cbeeff','#99e0ff','#62c5ee','#38a6cf','#1186ac','#006786','#004961'];
+const RAMP_M = ['#ffdee6','#ffc0d0','#ff90b1','#ff458e','#d82071','#aa0b56','#790e3d'];
+const MIN_N = 30, KEY = 'urg-origem-v2';
+const ATT = '#c8501e', NEUT = 'var(--color-neutral-700)';
+const MES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const NF = new Intl.NumberFormat('pt-PT');
+const pc = (x, d = 0) => isFinite(x) ? (x * 100).toLocaleString('pt-PT', {maximumFractionDigits: d, minimumFractionDigits: d}) + '%' : '—';
+const nice = s => s.replace(/^União das Freguesias d[aeo]s? /, '').replace(/ \(S\. Maria.*\)$/, '');
+const sum = a => a.reduce((x, y) => x + y, 0);
+const tt = (v, t, i) => `${PRIO[i][0]}: ${NF.format(v)} · ${pc(t ? v / t : 0, 1)}`;
+const z7 = () => [0,0,0,0,0,0,0];
+const fd = s => { const [y, m, d] = s.split('-'); return `${+d} ${MES[+m - 1]}`; };
+const fdy = s => { const [y, m, d] = s.split('-'); return `${d}/${m}/${y}`; };
+
+// fundos de mapa: mosaicos públicos, só imagens (nenhum dado sai do computador)
+const ESRI = s => (z, x, y) => `https://server.arcgisonline.com/ArcGIS/rest/services/${s}/MapServer/tile/${z}/${y}/${x}`;
+const BASEMAPS = {
+  mapa: { base: ESRI('Canvas/World_Light_Gray_Base'), baseStyle: { mixBlendMode: 'multiply' }, ref: ESRI('Canvas/World_Light_Gray_Reference'), refStyle: { opacity: 0.9 }, snap: Math.ceil, attr: '© Esri · OpenStreetMap' },
+  ruas: { base: (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`, baseStyle: { filter: 'saturate(.5)' }, snap: Math.round, attr: '© OpenStreetMap' },
+  sat: { base: ESRI('World_Imagery'), baseStyle: { filter: 'saturate(.35) brightness(1.75) contrast(.6)' }, ref: ESRI('Reference/World_Boundaries_and_Places'), refStyle: { filter: 'none' }, snap: Math.ceil, attr: '© Esri · Maxar · Earthstar Geographics' }
+};
+
+function bboxOf(paths) {
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
+  for (const p of paths) { const re = /(-?\d+\.?\d*),(-?\d+\.?\d*)/g; let m;
+    while ((m = re.exec(p))) { const x = +m[1], y = +m[2]; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } }
+  return [x0, y0, x1, y1];
+}
+function fitAspect(b, asp, padF) {
+  let w = b[2] - b[0], h = b[3] - b[1]; const pad = w * padF; w += 2 * pad; h += 2 * pad;
+  const cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2;
+  if (w / h < asp) w = h * asp; else h = w / asp;
+  return [cx - w / 2, cy - h / 2, w, h];
+}
+
+class Component extends DCLogic {
+  state = { mode: 'calor', stuck: false, sec: '', metric: 'n', local: -1, prios: [], sel: null, hover: null, zoom: 'area', fundo: 'mapa', fixed: true,
+            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false };
+  mapRef = React.createRef();
+
+  componentDidMount() {
+    const U = window.URG; if (!U) { this.waitURG = setTimeout(() => this.componentDidMount(), 60); return; }
+    this.U = U; const N = U.days.length;
+    this.fregs = U.feats.filter(f => f.t === 1);
+    this.cons = U.feats.filter(f => f.t === 0);
+    this.bb = new Map(this.fregs.map(f => [f.d, bboxOf([f.p])]));
+    this.pop = U.pop || {}; // população residente por freguesia: INE, Censos 2021
+    this.popCon = {}; for (const f of this.fregs) { const P = this.pop[f.d]; if (P) this.popCon[f.c] = (this.popCon[f.c] || 0) + P[0]; }
+    this.vbArea = fitAspect(bboxOf(this.cons.filter(c => c.c === 'Sintra' || c.c === 'Amadora').map(c => c.p)), 1.3, 0.04);
+    this.vbReg = fitAspect([0, 60, U.meta.w, U.meta.h - 60], 1.3, 0);
+    const R = U.R; this.off = new Array(N + 1).fill(R.length);
+    for (let j = R.length - 6; j >= 0; j -= 6) this.off[R[j]] = j;
+    for (let d = N - 1; d >= 0; d--) if (this.off[d] > this.off[d + 1]) this.off[d] = this.off[d + 1];
+    this.cache = new Map();
+    if (!this.ttEl) {
+      const T = this.ttEl = document.createElement('div');
+      T.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;display:none;background:#f3f2f2;color:#201e1d;box-shadow:0 2px 10px rgba(32,30,29,.28);border-radius:2px;padding:8px 10px;font:13px/1.45 Source Serif 4,serif;font-variant-numeric:tabular-nums;white-space:nowrap';
+      document.body.appendChild(T);
+      const grab = c => { if (c.hasAttribute('title')) { c._tt = c.getAttribute('title'); c.removeAttribute('title'); } return c._tt; };
+      this.onTT = e => {
+        const t = e.target, i = t && t.closest ? t.closest('i') : null, bar = i ? i.parentElement : t;
+        const segs = bar && bar.children ? [...bar.children].filter(c => c.tagName === 'I' && grab(c)) : [];
+        if (!segs.length) { T.style.display = 'none'; this.ttKey = null; return; }
+        const key = segs.map(c => c._tt).join('|') + '#' + segs.indexOf(i);
+        if (key !== this.ttKey) { this.ttKey = key; T.textContent = '';
+          segs.forEach(c => { const r = document.createElement('div'), d = document.createElement('span');
+            r.style.cssText = 'display:flex;align-items:center;gap:7px;font-weight:' + (c === i ? 700 : 400) + ';opacity:' + (!segs.includes(i) || c === i ? 1 : .7);
+            d.style.cssText = 'flex:none;width:9px;height:9px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(32,30,29,.3);background:' + c.style.background;
+            r.append(d, c._tt); T.appendChild(r); }); }
+        T.style.display = 'block';
+        T.style.left = Math.max(6, Math.min(e.clientX + 14, innerWidth - T.offsetWidth - 6)) + 'px';
+        T.style.top = Math.max(6, Math.min(e.clientY + 16, innerHeight - T.offsetHeight - 6)) + 'px';
+      };
+      document.addEventListener('mousemove', this.onTT);
+    }
+    let saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+    this.setState({ end: N - 2, ...saved, orig: Array.isArray(saved.orig) ? saved.orig : [], playing: false });
+    this.ro = new ResizeObserver(() => { const w = this.mapRef.current && this.mapRef.current.clientWidth; if (w && Math.abs(w - this.state.mapW) > 40) this.setState({ mapW: w }); });
+    setTimeout(() => this.setState({ grids: { area: this.grid(3.4, this.vbReg), regiao: this.grid(6.5, this.vbReg) } }), 0);
+    this.onWheel = e => { e.preventDefault(); const r = this.mapRef.current.getBoundingClientRect();
+      this.zoomAt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, e.deltaY > 0 ? 1.18 : 1 / 1.18); };
+    if (!this.ctxOn) { // barra de contexto: um só listener, limitado por rAF
+      this.ctxOn = true;
+      this.onCtxScroll = () => { if (this.ctxRaf) return; this.ctxRaf = requestAnimationFrame(() => { this.ctxRaf = 0; this.ctxMeasure(); }); };
+      window.addEventListener('scroll', this.onCtxScroll, { passive: true });
+      this.ctxMeasure();
+    }
+    this.attach();
+  }
+  // secções localizadas pelo texto dos h2 (sem depender de ids nas tags <section>)
+  ctxTargets() {
+    const hs = [...document.querySelectorAll('h2')];
+    const sec = f => { const h = hs.find(x => f((x.textContent || '').trim())); return h ? (h.closest('section') || h) : null; };
+    return [['mapa', 'Mapa', this.mapRef.current], ['freg', 'Freguesias', sec(t => t.startsWith('Freguesias com'))], ['fora', 'Fora do padrão', sec(t => t === 'Fora do padrão')],
+      ['uni', 'Unidades', sec(t => t === 'Por unidade de cuidados primários')], ['freq', 'Frequentes', sec(t => t === 'Quem volta muitas vezes')], ['horas', 'Horas', sec(t => t === 'Quando chegam')]]
+      .filter(x => x[2]).map(([k, label, el]) => ({ k, label, el }));
+  }
+  ctxBarH() { const b = document.getElementById('ctxbar'); return b ? b.offsetHeight : 0; }
+  ctxScrollTo(el) { if (!el) return; el.style.scrollMarginTop = (this.ctxBarH() + 12) + 'px'; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  ctxGo(k) { const t = this.ctxTargets().find(x => x.k === k); t && this.ctxScrollTo(t.el); }
+  ctxMeasure() {
+    const h1 = document.querySelector('h1'), stuck = !!h1 && h1.getBoundingClientRect().bottom < 0;
+    let sec = this.state.sec;
+    if (stuck) {
+      const thr = this.ctxBarH() + 40, ts = this.ctxTargets().map(t => ({ k: t.k, y: t.el.getBoundingClientRect().top })).sort((a, b) => a.y - b.y);
+      let best = null; for (const t of ts) if (t.y <= thr) best = t.k;
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2 && ts.length) best = ts[ts.length - 1].k;
+      sec = best || (ts.length ? ts[0].k : '');
+    }
+    if (stuck !== this.state.stuck || sec !== this.state.sec) this.setState({ stuck, sec });
+  }
+  componentWillUnmount() { window.removeEventListener('scroll', this.onCtxScroll); cancelAnimationFrame(this.ctxRaf); this.ctxOn = false; clearTimeout(this.waitURG); document.removeEventListener('mousemove', this.onTT); this.ttEl && this.ttEl.remove(); clearInterval(this.timer); this.ro && this.ro.disconnect(); this.mapRef.current && this.mapRef.current.removeEventListener('wheel', this.onWheel); }
+  curVB() { return this.state.vbC || (this.state.zoom === 'area' ? this.vbArea : this.vbReg); }
+  zoomAt(px, py, f) {
+    const vb = this.curVB(), nw = Math.max(30, Math.min(1400, vb[2] * f)), g = nw / vb[2], nh = vb[3] * g;
+    this.setState({ vbC: [vb[0] + px * vb[2] - px * nw, vb[1] + py * vb[3] - py * nh, nw, nh], hover: null });
+  }
+  onDown = e => {
+    if (e.button !== 0) return;
+    const r = this.mapRef.current.getBoundingClientRect(), vb0 = this.curVB(), x0 = e.clientX, y0 = e.clientY;
+    this.dragged = false; let raf = 0, last = null;
+    const move = ev => { const dx = ev.clientX - x0, dy = ev.clientY - y0;
+      if (!this.dragged && Math.hypot(dx, dy) < 4) return; this.dragged = true; last = [dx, dy];
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; const [ddx, ddy] = last;
+        this.setState({ hover: null, vbC: [vb0[0] - ddx * vb0[2] / r.width, vb0[1] - ddy * vb0[3] / r.height, vb0[2], vb0[3]] }); }); };
+    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); setTimeout(() => { this.dragged = false; }, 0); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+  };
+  attach() {
+    const el = this.mapRef.current; if (!el || el === this.attached || !this.onWheel) return;
+    if (this.attached) { this.attached.removeEventListener('wheel', this.onWheel); this.ro.unobserve(this.attached); }
+    el.addEventListener('wheel', this.onWheel, { passive: false }); this.ro.observe(el); this.attached = el;
+  }
+  componentDidUpdate() {
+    this.attach();
+    const s = this.state, ps = this._prev || {}; this._prev = { ...s };
+    if (ps.mode !== s.mode || ps.metric !== s.metric || ps.zoom !== s.zoom || ps.fundo !== s.fundo || ps.win !== s.win || ps.end !== s.end || ps.local !== s.local || ps.orig !== s.orig || ps.fixed !== s.fixed || ps.speed !== s.speed)
+      try { localStorage.setItem(KEY, JSON.stringify({ mode: s.mode, metric: s.metric, zoom: s.zoom, fundo: s.fundo, win: s.win, end: s.end, local: s.local, orig: s.orig, fixed: s.fixed, speed: s.speed })); } catch (e) {}
+    if (ps.playing !== s.playing || (s.playing && ps.speed !== s.speed)) {
+      clearInterval(this.timer);
+      if (s.playing) this.timer = setInterval(() => {
+        const N = this.U.days.length;
+        if (this.state.end >= N - 1) { this.setState({ playing: false }); return; }
+        this.setState({ end: this.state.end + 1 });
+      }, s.speed);
+    }
+  }
+
+  grid(s, vb) {
+    const ctx = document.createElement('canvas').getContext('2d'); const out = {};
+    for (const f of this.fregs) {
+      const b = this.bb.get(f.d); if (b[2] < vb[0] || b[0] > vb[0] + vb[2] || b[3] < vb[1] || b[1] > vb[1] + vb[3]) continue;
+      const P = new Path2D(f.p); const pts = [];
+      for (let y = Math.ceil(b[1] / s) * s; y <= b[3]; y += s)
+        for (let x = Math.ceil(b[0] / s) * s + ((Math.round(y / s) % 2) ? s / 2 : 0); x <= b[2]; x += s)
+          if (ctx.isPointInPath(P, x, y)) pts.push(x, y);
+      if (!pts.length) pts.push(f.x, f.y);
+      out[f.d] = pts;
+    }
+    return { s, pts: out };
+  }
+
+  agg(i0, i1) {
+    const og = this.state.orig, key = i0 + '-' + i1 + '-' + og.join(','); if (this.cache.has(key)) return this.cache.get(key);
+    const U = this.U, R = U.R, A = { cube: {}, loc: U.LOC.map(z7), sem: z7(), agl: U.AG.map(() => U.LOC.map(z7)) };
+    for (let j = this.off[i0]; j < this.off[i1 + 1]; j += 6) {
+      const p = R[j + 1], l = R[j + 2], pr = R[j + 3], ag = R[j + 4], c = R[j + 5];
+      A.agl[ag][l][pr] += c;
+      if (og.length && !og.includes(ag)) continue;
+      A.loc[l][pr] += c;
+      if (p === 0) A.sem[pr] += c; else { const d = U.pd[p]; (A.cube[d] || (A.cube[d] = U.LOC.map(z7)))[l][pr] += c; }
+    }
+    if (this.cache.size > 400) this.cache.clear();
+    this.cache.set(key, A); return A;
+  }
+  counts(A, d) {
+    const li = this.state.local;
+    if (d) { const c = A.cube[d]; if (!c) return z7(); return li < 0 ? c.reduce((a, r) => a.map((v, i) => v + r[i])) : c[li].slice(); }
+    return li < 0 ? A.loc.reduce((a, r) => a.map((v, i) => v + r[i])) : A.loc[li].slice();
+  }
+
+  tilesFor(vb, url, snap) {
+    const m = this.U.meta, W = this.state.mapW || 900;
+    const z = Math.max(9, Math.min(16, (snap || Math.ceil)(Math.log2(m.s * W / (vb[2] * 256)))));
+    const n = Math.pow(2, z), tw = m.s / n, out = [];
+    const tx0 = Math.floor((m.wx0 + vb[0] / m.s) * n), tx1 = Math.floor((m.wx0 + (vb[0] + vb[2]) / m.s) * n);
+    const ty0 = Math.floor((m.wy0 + vb[1] / m.s) * n), ty1 = Math.floor((m.wy0 + (vb[1] + vb[3]) / m.s) * n);
+    for (let x = tx0; x <= tx1; x++) for (let y = ty0; y <= ty1; y++)
+      { const sx = (x / n - m.wx0) * m.s, sy = (y / n - m.wy0) * m.s; out.push({ u: url(z, x, y), l: ((sx - vb[0]) / vb[2] * 100).toFixed(3), t: ((sy - vb[1]) / vb[3] * 100).toFixed(3), w: ((tw + 0.2) / vb[2] * 100).toFixed(3), h: ((tw + 0.2) / vb[3] * 100).toFixed(3) }); }
+    return out;
+  }
+
+  layer(tiles, extra) {
+    const e = React.createElement;
+    return e('div', { style: { position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', filter: 'saturate(.15)', ...extra } },
+      tiles.map(t => e('img', { key: t.u, src: t.u, alt: '', draggable: false, style: { position: 'absolute', left: t.l + '%', top: t.t + '%', width: t.w + '%', height: t.h + '%', display: 'block' } })));
+  }
+
+  rollMax(nD, sp) { // maior soma de nD dias seguidos numa freguesia, com os filtros atuais: a escala fixa nunca corta valores
+    const st = this.state, key = [nD, st.local, st.orig.join(','), (sp || []).join(',')].join('|');
+    if (this.rmKey === key) return this.rmVal;
+    const U = this.U, R = U.R, N = U.days.length, og = st.orig, li = st.local, ser = new Map();
+    for (let j = 0; j < R.length; j += 6) { const p = R[j + 1]; if (!p) continue;
+      if ((li < 0 || R[j + 2] === li) && (!og.length || og.includes(R[j + 4])) && (!sp || sp.includes(R[j + 3]))) {
+        let a = ser.get(p); if (!a) ser.set(p, a = new Float64Array(N)); a[R[j]] += R[j + 5]; } }
+    let mx = 1;
+    for (const a of ser.values()) { let s = 0; for (let i = 0; i < N; i++) { s += a[i]; if (i >= nD) s -= a[i - nD]; if (s > mx) mx = s; } }
+    this.rmKey = key; this.rmVal = mx; return mx;
+  }
+
+  renderVals() {
+    const U = this.U;
+    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84' };
+    const st = this.state, set = o => this.setState(o);
+    const N = U.days.length;
+    const end = Math.min(N - 1, Math.max(0, st.end));
+    const i1 = st.win ? end : N - 1, i0 = st.win ? Math.max(0, end - st.win + 1) : 0, nD = i1 - i0 + 1;
+    const A = this.agg(i0, i1), AF = this.agg(0, N - 1), frac = nD / N;
+    const sp = st.prios.length ? st.prios : null, spIdx = sp || [0, 1, 2];
+    const vb = this.curVB(), k = vb[2] / 1000;
+    const isPct = st.metric === 'pct', isTx = st.metric === 'tx', isRel = isPct || isTx, ramp = isRel ? RAMP_M : RAMP_C, base = st.fundo !== 'papel', BM = BASEMAPS[st.fundo] || BASEMAPS.mapa;
+    const f0 = v => isFinite(v) ? NF.format(Math.round(v)) : '—';
+
+    // tx: admissões por 1 000 residentes, anualizadas a partir dos dias do recorte
+    // utilizadores frequentes: por freguesia [utentes, frequentes, admissões dos frequentes, admissões com cartão], período completo
+    const FQ = U.freq, FQ_MIN = 200, fqOf = d => FQ && FQ.by[d] && FQ.by[d][0] >= FQ_MIN ? FQ.by[d] : null;
+    const mk = (AA, f, days) => { const c = this.counts(AA, f.d), tot = sum(c), n = sp ? sum(sp.map(i => c[i])) : tot, P = this.pop[f.d], pop = P ? P[0] : 0;
+      return { f, c, tot, n, pop, tx: pop ? n / pop * 1000 * 365 / days : NaN, share: tot ? sum(spIdx.map(i => c[i])) / tot : NaN }; };
+    const rows = this.fregs.map(f => mk(A, f, nD));
+    const refRows = st.fixed ? this.fregs.map(f => mk(AF, f, N)) : rows;
+    const maxT = Math.max(1e-9, ...refRows.filter(r => r.pop && r.tot >= MIN_N * (st.fixed ? 1 : Math.min(1, frac * 3))).map(r => r.tx));
+    const area = f => { const b = this.bb.get(f.d); return Math.max(30, (b[2] - b[0]) * (b[3] - b[1]) * 0.6); };
+    const sc = st.fixed ? frac : 1;
+    const curMax = Math.max(1, ...rows.map(r => r.n));
+    const maxN = st.fixed ? Math.max(curMax, this.rollMax(nD, sp)) : curMax;
+    const maxD = Math.max(1e-9, ...refRows.map(r => r.n / area(r.f))) * sc;
+    const shares = refRows.filter(r => r.tot >= MIN_N).map(r => r.share).sort((a, b) => a - b);
+    const sLo = shares.length ? shares[Math.floor(shares.length * 0.05)] : 0, sHi = shares.length ? shares[Math.floor(shares.length * 0.95)] : 1;
+    const minN = isRel ? Math.max(5, Math.round(MIN_N * Math.min(1, frac * 3))) : 1;
+    rows.forEach(r => { r.t = isPct ? (r.tot >= minN ? Math.max(0, Math.min(1, (r.share - sLo) / ((sHi - sLo) || 1))) : null) : isTx ? (r.pop && r.n > 0 ? Math.min(1, r.tx / maxT) : null) : (r.n > 0 ? Math.min(1, r.n / maxN) : null); });
+    const colorOf = t => t == null ? '#d7d3d3' : ramp[Math.min(6, Math.floor(t * 7))];
+
+    const parishes = rows.map(r => ({ p: r.f.p, fill: st.mode === 'freg' ? colorOf(r.t) : (base ? 'none' : '#e2dfdf') }));
+    const circ = (x, y, rr) => `M${(x - rr).toFixed(2)},${y.toFixed(2)}a${rr.toFixed(2)},${rr.toFixed(2)} 0 1,0 ${(2 * rr).toFixed(2)},0a${rr.toFixed(2)},${rr.toFixed(2)} 0 1,0 -${(2 * rr).toFixed(2)},0`;
+    const R46 = 46 * k;
+    // calor: a mesma mancha proporcional dos círculos (área ∝ admissões), desfocada e colorida pela intensidade
+    const heat = st.mode !== 'calor' ? [] : rows.filter(r => r.t != null && r.n > 0).map(r => ({ p: circ(r.f.x, r.f.y, Math.sqrt(Math.min(1, r.n / maxN)) * R46 + 0.6 * k), op: isRel ? 0.2 + 0.8 * r.t : 0.12 + 0.88 * r.t }));
+    let dots = []; const g = st.grids && st.grids[vb[2] < 600 ? 'area' : 'regiao'];
+    if (st.mode === 'ret' && g) dots = rows.filter(r => r.t != null && g.pts[r.f.d]).map(r => {
+      const rr = Math.max(0.28, g.s * 0.56 * Math.sqrt(r.t)), R2 = (2 * rr).toFixed(2), Rs = rr.toFixed(2), pts = g.pts[r.f.d]; let p = '';
+      for (let i = 0; i < pts.length; i += 2) p += `M${(pts[i] - rr).toFixed(2)},${pts[i + 1].toFixed(2)}a${Rs},${Rs} 0 1,0 ${R2},0a${Rs},${Rs} 0 1,0 -${R2},0`;
+      return { p };
+    });
+    const circles = st.mode !== 'circ' ? [] : rows.filter(r => r.n > 0).sort((a, b) => b.n - a.n).map(r => ({ x: r.f.x, y: r.f.y, r: (Math.sqrt(Math.min(1, r.n / maxN)) * R46 + 0.6 * k).toFixed(2), fill: isRel ? colorOf(r.t) : '#1186ac' }));
+
+    const hover = st.hover;
+    const hits = rows.map(r => { const on = st.sel === r.f.d, hv = hover && hover.d === r.f.d;
+      return { p: r.f.p, stroke: on || hv ? '#201e1d' : 'transparent', sw: (on ? 2.4 : 1.2) * k,
+        move: e => { if (this.dragged) return; const bx = this.mapRef.current.getBoundingClientRect(); this.setState({ hover: { d: r.f.d, x: e.clientX - bx.left, y: e.clientY - bx.top } }); },
+        click: () => { if (!this.dragged) set({ sel: st.sel === r.f.d ? null : r.f.d }); } }; });
+    let tip = { show: false };
+    if (hover) { const r = rows.find(x => x.f.d === hover.d); if (r) { const bw = this.mapRef.current ? this.mapRef.current.clientWidth : 900;
+      tip = { show: true, x: Math.min(hover.x, bw - 290), y: hover.y, name: nice(r.f.n), con: r.f.c, n: NF.format(r.n), pctLabel: sp ? 'Peso no total' : 'Urgentes (V+L+A)', pct: pc(r.share, 1),
+        extra: r.pop ? [{ k: 'Residentes (Censos 2021)', v: NF.format(r.pop) }, { k: 'Por 1 000 hab./ano', v: f0(r.tx) }, { k: '65 e mais anos', v: pc(this.pop[r.f.d][2] / r.pop, 1) }].concat(fqOf(r.f.d) ? [{ k: `Utentes com ${FQ.k}+ idas`, v: `${NF.format(fqOf(r.f.d)[1])} · ${pc(fqOf(r.f.d)[1] / fqOf(r.f.d)[0], 1)}` }] : []) : [],
+        segs: r.c.map((v, i) => ({ w: r.tot ? v / r.tot * 100 : 0, c: PRIO[i][1], t: tt(v, r.tot, i) })) }; } }
+
+    const selNames = spIdx.map(i => PRIO[i][0].toLowerCase()).join(', ');
+    const legendTitle = isTx ? 'Admissões por 1 000 residentes, ritmo anual' + (sp ? ` · só ${selNames}` : '') : isPct ? `Peso de ${sp ? selNames : 'urgentes'} no total da freguesia` : 'Admissões por freguesia' + (sp ? ` · só ${selNames}` : '');
+
+    // timeline
+    const li = st.local, R = U.R, daily = new Array(N).fill(0);
+    const og = st.orig; for (let j = 0; j < R.length; j += 6) if ((li < 0 || R[j + 2] === li) && (!og.length || og.includes(R[j + 4])) && (!sp || sp.includes(R[j + 3]))) daily[R[j]] += R[j + 5];
+    const dMax = Math.max(...daily), BW = 10;
+    const bars = daily.map((v, i) => { const h = v / dMax * 76; const inW = i >= i0 && i <= i1;
+      return { x: i * BW + 1, w: BW - 2, y: (84 - h).toFixed(1), h: h.toFixed(1), fill: inW ? '#0088b0' : '#bab6b6', t: `${fdy(U.days[i])} · ${NF.format(v)} admissões`, pick: () => set({ end: Math.max(i, st.win ? Math.min(N - 1, i) : i), playing: false, win: st.win || 7 }) }; });
+    const months = U.days.map((d, i) => [d, i]).filter(([d]) => d.endsWith('-01')).map(([d, i]) => ({ x: i * BW, pct: (i / N * 100).toFixed(2), label: MES[+d.slice(5, 7) - 1] + ' ' + d.slice(2, 4) }));
+
+    // panel
+    const areaC = this.counts(A, null), areaTot = sum(areaC) || 1;
+    const cur = st.sel ? this.counts(A, st.sel) : areaC, curTot = sum(cur) || 1;
+    const selF = st.sel && this.fregs.find(f => f.d === st.sel);
+    const maxC = Math.max(1, ...cur);
+    const prios = PRIO.map(([name, c, hint], i) => ({ name, c, hint, n: NF.format(cur[i]), pct: pc(cur[i] / curTot, 1), w: cur[i] / maxC * 100, op: !sp || sp.includes(i) ? 1 : 0.42,
+      bg: sp && sp.includes(i) ? 'color-mix(in srgb,#0088b0 10%,transparent)' : 'transparent',
+      toggle: () => { const s = new Set(st.prios); s.has(i) ? s.delete(i) : s.add(i); set({ prios: [...s].sort() }); } }));
+    const same = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+    const locRows = U.LOC.map((name, l) => { const c = st.sel ? (A.cube[st.sel] ? A.cube[st.sel][l] : z7()) : A.loc[l], t = sum(c) || 1;
+      return { name, n: NF.format(sum(c)), ur: pc((c[0] + c[1] + c[2]) / t), op: st.local < 0 || st.local === l ? 1 : 0.4, segs: c.map((v, i) => ({ w: v / t * 100, c: PRIO[i][1], t: tt(v, sum(c), i) })) }; });
+
+    const byN = rows.slice().sort((a, b) => b.n - a.n);
+    const rk = (isPct ? rows.filter(r => r.tot >= minN).sort((a, b) => b.share - a.share) : isTx ? rows.filter(r => r.pop && r.tot >= minN).sort((a, b) => b.tx - a.tx) : byN).slice(0, 12);
+    const rank = rk.map((r, i) => ({ i: i + 1, name: nice(r.f.n), con: r.f.c, n: NF.format(isPct ? r.tot : r.n), pct: isTx ? f0(r.tx) : pc(r.share),
+      bg: st.sel === r.f.d ? 'color-mix(in srgb,#0088b0 10%,transparent)' : 'transparent',
+      segs: r.c.map((v, j) => ({ w: r.tot ? v / r.tot * 100 : 0, c: PRIO[j][1], t: tt(v, r.tot, j) })), click: () => set({ sel: st.sel === r.f.d ? null : r.f.d }) }));
+
+    const totAll = sum(AF.loc.map(sum)), totW = sum(A.loc.map(sum)) || 1;
+    const urW = sum(A.loc.map(r => r[0] + r[1] + r[2])), nuW = sum(A.loc.map(r => r[3] + r[4])), semW = sum(A.sem);
+    const winN = sp ? sum(sp.map(i => areaC[i])) : areaTot;
+    const rangeLabel = nD === 1 ? fdy(U.days[i0]) : `${fdy(U.days[i0])} → ${fdy(U.days[i1])}`;
+    const per = nD === 1 ? `em ${fd(U.days[i0])}` : `entre ${fd(U.days[i0])} e ${fd(U.days[i1])}`;
+    const top = byN[0];
+    const ogN = st.orig.filter(a => a < 2).map(a => U.AG[a]), ogO = st.orig.includes(2);
+    const locName = (!st.orig.length ? '' : ' de ' + [ogN.length ? `residentes em ${ogN.join(' e ')}` : '', ogO ? 'fora de Amadora e Sintra' : ''].filter(Boolean).join(' ou de ')) + (st.local < 0 ? '' : ` na urgência ${U.LOC[st.local].toLowerCase()}`);
+    const lede = `${NF.format(areaTot)} admissões${locName} ${per}, ${NF.format(Math.round(areaTot / nD))} por dia. ${pc((areaC[0] + areaC[1] + areaC[2]) / areaTot)} chegaram com pulseira vermelha, laranja ou amarela; ${pc((areaC[3] + areaC[4]) / areaTot)} foram triadas verde ou azul. ${top && top.n ? `${nice(top.f.n)} é a freguesia que mais contribui, com ${NF.format(top.tot)}.` : ''}`;
+
+    // taxa de recurso dos residentes (Censos 2021) e cobertura de médico de família (Transparência SNS)
+    const resAdm = a => st.local < 0 ? sum(A.agl[a].map(sum)) : sum(A.agl[a][st.local]);
+    const txOf = (n, p) => p ? n / p * 1000 * 365 / nD : NaN;
+    const pA = this.popCon.Amadora || 0, pS = this.popCon.Sintra || 0, S = U.sns;
+    const extraKpis = [];
+    if (pA + pS) extraKpis.push({ label: 'Por 1 000 hab./ano', value: f0(txOf(resAdm(0) + resAdm(1), pA + pS)), sub: `Amadora ${f0(txOf(resAdm(0), pA))} · Sintra ${f0(txOf(resAdm(1), pS))}`, delta: '', dc: NEUT });
+    if (S) extraKpis.push({ label: 'Sem médico de família', value: pc(S.sem / S.insc, 1), sub: `${NF.format(S.sem)} inscritos · ${MES[+S.per.slice(5) - 1]} ${S.per.slice(0, 4)}`, delta: '', dc: NEUT });
+    const foot2 = (pA + pS ? 'População residente: INE, Censos 2021 (indicador 0011609); as taxas por 1 000 habitantes usam a freguesia de residência registada na admissão e são anualizadas a partir dos dias do recorte (um trimestre de inverno sobrestima o ano).' : '') + (S ? ` Médico de família: Portal da Transparência do SNS, ${S.ent}, ${NF.format(S.insc)} inscritos em ${S.per.slice(5)}/${S.per.slice(0, 4)}.` : '')
+      + (FQ ? ` Utilizadores frequentes: utentes com ${FQ.k} ou mais admissões no período completo, contados pelo cartão de utente (${NF.format(FQ.sem)} admissões sem cartão ficam de fora); cada utente conta na freguesia que mais vezes indicou.` : '') + (U.cs && U.cs.rows && U.cs.rows.length ? ' Unidade de cuidados primários: coluna Centro_Saude da extração; ' + NF.format(U.cs.sem) + ' admissões não têm unidade registada.' : '') + (U.hosp ? ' Localização dos hospitais: OpenStreetMap.' : '');
+
+    // exporta a tabela por freguesia do recorte atual (janela, origem, local); separador ; e vírgula decimal para abrir no Excel PT
+    const exportCsv = () => {
+      const nm = v => isFinite(v) ? String(Math.round(v * 10) / 10).replace('.', ',') : '';
+      const head = ['DICOFRE', 'Freguesia', 'Concelho', 'Inicio', 'Fim', 'Admissoes', 'Vermelho', 'Laranja', 'Amarelo', 'Verde', 'Azul', 'Branco', 'Nao_triado', 'Urgentes_pct', 'Residentes_Censos2021', 'Residentes_65mais_pct', 'Admissoes_por_1000_hab_ano', 'Utentes_identificados_periodo_completo', 'Utentes_4mais_idas_periodo_completo', 'Utentes_4mais_idas_pct'];
+      const lines = rows.filter(r => r.tot > 0).sort((a, b) => b.tot - a.tot).map(r => { const P = this.pop[r.f.d], q = FQ && FQ.by[r.f.d];
+        return [r.f.d, '"' + r.f.n.replace(/"/g, '""') + '"', r.f.c, U.days[i0], U.days[i1], r.tot, ...r.c, nm((r.c[0] + r.c[1] + r.c[2]) / r.tot * 100), P ? P[0] : '', P ? nm(P[2] / P[0] * 100) : '', P ? nm(r.tot / P[0] * 1000 * 365 / nD) : '', q ? q[0] : '', q ? q[1] : '', q ? nm(q[1] / q[0] * 100) : ''].join(';'); });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + head.join(';') + '\r\n' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+      a.download = `urgencias_freguesias_${U.days[i0]}_${U.days[i1]}.csv`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    };
+    let fqRows = [], fqLede = '';
+    if (FQ) { const T = FQ.tot, fr = this.fregs.map(f => ({ f, q: fqOf(f.d) })).filter(x => x.q).sort((a, b) => b.q[1] / b.q[0] - a.q[1] / a.q[0]).slice(0, 12);
+      const mxW = Math.max(1e-9, ...fr.map(x => x.q[2] / x.q[3]));
+      fqRows = fr.map((x, i) => ({ i: i + 1, name: nice(x.f.n), con: x.f.c, n: NF.format(x.q[1]), pct: pc(x.q[1] / x.q[0], 1), w: x.q[2] / x.q[3] / mxW * 100,
+        t: `${pc(x.q[2] / x.q[3], 1)} das admissões da freguesia · ${NF.format(x.q[2])} de ${NF.format(x.q[3])}`,
+        bg: st.sel === x.f.d ? 'color-mix(in srgb,#0088b0 10%,transparent)' : 'transparent', click: () => set({ sel: st.sel === x.f.d ? null : x.f.d }) }));
+      fqLede = `${NF.format(T[1])} utentes vieram à urgência ${FQ.k} ou mais vezes nos ${N} dias do período. São ${pc(T[1] / T[0], 1)} dos ${NF.format(T[0])} utentes identificados, mas fizeram ${pc(T[2] / T[3], 1)} das admissões (${NF.format(T[2])}). Abaixo, as freguesias com pelo menos ${FQ_MIN} utentes onde essa proporção é maior.`; }
+    // fora do padrão: cada dia face à média dos outros dias com o mesmo dia da semana; segue origem, local e prioridades, não a janela
+    const AL_ZT = 2, AL_ZF = 2.5, AL_MINF = 5, AL_TOP = 10, DNS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
+    const alDow = this.dow || (this.dow = U.days.map(d => new Date(d + 'T12:00:00').getDay())), alL = N - 1;
+    const alKey = [li, og.join(','), (sp || []).join(',')].join('|');
+    if (this.alKey !== alKey) {
+      const ser = new Map(), cons = new Set(this.fregs.filter(f => f.c === 'Amadora' || f.c === 'Sintra').map(f => f.d)), found = []; let nFr = 0;
+      for (let j = 0; j < R.length; j += 6) { const p = R[j + 1], d = p ? U.pd[p] : null; if (!d || !cons.has(d)) continue;
+        if ((li < 0 || R[j + 2] === li) && (!og.length || og.includes(R[j + 4])) && (!sp || sp.includes(R[j + 3]))) {
+          let a = ser.get(d); if (!a) ser.set(d, a = new Float64Array(N)); a[R[j]] += R[j + 5]; } }
+      const scan = (a, d, thr) => { const g = [[], [], [], [], [], [], []]; for (let i = 0; i < alL; i++) g[alDow[i]].push(i);
+        for (const ix of g) { const n = ix.length; if (n < 4) continue; let S = 0, Q = 0; for (const i of ix) { S += a[i]; Q += a[i] * a[i]; }
+          for (const i of ix) { const v = a[i], m = (S - v) / (n - 1), s = Math.max(Math.sqrt(Math.max(0, (Q - v * v - (n - 1) * m * m) / (n - 2))), Math.sqrt(m));
+            if (!(s > 0)) continue; const z = (v - m) / s; if (Math.abs(z) >= thr) found.push({ i, d, v, m, z }); } } };
+      scan(daily, null, AL_ZT);
+      for (const [d, a] of ser) { let t = 0; for (let i = 0; i < alL; i++) t += a[i]; if (t / alL >= AL_MINF) { nFr++; scan(a, d, AL_ZF); } }
+      found.sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
+      this.alKey = alKey; this.alVal = { found, nFr, nArea: found.filter(x => !x.d).length, nComp: alL * (nFr + 1) };
+    }
+    const alF = this.alVal.found, alFm = new Map(this.fregs.map(f => [f.d, f]));
+    const alMore = alF.length > AL_TOP, alToggleLabel = st.alAll ? 'Ver menos' : `Ver todos (${NF.format(alF.length)})`;
+    const alToggle = () => set({ alAll: !st.alAll });
+    const alRows = (st.alAll ? alF : alF.slice(0, AL_TOP)).map(x => { const f = x.d ? alFm.get(x.d) : null, dy = U.days[x.i], r = x.m > 0 ? Math.round((x.v / x.m - 1) * 100) : null, sev = x.z >= 3 ? 2 : x.z > 0 ? 1 : 0;
+      return { dt: `${dy.slice(8)}/${dy.slice(5, 7)} · ${DNS[alDow[x.i]]}`, name: f ? nice(f.n) : 'Toda a área', con: f ? f.c : '', v: NF.format(x.v), m: NF.format(Math.round(x.m)),
+        dev: r == null ? '—' : `${r > 0 ? '+' : r < 0 ? '−' : ''}${Math.abs(r)}%`, tag: ['abaixo', 'acima', 'muito acima'][sev],
+        tb: sev === 2 ? ATT : 'transparent', tc: sev === 2 ? '#f3f2f2' : sev === 1 ? ATT : 'var(--color-neutral-700)', tr: sev ? ATT : '#bab6b6',
+        click: () => { set({ end: x.i, win: 1, sel: x.d || null, playing: false }); this.mapRef.current && this.mapRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }; });
+    const alN = alF.length, alNf = alN - this.alVal.nArea, alPl = (n, s, p) => `${NF.format(n)} ${n === 1 ? s : p}`;
+    const alLede = (alN ? `Em ${alPl(this.alVal.nArea, 'dia', 'dias')} o total de admissões ficou fora do padrão e, em ${alPl(alNf, 'caso', 'casos')}, uma freguesia de Amadora ou Sintra num determinado dia (${alPl(this.alVal.nFr, 'freguesia analisada', 'freguesias analisadas')}, com pelo menos ${AL_MINF} admissões por dia).` : `Nenhum dia ficou fora do padrão com os filtros atuais, nem para o total nem para as ${alPl(this.alVal.nFr, 'freguesia analisada', 'freguesias analisadas')}.`)
+      + ` O normal é a média dos outros dias com o mesmo dia da semana no período (por exemplo, as outras segundas-feiras), tendo em conta a variação habitual; o último dia fica de fora por estar incompleto. Com ${NF.format(this.alVal.nComp)} comparações, alguns desvios acontecem por acaso. Segue os filtros de origem, local e prioridades, mas não a janela.`;
+    // desvios dos indicadores do topo face ao período completo (só quando há janela)
+    const sgn = r => r > 0 ? '+' : r < 0 ? '−' : '';
+    const kD = ['', '', ''], kC = [NEUT, NEUT, NEUT];
+    if (st.win && totAll) {
+      const dp = (totW / nD) / (totAll / N) - 1, rp = Math.round(dp * 100); kD[0] = `${sgn(rp)}${Math.abs(rp)}% face ao período`; kC[0] = Math.abs(dp) >= 0.1 ? ATT : NEUT;
+      [[urW, sum(AF.loc.map(r => r[0] + r[1] + r[2]))], [nuW, sum(AF.loc.map(r => r[3] + r[4]))]].forEach(([w, f], q) => { const dd = (w / totW - f / totAll) * 100, rr = Math.round(dd * 10) / 10;
+        kD[q + 1] = `${sgn(rr)}${Math.abs(dd).toLocaleString('pt-PT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} p.p. face ao período`; kC[q + 1] = Math.abs(dd) >= 3 ? ATT : NEUT; });
+    }
+    // unidades de cuidados primários (coluna Centro_Saude): período completo, não segue a janela nem os filtros
+    const CS = U.cs, CS_MIN = 200, CS_LINES = 12, hasCs = !!(CS && CS.rows && CS.rows.length);
+    let csRows = [], csLede = '', csNote = '', csMore = false, csToggleLabel = '';
+    if (hasCs) {
+      const all = CS.rows.map(r => { const tot = sum(r.c); return { r, tot, nu: tot ? (r.c[3] + r.c[4]) / tot : 0, fq: r.u ? r.f / r.u : 0 }; });
+      const csS = st.csSort === 'nu' || st.csSort === 'fq' ? st.csSort : 'n';
+      const pool = csS === 'n' ? all : all.filter(x => x.tot >= CS_MIN);
+      const sorted = pool.slice().sort((a, b) => csS === 'nu' ? b.nu - a.nu : csS === 'fq' ? b.fq - a.fq : b.tot - a.tot);
+      csMore = sorted.length > CS_LINES;
+      csToggleLabel = st.csAll ? 'Ver menos' : `Ver todas (${NF.format(sorted.length)})`;
+      csRows = (st.csAll ? sorted : sorted.slice(0, CS_LINES)).map((x, i) => ({ i: i + 1, name: x.r.n,
+        con: `${x.r.t === 'USF' || x.r.t === 'UCSP' ? x.r.t : 'Outra unidade'} · ${U.AG[x.r.ag] || ''}`,
+        n: NF.format(x.tot), pct: csS === 'fq' ? pc(x.fq, 1) : pc(x.nu),
+        segs: x.r.c.map((v, j) => ({ w: x.tot ? v / x.tot * 100 : 0, c: PRIO[j][1], t: tt(v, x.tot, j) })) }));
+      const totCs = sum(all.map(x => x.tot)), nuCs = sum(CS.rows.map(r => r.c[3] + r.c[4]));
+      csLede = `${NF.format(CS.rows.length)} unidades com utentes sobretudo de Amadora e Sintra e pelo menos 20 admissões no período completo somam ${NF.format(totCs)} admissões; ${pc(totCs ? nuCs / totCs : NaN, 1)} foram triadas verde ou azul (não urgentes).` + (CS.fora ? ` Ficam de fora ${NF.format(CS.fora.a)} admissões de ${NF.format(CS.fora.u)} unidades de outras zonas ou com poucos casos, e ${NF.format(CS.sem)} sem unidade registada.` : '');
+      csNote = `Por linha: admissões da unidade, triagem (barra) e, à direita, ${csS === 'fq' ? `a percentagem de utentes da unidade com ${CS.k} ou mais idas à urgência (utentes frequentes)` : 'a percentagem de admissões não urgentes (verde e azul)'}.` + (csS === 'n' ? '' : ` Só entram unidades com pelo menos ${CS_MIN} admissões.`);
+    }
+    const csOpts = [['n', 'Admissões'], ['nu', 'Não urgentes'], ['fq', 'Frequentes']].map(([v, label]) => ({ label, on: (st.csSort === 'nu' || st.csSort === 'fq' ? st.csSort : 'n') === v, pick: () => set({ csSort: v }) }));
+    const csToggle = () => set({ csAll: !st.csAll });
+    const hosps = (U.hosp || []).map(h => ({ n: h.n, t: h.t, rx: (h.x - 4 * k).toFixed(2), ry: (h.y - 4 * k).toFixed(2), s: (8 * k).toFixed(2), sw: (1.5 * k).toFixed(2) }));
+    // nomes dos hospitais em HTML por cima do mapa (texto interpolado dentro de <text> SVG não é desenhado)
+    const hospLayer = React.createElement('div', { style: { position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' } },
+      (U.hosp || []).map(h => React.createElement('span', { key: h.n, title: h.t, style: { position: 'absolute', left: ((h.x - vb[0]) / vb[2] * 100).toFixed(2) + '%', top: ((h.y - vb[1]) / vb[3] * 100).toFixed(2) + '%', transform: 'translate(9px,-50%)', fontFamily: '"Source Serif 4",serif', fontSize: 12, fontWeight: 600, lineHeight: 1, color: '#201e1d', whiteSpace: 'nowrap', background: '#f3f2f2', padding: '3px 5px', borderRadius: 2, boxShadow: '0 1px 3px rgba(32,30,29,.3)' } }, h.n))
+        .concat(base ? [] : this.cons.filter(c => c.x > vb[0] && c.x < vb[0] + vb[2] && c.y > vb[1] && c.y < vb[1] + vb[3]).map(c => React.createElement('span', { key: 'c' + c.c, style: { position: 'absolute', left: ((c.x - vb[0]) / vb[2] * 100).toFixed(2) + '%', top: ((c.y - vb[1]) / vb[3] * 100).toFixed(2) + '%', transform: 'translate(-50%,-50%)', fontFamily: '"Source Serif 4",serif', fontSize: 13, fontStyle: 'italic', lineHeight: 1, color: '#201e1d', whiteSpace: 'nowrap', textShadow: '0 0 2px #f3f2f2,0 0 2px #f3f2f2,0 0 3px #f3f2f2,0 0 3px #f3f2f2' } }, c.c))));
+
+    // barra fixa de contexto + índice de secções
+    const cxOg = st.orig.map(a => U.AG[a]);
+    const cxParts = [{ txt: rangeLabel, fw: 600 }, { txt: cxOg.length ? 'Origem: ' + cxOg.join(', ') : 'Todas as origens', fw: 400 },
+      { txt: st.local < 0 ? 'Todos os locais' : U.LOC[st.local], fw: 400 },
+      ...(st.prios.length ? [{ txt: 'Prioridades: ' + st.prios.map(i => PRIO[i][0]).join(', '), fw: 400 }] : [])].map((p, i) => ({ ...p, sep: i ? ' · ' : '' }));
+    const cxItems = st.stuck ? this.ctxTargets().map(t => { const on = st.sec === t.k;
+      return { label: t.label, fw: on ? 600 : 400, color: on ? 'var(--color-accent-700)' : 'var(--color-neutral-700)', bc: on ? 'var(--color-accent-700)' : 'transparent', go: () => this.ctxGo(t.k) }; }) : [];
+
+    // hour × weekday heatmap (média por dia desse dia da semana na janela)
+    const H = U.H, DOWS = [1, 2, 3, 4, 5, 6, 0], DN = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
+    if (!this.dow) this.dow = U.days.map(d => new Date(d + 'T12:00:00').getDay());
+    const hm = DOWS.map(() => new Array(24).fill(0)), nDow = DOWS.map(() => 0);
+    for (let i = i0; i <= i1; i++) nDow[DOWS.indexOf(this.dow[i])]++;
+    for (let j = 0; j < H.length; j += 6) { const d = H[j]; if (d < i0 || d > i1) continue;
+      if ((li < 0 || H[j + 2] === li) && (!og.length || og.includes(H[j + 4])) && (!sp || sp.includes(H[j + 3]))) hm[DOWS.indexOf(this.dow[d])][H[j + 1]] += H[j + 5]; }
+    const avg = hm.map((r, w) => r.map(v => nDow[w] ? v / nDow[w] : null));
+    const hmMax = Math.max(1e-9, ...avg.flat().filter(v => v != null));
+    const f1 = v => v == null ? '–' : v < 10 ? v.toLocaleString('pt-PT', { maximumFractionDigits: 1 }) : NF.format(Math.round(v));
+    const hmRows = avg.map((r, w) => ({ dia: DN[w], tot: nDow[w] ? NF.format(Math.round(sum(r))) : '–',
+      cells: r.map((v, hh) => { const s = v == null ? -1 : Math.min(6, Math.floor(Math.sqrt(v / hmMax) * 7));
+        return { v: f1(v), bg: s < 0 ? '#eae7e7' : RAMP_C[s], fg: s >= 4 ? '#f3f2f2' : '#201e1d', t: `${DN[w]}, ${hh}h–${hh + 1}h · média ${f1(v)}` }; }) }));
+    const hmNote = `Cada quadrado é a média de admissões nessa hora, nesse dia da semana (por exemplo, numa segunda-feira típica entre as 10h e as 11h); quanto mais escuro, mais gente chega. À direita, a média do dia inteiro. Segue a janela, a origem, o local de entrada e as prioridades escolhidas${st.sel ? ' — não a freguesia selecionada' : ''}.`;
+
+    return {
+      hmRows, hmHours: Array.from({ length: 24 }, (_, i) => i + 'h'), hmNote,
+      totalLabel: NF.format(totAll), lede, rangeLabel,
+      kpis: [
+        { label: 'Admissões', value: NF.format(totW), sub: `${NF.format(Math.round(totW / nD))} por dia`, delta: kD[0], dc: kC[0] },
+        { label: 'Urgentes (V+L+A)', value: pc(urW / totW), sub: `${NF.format(urW)} admissões`, delta: kD[1], dc: kC[1] },
+        { label: 'Não urgentes', value: pc(nuW / totW), sub: `verde + azul · ${NF.format(nuW)}`, delta: kD[2], dc: kC[2] },
+        { label: 'Sem freguesia', value: NF.format(semW), sub: `${pc(semW / totW, 1)} fora do mapa`, delta: '', dc: NEUT },
+        ...extraKpis
+      ], foot2, hosps, hospLayer, exportCsv, fqRows, fqLede, hasFq: fqRows.length > 0, hasCs, csRows, csLede, csNote, csOpts, csMore, alRows, alLede, alMore, alToggleLabel, alToggle, csToggleLabel, csToggle,
+      mapTitle: isTx ? (sp ? `Onde se recorre mais à urgência com pulseira ${selNames}, por habitante` : 'Onde se recorre mais à urgência, por habitante') : isPct ? (sp ? `Onde pesam mais as pulseiras ${selNames}` : 'Onde pesam mais as admissões urgentes') : (sp ? `De onde vêm as admissões ${selNames}` : 'De onde vêm as admissões'),
+      modes: [['calor', 'Calor'], ['freg', 'Freguesias'], ['circ', 'Círculos'], ['ret', 'Retícula']].map(([v, label]) => ({ label, on: st.mode === v, pick: () => set({ mode: v }) })),
+      metrics: [['n', 'Admissões'], ['pct', 'Proporção'], ['tx', 'Por 1 000 hab.']].map(([v, label]) => ({ label, on: st.metric === v, pick: () => set({ metric: v }) })),
+      fundos: [['mapa', 'Mapa'], ['ruas', 'Ruas'], ['sat', 'Satélite'], ['papel', 'Papel']].map(([v, label]) => ({ label, on: st.fundo === v, pick: () => set({ fundo: v }) })),
+      scales: [[true, 'Fixa'], [false, 'Por janela']].map(([v, label]) => ({ label, on: st.fixed === v, pick: () => set({ fixed: v }) })),
+      origens: [[-1, 'Todas'], ...U.AG.map((n, i) => [i, n])].map(([v, label]) => ({ label, on: v < 0 ? !st.orig.length : st.orig.includes(v),
+        pick: () => { if (v < 0) return set({ orig: [], sel: null }); const s = new Set(st.orig); s.has(v) ? s.delete(v) : s.add(v); set({ orig: s.size === U.AG.length ? [] : [...s].sort(), sel: null }); } })),
+      agRows: U.AG.map((name, a) => { const c = A.agl[a].reduce((x, r) => x.map((v, i) => v + r[i])), cc = st.local < 0 ? c : A.agl[a][st.local], t = sum(cc) || 1;
+        return { name: name === 'Outros' ? 'Outros (fora de Amadora e Sintra)' : name, n: NF.format(sum(cc)), ur: pc((cc[0] + cc[1] + cc[2]) / t), op: !st.orig.length || st.orig.includes(a) ? 1 : 0.4, pick: () => { const s = new Set(st.orig); s.has(a) ? s.delete(a) : s.add(a); set({ orig: s.size === U.AG.length ? [] : [...s].sort(), sel: null }); }, segs: cc.map((v, i) => ({ w: v / t * 100, c: PRIO[i][1], t: tt(v, sum(cc), i) })) }; }),
+      locais: [[-1, 'Todos'], ...U.LOC.map((n, i) => [i, n])].map(([v, label]) => ({ label, on: st.local === v, pick: () => set({ local: v }) })),
+      zooms: [['area', 'Amadora–Sintra'], ['regiao', 'Região']].map(([v, label]) => ({ label, on: st.zoom === v, pick: () => set({ zoom: v, vbC: null }) })),
+      onDown: this.onDown, zoomIn: () => this.zoomAt(0.5, 0.5, 1 / 1.4), zoomOut: () => this.zoomAt(0.5, 0.5, 1.4), zoomReset: () => set({ vbC: null }),
+      mapRef: this.mapRef, viewBox: vb.map(v => v.toFixed(1)).join(' '), aspect: `${vb[2].toFixed(1)}/${vb[3].toFixed(1)}`,
+      tileLayer: base ? this.layer(this.tilesFor(vb, BM.base, BM.snap), BM.baseStyle) : null, attr: BM.attr,
+      labelLayer: base && BM.ref ? this.layer(this.tilesFor(vb, BM.ref, BM.snap), BM.refStyle) : null, showAttr: base,
+      landOp: st.mode === 'freg' ? (base ? '0.8' : '1') : '1', landStroke: base && st.mode !== 'freg' ? '#201e1d' : '#f3f2f2', landStrokeOp: base && st.mode !== 'freg' ? '0.22' : '1',
+      blur: Math.max(1.5, 9 * k).toFixed(2), heatFilter: isRel ? 'url(#heat-m)' : 'url(#heat-c)',
+      hair: (0.5 * k).toFixed(2), conStroke: (1.1 * k).toFixed(2), labelSize: (13 * k).toFixed(1), labelHalo: (3 * k).toFixed(1),
+      parishes, heat, dots, dotInk: isRel ? '#aa0b56' : '#004961', circles, hits, tip,
+      showHeat: st.mode === 'calor', showDots: st.mode === 'ret', showCircles: st.mode === 'circ',
+      concelhos: this.cons.map(c => ({ p: c.p })),
+      conLabels: [], // nomes dos concelhos passam para hospLayer (HTML)
+      clearHover: () => set({ hover: null }),
+      legend: ramp.map(c => ({ c })), legendTitle,
+      legendLo: isPct ? pc(sLo) : '0', legendHi: isPct ? pc(sHi) : isTx ? f0(maxT) : `${NF.format(Math.round(maxN))}`, legendNote: isTx ? (st.mode === 'freg' ? 'Cor pela taxa · Censos 2021' : 'Tamanho pelas admissões · cor pela taxa') : isPct ? (st.mode === 'freg' ? 'Cor pela proporção' : 'Tamanho pelas admissões · cor pela proporção') : ({ freg: 'Cor proporcional às admissões', circ: 'Área proporcional às admissões', calor: 'Área e intensidade proporcionais às admissões', ret: 'Área de cada ponto proporcional às admissões' })[st.mode],
+      ov: { n: NF.format(winN), sub: `admissões em ${nD} ${nD === 1 ? 'dia' : 'dias'} · média ${(winN / nD).toLocaleString('pt-PT', { maximumFractionDigits: 1 })}/dia`, topLabel: 'Freguesias com mais admissões',
+        top: byN.slice(0, (this.state.mapW || 900) < 700 ? 4 : 7).filter(r => r.n).map(r => ({ name: nice(r.f.n), n: NF.format(r.n) })) },
+      cxOp: st.stuck ? 1 : 0, cxVis: st.stuck ? 'visible' : 'hidden', cxParts, cxItems, cxHasSel: !!selF, cxSelName: selF ? nice(selF.n) : '', cxClear: () => set({ sel: null }), cxFilters: () => this.ctxScrollTo(this.mapRef.current),
+      playLabel: st.playing ? 'Pausar' : 'Reproduzir',
+      togglePlay: () => { if (st.playing) return set({ playing: false }); const w = st.win || 7; set({ win: w, end: end >= N - 1 ? w - 1 : end, playing: true }); },
+      wins: [[1, '1 dia'], [7, '7 dias'], [14, '14'], [30, '30'], [0, 'Tudo']].map(([w, label]) => ({ label, on: st.win === w, pick: () => set({ win: w, playing: w ? st.playing : false, end: Math.max(end, w ? w - 1 : end) }) })),
+      speeds: [[800, 'Lenta'], [450, 'Normal'], [180, 'Rápida']].map(([v, label]) => ({ label, on: st.speed === v, pick: () => set({ speed: v }) })),
+      tlBox: `0 0 ${N * BW} 84`, bars, months, maxIdx: N - 1, sliderVal: st.win ? end : N - 1, sliderOff: !st.win,
+      onSlide: e => set({ end: Math.max(+e.target.value, st.win - 1), playing: false }),
+      tlNote: st.win ? 'Arraste o cursor ou clique num dia para mover a janela; Reproduzir anima o mapa dia a dia. Com a escala fixa, as cores comparam-se entre janelas.' : 'A ver o período completo. Escolha uma janela para percorrer os dias.',
+      panelTitle: selF ? nice(selF.n) : 'Toda a área de influência', panelSub: selF ? `${selF.c} · ${NF.format(curTot)} admissões` + (this.pop[selF.d] ? ` · ${NF.format(this.pop[selF.d][0])} residentes` : "") : `${NF.format(areaTot)} admissões${locName}`,
+      hasSel: !!selF, clearSel: () => set({ sel: null }),
+      bar: cur.map((v, i) => ({ w: v / curTot * 100, c: PRIO[i][1], t: tt(v, sum(cur), i), op: !sp || sp.includes(i) ? 1 : 0.3 })),
+      barRef: areaC.map((v, i) => ({ w: v / areaTot * 100, c: PRIO[i][1], t: tt(v, sum(areaC), i) })),
+      prios, presets: [['Todas', []], ['Urgentes', [0, 1, 2]], ['Não urgentes', [3, 4]]].map(([label, v]) => ({ label, deco: same(st.prios, v) ? 'underline' : 'none', pick: () => set({ prios: v }) })),
+      locRows,
+      rankTitle: isTx ? `Freguesias com mais admissões${sp ? " " + selNames : ""} por 1 000 habitantes` : isPct ? `Freguesias com mais peso de ${sp ? selNames : 'urgentes'}` : (sp ? `Freguesias com mais admissões ${selNames}` : 'Freguesias com mais admissões'),
+      rank,
+      foot: `Dados: BD_Urgencia_Admissoes.csv, ${NF.format(totAll)} admissões de ${fdy(U.days[0])} a ${fdy(U.days[N - 1])} (31/03 parcial). As admissões sem freguesia contam nos totais mas não no mapa.`
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+Scripts que geraram os dados acrescentados ao dashboard em 13/10/2026.
+Ficam aqui como referência; nao correm tal como estao sem ajustar caminhos.
+
+1_populacao_censos_e_sns.py
+   Populacao por freguesia (INE, Censos 2021, indicador 0011609) e inscritos sem medico
+   de familia (Transparencia SNS). Precisa dos ficheiros ine.json e sns.json descarregados
+   das APIs; acrescenta os resultados ao urgencias-data.js. Correr a partir de 01_Fonte.
+
+2_utilizadores_frequentes_e_hospitais.py
+   Utentes com 4 ou mais admissoes, por freguesia, a partir do CSV em 02_Dados, e posicao
+   dos hospitais. Correr a partir de 01_Fonte.
+
+3_unidades_cuidados_primarios.py
+   Agregados por Centro_Saude. Tem caminhos absolutos da sessao em que foi escrito (P e OUT
+   no inicio do ficheiro), que e preciso alterar.
+
+Nota: o "Origem das Urgencias.html" da raiz e um ficheiro unico com tudo embebido. Nao e
+gerado automaticamente a partir destes ficheiros: depois de alterar o .dc.html ou o
+urgencias-data.js, e preciso voltar a embebe-los no HTML.
