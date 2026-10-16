@@ -2,3 +2,5 @@
 02_Dados/
 
 .claude/
+__pycache__/
+*.pyc
