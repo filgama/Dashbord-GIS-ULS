@@ -465,6 +465,50 @@ input[type=range]{accent-color:#0088b0}
   </section>
   </sc-if>
 
+  <sc-if value="{{ hasSoc }}" hint-placeholder-val="{{ false }}">
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Determinantes sociais · Amadora e Sintra · período completo</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">Urgência e contexto social</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap">
+        <span style="color:var(--color-neutral-700)">Comparar com</span>
+        <div class="seg" style="flex-wrap:wrap"><sc-for list="{{ socOpts }}" as="o" hint-placeholder-count="3"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="socind" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+      </div>
+    </div>
+    <p style="margin:0 0 18px;font-size:14px;line-height:1.5;max-width:52em;color:var(--color-neutral-800)">{{ socLede }}</p>
+    <div style="display:flex;flex-wrap:wrap;gap:24px 56px;align-items:flex-start">
+      <div style="flex:1 1 520px;min-width:0">
+        <div style="font-size:12px;color:var(--color-neutral-700);margin:0 0 10px 44px">Admissões por 1 000 residentes, ritmo anual</div>
+        <div ref="{{ socRef }}" style="position:relative;height:380px;margin:0 16px 34px 44px">
+          <sc-for list="{{ socTicksY }}" as="t" hint-placeholder-count="5"><div style="position:absolute;left:0;right:0;bottom:{{ t.b }}%;border-top:1px solid var(--color-neutral-200)"><span style="position:absolute;right:calc(100% + 8px);top:-8px;font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ t.t }}</span></div></sc-for>
+          <sc-for list="{{ socTicksX }}" as="t" hint-placeholder-count="5"><span style="position:absolute;top:calc(100% + 6px);left:{{ t.l }}%;transform:translateX(-50%);font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ t.t }}</span></sc-for>
+          <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible"><path d="{{ socLine }}" stroke="var(--color-neutral-600)" stroke-width="1.5" stroke-dasharray="5 4" fill="none" vector-effect="non-scaling-stroke"></path></svg>
+          <sc-for list="{{ socPts }}" as="p" hint-placeholder-count="17">
+            <button onClick="{{ p.click }}" title="{{ p.tip }}" aria-label="{{ p.tip }}" style="position:absolute;left:{{ p.l }}%;bottom:{{ p.b }}%;transform:{{ p.tf }};display:flex;align-items:center;gap:5px;flex-direction:{{ p.dir }};padding:0;border:0;background:transparent;font:inherit;cursor:pointer;white-space:nowrap">
+              <i style="display:block;flex:none;width:10px;height:10px;border-radius:50%;background:{{ p.c }};box-shadow:{{ p.ring }}"></i>
+              <span style="display:{{ p.lab }};font-size:12px;font-weight:{{ p.fw }};color:{{ p.c }};background:color-mix(in srgb,var(--color-bg) 80%,transparent);padding:0 2px">{{ p.name }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--color-neutral-700)">{{ socXLabel }}</div>
+      </div>
+      <div style="flex:0 1 380px;min-width:0">
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:6px">Fora da reta</div>
+        <sc-for list="{{ socOut }}" as="r" hint-placeholder-count="4">
+          <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:minmax(0,1fr) 48px 112px;gap:10px;align-items:center;width:100%;padding:9px 6px;margin:0 -6px;border:0;background:transparent;font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)">
+            <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.x }} · {{ r.y }} por 1 000 (esperado {{ r.e }})</span></span>
+            <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:{{ r.tc }}">{{ r.dev }}</span>
+            <span style="justify-self:end;font-size:11.5px;line-height:1.3;color:{{ r.tc }}">{{ r.tag }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+    <p style="margin:14px 0 0;font-size:12.5px;font-style:italic;color:var(--color-neutral-700);max-width:60em">{{ socNote }}</p>
+  </section>
+  </sc-if>
+
   <sc-if value="{{ hasFq }}" hint-placeholder-val="{{ false }}">
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
@@ -610,9 +654,10 @@ function fitAspect(b, asp, padF) {
 
 class Component extends DCLogic {
   state = { mode: 'calor', stuck: false, sec: '', metric: 'n', local: -1, prios: [], sel: null, hover: null, zoom: 'area', fundo: 'mapa', fixed: true,
-            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, view3d: false, d3msg: '', uni: null, uniOn: true };
+            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, view3d: false, d3msg: '', uni: null, uniOn: true, socInd: 'i65' };
   mapRef = React.createRef();
   map3dRef = React.createRef();
+  socRef = React.createRef();
 
   componentDidMount() {
     const U = window.URG; if (!U) { this.waitURG = setTimeout(() => this.componentDidMount(), 60); return; }
@@ -670,7 +715,7 @@ class Component extends DCLogic {
     const hs = [...document.querySelectorAll('h2')];
     const sec = f => { const h = hs.find(x => f((x.textContent || '').trim())); return h ? (h.closest('section') || h) : null; };
     return [['mapa', 'Mapa', this.mapRef.current], ['freg', 'Freguesias', sec(t => t.startsWith('Freguesias com'))], ['fora', 'Fora do padrão', sec(t => t === 'Fora do padrão')],
-      ['uni', 'Unidades', sec(t => t === 'Por unidade de cuidados primários')], ['freq', 'Frequentes', sec(t => t === 'Quem volta muitas vezes')], ['horas', 'Horas', sec(t => t === 'Quando chegam')]]
+      ['uni', 'Unidades', sec(t => t === 'Por unidade de cuidados primários')], ['soc', 'Contexto social', sec(t => t === 'Urgência e contexto social')], ['freq', 'Frequentes', sec(t => t === 'Quem volta muitas vezes')], ['horas', 'Horas', sec(t => t === 'Quando chegam')]]
       .filter(x => x[2]).map(([k, label, el]) => ({ k, label, el }));
   }
   ctxBarH() { const b = document.getElementById('ctxbar'); return b ? b.offsetHeight : 0; }
@@ -687,7 +732,7 @@ class Component extends DCLogic {
     }
     if (stuck !== this.state.stuck || sec !== this.state.sec) this.setState({ stuck, sec });
   }
-  componentWillUnmount() { if (this.ml) { this.ml.remove(); this.ml = null; } window.removeEventListener('scroll', this.onCtxScroll); cancelAnimationFrame(this.ctxRaf); this.ctxOn = false; clearTimeout(this.waitURG); document.removeEventListener('mousemove', this.onTT); this.ttEl && this.ttEl.remove(); clearInterval(this.timer); this.ro && this.ro.disconnect(); this.mapRef.current && this.mapRef.current.removeEventListener('wheel', this.onWheel); }
+  componentWillUnmount() { if (this.ml) { this.ml.remove(); this.ml = null; } if (this.socRo) this.socRo.disconnect(); window.removeEventListener('scroll', this.onCtxScroll); cancelAnimationFrame(this.ctxRaf); this.ctxOn = false; clearTimeout(this.waitURG); document.removeEventListener('mousemove', this.onTT); this.ttEl && this.ttEl.remove(); clearInterval(this.timer); this.ro && this.ro.disconnect(); this.mapRef.current && this.mapRef.current.removeEventListener('wheel', this.onWheel); }
   curVB() { return this.state.vbC || (this.state.zoom === 'area' ? this.vbArea : this.vbReg); }
   zoomAt(px, py, f) {
     const vb = this.curVB(), nw = Math.max(30, Math.min(1400, vb[2] * f)), g = nw / vb[2], nh = vb[3] * g;
@@ -705,6 +750,10 @@ class Component extends DCLogic {
     window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   };
   attach() {
+    // largura real do gráfico do contexto social (para esconder nomes que se sobrepõem)
+    const sEl = this.socRef.current;
+    if (sEl && sEl !== this.socEl) { this.socRo = this.socRo || new ResizeObserver(() => { const w = this.socEl && this.socEl.clientWidth; if (w && Math.abs(w - (this.state.socW || 0)) > 24) this.setState({ socW: w }); });
+      if (this.socEl) this.socRo.unobserve(this.socEl); this.socRo.observe(sEl); this.socEl = sEl; }
     const el = this.mapRef.current; if (!el || el === this.attached || !this.onWheel) return;
     if (this.attached) { this.attached.removeEventListener('wheel', this.onWheel); this.ro.unobserve(this.attached); }
     el.addEventListener('wheel', this.onWheel, { passive: false }); this.ro.observe(el); this.attached = el;
@@ -874,7 +923,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [], showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [] };
+    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], hasSoc: false, socPts: [], socTicksX: [], socTicksY: [], socLine: '', socOpts: [], socLede: '', socOut: [], socXLabel: '', socNote: '', alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [], showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [] };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -1104,6 +1153,53 @@ class Component extends DCLogic {
     }
     const csOpts = [['n', 'Admissões'], ['nu', 'Não urgentes'], ['fq', 'Frequentes']].map(([v, label]) => ({ label, on: (st.csSort === 'nu' || st.csSort === 'fq' ? st.csSort : 'n') === v, pick: () => set({ csSort: v }) }));
     const csToggle = () => set({ csAll: !st.csAll });
+    // contexto social (INE, Censos 2021, por freguesia) contra admissões por 1 000 residentes no período completo, só Amadora e Sintra
+    const SOC = U.soc, SOC_IND = { i65: ['65+ anos', 'Pessoas com 65 ou mais anos', 0, 1], des: ['Desemprego', 'Taxa de desemprego', 2, 3], esc: ['Ensino superior', 'Pessoas com 25+ anos com ensino superior', 4, 5], rep: ['Edifícios a reparar', 'Edifícios a precisar de reparação', 6, 7] };
+    const socK = SOC_IND[st.socInd] ? st.socInd : 'i65', [, socName, sNum, sDen] = SOC_IND[socK];
+    let socPts = [], socTicksX = [], socTicksY = [], socLine = '', socLede = '', socOut = [], hasSoc = false;
+    if (SOC && SOC.by) {
+      const pts = this.fregs.filter(f => (f.c === 'Amadora' || f.c === 'Sintra') && SOC.by[f.d] && this.pop[f.d]).map(f => { const v = SOC.by[f.d], tot = sum(this.counts(AF, f.d));
+        return { f, x: v[sDen] ? v[sNum] / v[sDen] * 100 : NaN, y: tot / this.pop[f.d][0] * 1000 * 365 / N, tot }; }).filter(p => isFinite(p.x) && isFinite(p.y));
+      hasSoc = pts.length >= 5;
+      if (hasSoc) {
+        const n = pts.length, mx = sum(pts.map(p => p.x)) / n, my = sum(pts.map(p => p.y)) / n;
+        const sxx = sum(pts.map(p => (p.x - mx) ** 2)), sxy = sum(pts.map(p => (p.x - mx) * (p.y - my))), syy = sum(pts.map(p => (p.y - my) ** 2));
+        const b = sxx ? sxy / sxx : 0, a = my - b * mx, r = sxx && syy ? sxy / Math.sqrt(sxx * syy) : NaN;
+        pts.forEach(p => { p.e = a + b * p.x; p.res = p.y - p.e; });
+        const sdr = Math.sqrt(sum(pts.map(p => p.res ** 2)) / Math.max(1, n - 2));
+        const step = (lo, hi) => { const g = 10 ** Math.floor(Math.log10((hi - lo) / 4 || 1)); return [1, 2, 2.5, 5, 10, 20].map(k => k * g).find(k => (hi - lo) / k <= 5); };
+        const ext = (lo, hi) => { const k = step(lo, hi); return [Math.floor(lo / k) * k, Math.ceil(hi / k) * k, k]; };
+        const [x0, x1, xs] = ext(Math.min(...pts.map(p => p.x)), Math.max(...pts.map(p => p.x)));
+        const [y0, y1, ys] = ext(Math.min(...pts.map(p => p.y)) * 0.95, Math.max(...pts.map(p => p.y)) * 1.03);
+        const X = v => (v - x0) / ((x1 - x0) || 1) * 100, Y = v => (v - y0) / ((y1 - y0) || 1) * 100;
+        for (let v = x0; v <= x1 + 1e-9; v += xs) socTicksX.push({ l: X(v), t: NF.format(Math.round(v * 10) / 10) + '%' });
+        for (let v = y0; v <= y1 + 1e-9; v += ys) socTicksY.push({ b: Y(v), t: NF.format(Math.round(v)) });
+        socLine = `M${X(x0).toFixed(2)},${(100 - Y(a + b * x0)).toFixed(2)}L${X(x1).toFixed(2)},${(100 - Y(a + b * x1)).toFixed(2)}`;
+        const tag = p => p.res > sdr ? 'hi' : p.res < -sdr ? 'lo' : '';
+        socPts = pts.map(p => { const t = tag(p), on = st.sel === p.f.d, right = X(p.x) > 70;
+          return { l: X(p.x), b: Y(p.y), name: nice(p.f.n).replace(/, .*$/, '…'), dir: right ? 'row-reverse' : 'row', tf: right ? 'translate(calc(-100% + 5px),5px)' : 'translate(-5px,5px)',
+            c: t === 'hi' ? ATT : t === 'lo' ? '#0088b0' : 'var(--color-neutral-700)', ring: on ? '0 0 0 2px var(--color-bg),0 0 0 4px #201e1d' : '0 0 0 2px var(--color-bg)',
+            fw: t || on ? 600 : 400,
+            tip: `${nice(p.f.n)} (${p.f.c}): ${pc(p.x / 100, 1)} · ${f0(p.y)} admissões por 1 000 hab./ano (esperado pela reta: ${f0(p.e)})`,
+            click: () => set({ sel: on ? null : p.f.d }), pri: (t ? 2 : 0) + (on ? 4 : 0) }; });
+        // nomes que se sobrepõem: ficam os destacados e o selecionado; os outros só aparecem ao passar o rato
+        const cw = st.socW || 600, placed = socPts.map(p => { const x = p.l / 100 * cw, y = (100 - p.b) / 100 * 380; return [x - 6, y - 6, x + 6, y + 6, p]; });
+        socPts.map((p, i) => i).sort((i, j) => socPts[j].pri - socPts[i].pri).forEach(i => { const p = socPts[i], w = p.name.length * 6.3 + 10, x = p.l / 100 * cw, y = (100 - p.b) / 100 * 380;
+          const boxOf = dir => dir === 'row' ? [x + 7, y - 8, x + 7 + w, y + 8] : [x - 7 - w, y - 8, x - 7, y + 8];
+          const free = box => box[0] >= -44 && box[2] <= cw + 16 && !placed.some(b => b[4] !== p && box[0] < b[2] && box[2] > b[0] && box[1] < b[3] && box[3] > b[1]);
+          const alt = p.dir === 'row' ? 'row-reverse' : 'row', dir = free(boxOf(p.dir)) ? p.dir : free(boxOf(alt)) ? alt : null;
+          p.lab = dir ? 'inline' : 'none';
+          if (dir) { p.dir = dir; p.tf = dir === 'row' ? 'translate(-5px,5px)' : 'translate(calc(-100% + 5px),5px)'; placed.push(boxOf(dir)); } });
+        socOut = pts.filter(p => tag(p)).sort((p, q) => q.res - p.res).map(p => ({ name: nice(p.f.n), x: pc(p.x / 100, 1), y: f0(p.y), e: f0(p.e),
+          dev: (p.res > 0 ? '+' : '−') + NF.format(Math.abs(Math.round(p.res))), tag: p.res > 0 ? 'acima do esperado' : 'abaixo do esperado', tc: p.res > 0 ? ATT : '#0088b0',
+          click: () => set({ sel: st.sel === p.f.d ? null : p.f.d }) }));
+        const rTxt = isFinite(r) ? NF.format(Math.round(r * 100) / 100) : '—', strength = !isFinite(r) ? 'indeterminada' : Math.abs(r) < 0.3 ? 'fraca' : Math.abs(r) < 0.6 ? 'moderada' : 'forte';
+        socLede = `${n} freguesias de Amadora e Sintra. A relação entre ${socName.toLowerCase()} e o recurso à urgência é ${strength}${isFinite(r) ? ` (r = ${rTxt})` : ''}${Math.abs(r) >= 0.3 ? (b > 0 ? ': onde o indicador é mais alto, vai-se mais à urgência' : ': onde o indicador é mais alto, vai-se menos à urgência') : ''}. ${socOut.length ? `${socOut.length} freguesias afastam-se da reta mais do que o habitual (lista ao lado).` : 'Nenhuma freguesia se afasta muito da reta.'}`;
+      }
+    }
+    const socOpts = Object.entries(SOC_IND).map(([v, [label]]) => ({ label, on: socK === v, pick: () => set({ socInd: v }) }));
+    const socXLabel = socName + ' (%) · Censos 2021';
+    const socNote = `Cada ponto é uma freguesia. Eixo vertical: admissões por 1 000 residentes, ritmo anual, no período completo (segue a origem e o local de entrada, não a janela). A reta tracejada é o padrão médio; a cor marca as freguesias a mais de um desvio padrão dela. É uma associação entre freguesias, não uma causa: não diz quem, dentro de cada freguesia, recorre à urgência. Só conta as admissões nesta ULS: freguesias junto a Lisboa (como Alfragide) podem recorrer a outros hospitais e parecer abaixo do esperado sem o estarem. Dados sociais de 2021: ${SOC && SOC.src ? SOC.src : 'INE'}.`;
     // unidades de saúde no mapa: tamanho pelas admissões do período completo (como a lista), clicar abre o cartão
     const sites = this.sites || [], showUni = !!(st.uniOn && sites.length), uMax = Math.max(1, ...sites.map(x => x.tot));
     const uniDots = sites.map(x => { const on = st.uni === x.i, r = (3.2 + 8 * Math.sqrt(x.tot / uMax)) * k;
@@ -1157,7 +1253,7 @@ class Component extends DCLogic {
         { label: 'Não urgentes', value: pc(nuW / totW), sub: `verde + azul · ${NF.format(nuW)}`, delta: kD[2], dc: kC[2] },
         { label: 'Sem freguesia', value: NF.format(semW), sub: `${pc(semW / totW, 1)} fora do mapa`, delta: '', dc: NEUT },
         ...extraKpis
-      ], foot2, hosps, hospLayer, exportCsv, fqRows, fqLede, hasFq: fqRows.length > 0, hasCs, csRows, csLede, csNote, csOpts, csMore, alRows, alLede, alMore, alToggleLabel, alToggle, csToggleLabel, csToggle,
+      ], foot2, hosps, hospLayer, exportCsv, fqRows, fqLede, hasFq: fqRows.length > 0, hasSoc, socRef: this.socRef, socPts, socTicksX, socTicksY, socLine, socOpts, socLede, socOut, socXLabel, socNote, hasCs, csRows, csLede, csNote, csOpts, csMore, alRows, alLede, alMore, alToggleLabel, alToggle, csToggleLabel, csToggle,
       mapTitle: isTx ? (sp ? `Onde se recorre mais à urgência com pulseira ${selNames}, por habitante` : 'Onde se recorre mais à urgência, por habitante') : isPct ? (sp ? `Onde pesam mais as pulseiras ${selNames}` : 'Onde pesam mais as admissões urgentes') : (sp ? `De onde vêm as admissões ${selNames}` : 'De onde vêm as admissões'),
       modes: [['calor', 'Calor'], ['freg', 'Freguesias'], ['circ', 'Círculos'], ['ret', 'Retícula']].map(([v, label]) => ({ label, on: st.mode === v, pick: () => set({ mode: v }) })),
       metrics: [['n', 'Admissões'], ['pct', 'Proporção'], ['tx', 'Por 1 000 hab.']].map(([v, label]) => ({ label, on: st.metric === v, pick: () => set({ metric: v }) })),

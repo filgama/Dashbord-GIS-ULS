@@ -23,3 +23,10 @@ urgencias-data.js, e preciso voltar a embebe-los no HTML.
    dashboard. Correr a partir da raiz do repositorio. Com --verificar so confirma que o HTML
    da raiz esta em dia. Nao atualiza os dados: se o urgencias-data.js mudar, e preciso
    voltar a exportar o pacote.
+
+5_contexto_social.py
+   Contexto social por freguesia (INE, Censos 2021, Ficheiro Sintese por seccao, totais por
+   freguesia): 65+ anos, desemprego, ensino superior (25+ anos) e edificios a precisar de
+   reparacao. Descarrega o ficheiro do INE (ou usa um .zip/.xlsx ja descarregado), acrescenta
+   window.URG.soc ao urgencias-data.js e volta a embebe-lo no HTML da raiz. Precisa de openpyxl.
+   Correr a partir da raiz do repositorio.
