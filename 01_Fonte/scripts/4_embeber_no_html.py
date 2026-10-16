@@ -4,7 +4,7 @@ O "Origem das Urgencias.html" da raiz e um pacote com tudo embebido: um template
 os recursos substituidos por identificadores) e um manifesto com os scripts, estilos e fontes.
 Este script so troca a parte do template que vem depois de </helmet> (o corpo do dashboard e o
 seu script), convertendo os atributos camelCase para o formato que o pacote usa (sc-camel-...).
-Nao mexe nos dados: se o urgencias-data.js mudar, e preciso voltar a exportar o pacote.
+Os dados (urgencias-data.js) atualizam-se com o script 5, que chama atualizar_dados() deste ficheiro.
 
 Correr a partir da raiz do repositorio:  python3 01_Fonte/scripts/4_embeber_no_html.py
 Com --verificar, so confirma que o HTML da raiz esta em dia com o .dc.html (nao escreve nada).
@@ -51,6 +51,25 @@ def main():
     html = html[:m.start(2)] + enc + html[m.end(2):]
     open(DESTINO, 'w', encoding='utf-8', newline='\n').write(html)  # LF, também no Windows
     print('HTML atualizado:', DESTINO)
+
+
+def atualizar_dados():
+    """Substitui no pacote o recurso urgencias-data.js pela versão atual de 01_Fonte (chamado pelo script 5)."""
+    import base64
+    import gzip
+    novo = open(FONTE.replace('Origem das Urgencias.dc.html', 'urgencias-data.js'), encoding='utf-8').read()
+    html = open(DESTINO, encoding='utf-8').read()
+    m = re.search(r'(<script type="__bundler/manifest">)(.*?)(</script>)', html, re.S)
+    man = json.loads(m.group(2))
+    alvo = [k for k, v in man.items() if v.get('compressed') and 'javascript' in v.get('mime', '')
+            and gzip.decompress(base64.b64decode(v['data']))[:11] == b'window.URG=']
+    assert len(alvo) == 1, 'recurso dos dados não encontrado no pacote'
+    velho = man[alvo[0]]['data']
+    dados = base64.b64encode(gzip.compress(novo.encode('utf-8'), mtime=0)).decode('ascii')
+    assert html.count(velho) == 1
+    html = html.replace(velho, dados)
+    open(DESTINO, 'w', encoding='utf-8', newline='\n').write(html)
+    print('dados atualizados no HTML:', DESTINO)
 
 
 if __name__ == '__main__':

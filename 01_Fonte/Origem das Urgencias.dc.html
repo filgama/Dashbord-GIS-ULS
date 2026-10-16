@@ -1360,7 +1360,7 @@ class Component extends DCLogic {
       locRows,
       rankTitle: isTx ? `Freguesias com mais admissões${sp ? " " + selNames : ""} por 1 000 habitantes` : isPct ? `Freguesias com mais peso de ${sp ? selNames : 'urgentes'}` : (sp ? `Freguesias com mais admissões ${selNames}` : 'Freguesias com mais admissões'),
       rank,
-      foot: `Dados: BD_Urgencia_Admissoes.csv, ${NF.format(totAll)} admissões de ${fdy(U.days[0])} a ${fdy(U.days[N - 1])} (31/03 parcial). As admissões sem freguesia contam nos totais mas não no mapa.`
+      foot: `Dados: BD_Urgencia_Admissoes.csv, ${NF.format(totAll)} admissões de ${fdy(U.days[0])} a ${fdy(U.days[N - 1])} (o último dia pode estar incompleto). As admissões sem freguesia contam nos totais mas não no mapa.`
     };
   }
 }
