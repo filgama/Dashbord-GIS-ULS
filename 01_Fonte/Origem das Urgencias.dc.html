@@ -220,8 +220,8 @@ input[type=range]{accent-color:#0088b0}
         {{ labelLayer }}
         {{ hospLayer }}
         <div ref="{{ map3dRef }}" style="position:absolute;inset:0;display:{{ d3disp }};background:#ecebea"></div>
+        <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:58px;top:12px;max-width:max(160px,min(300px,calc(100% - 330px)));z-index:2;font-size:13px;font-style:italic;background:var(--color-bg);padding:6px 12px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</div></sc-if>
         <div style="position:absolute;right:12px;bottom:26px;display:flex;align-items:center;gap:8px">
-          <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-style:italic;background:color-mix(in srgb,var(--color-bg) 92%,transparent);padding:3px 8px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</span></sc-if>
           <div class="seg" style="background:var(--color-bg);box-shadow:var(--shadow-sm)"><sc-for list="{{ dims }}" as="o" hint-placeholder-count="2"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="dim" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
         </div>
         <div style="position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:4px">
@@ -545,6 +545,7 @@ class Component extends DCLogic {
     this.popCon = {}; for (const f of this.fregs) { const P = this.pop[f.d]; if (P) this.popCon[f.c] = (this.popCon[f.c] || 0) + P[0]; }
     this.vbArea = fitAspect(bboxOf(this.cons.filter(c => c.c === 'Sintra' || c.c === 'Amadora').map(c => c.p)), 1.3, 0.04);
     this.vbReg = fitAspect([0, 60, U.meta.w, U.meta.h - 60], 1.3, 0);
+    this.bbArea = (b => [b[0], b[1], b[2] - b[0], b[3] - b[1]])(bboxOf(this.cons.filter(c => c.c === 'Sintra' || c.c === 'Amadora').map(c => c.p)));
     const R = U.R; this.off = new Array(N + 1).fill(R.length);
     for (let j = R.length - 6; j >= 0; j -= 6) this.off[R[j]] = j;
     for (let d = N - 1; d >= 0; d--) if (this.off[d] > this.off[d + 1]) this.off[d] = this.off[d + 1];
@@ -659,7 +660,16 @@ class Component extends DCLogic {
       if (pts.length && (pts[0][0] !== pts[pts.length - 1][0] || pts[0][1] !== pts[pts.length - 1][1])) pts.push(pts[0]);
       return pts; }).filter(r => r.length >= 4);
   }
-  cam3d() { const v = this.vbArea, a = this.toLL(v[0], v[1] + v[3]), b = this.toLL(v[0] + v[2], v[1]); return [a, b]; }
+  cam3d() { const v = this.state.zoom === 'area' ? this.bbArea : this.vbReg, a = this.toLL(v[0], v[1] + v[3]), b = this.toLL(v[0] + v[2], v[1]); return [a, b]; }
+  // margens da câmara 3D: deixam livres o quadro das freguesias (canto superior direito) e a legenda (em baixo)
+  pad3d() { const el = this.map3dRef.current, w = el ? el.clientWidth : 900, h = el ? el.clientHeight : 690, r = w > 700;
+    return { top: Math.round(h * 0.06), left: r ? 56 : 16, right: r ? Math.round(Math.min(230, w * 0.28)) : 16, bottom: Math.round(h * (r ? 0.24 : 0.2)) }; }
+  // na vista Amadora–Sintra só as freguesias destes dois concelhos respondem ao rato
+  inArea3d(f) { return this.state.zoom !== 'area' || f.c === 'Sintra' || f.c === 'Amadora'; }
+  home3d(dur) { const map = this.ml; if (!map || !this.mlReady) return;
+    const cam = map.cameraForBounds(this.cam3d(), { padding: this.pad3d(), pitch: PITCH3D, bearing: BEAR3D }); if (!cam) return;
+    this.camHome = { center: cam.center, zoom: cam.zoom, pitch: PITCH3D, bearing: BEAR3D }; this.camZoom = this.state.zoom;
+    dur ? map.easeTo({ ...this.camHome, duration: dur }) : map.jumpTo(this.camHome); }
   async init3d() {
     if (this.ml || this.mlBusy) return; this.mlBusy = true; this.setState({ d3msg: 'A carregar a vista 3D…' });
     try { await this.loadML(); } catch (e) { this.mlBusy = false; this.setState({ view3d: false, d3msg: 'Não foi possível carregar a vista 3D (sem ligação à internet?)' }); return; }
@@ -675,14 +685,14 @@ class Component extends DCLogic {
       { id: 'con', type: 'line', source: 'con', paint: { 'line-color': '#201e1d', 'line-opacity': 0.6, 'line-width': 1.4 } },
       { id: 'fr-3d', type: 'fill-extrusion', source: 'fr', paint: { 'fill-extrusion-color': ['case', ['boolean', ['feature-state', 'sel'], false], '#201e1d', ['coalesce', ['feature-state', 'c'], '#d7d3d3']],
         'fill-extrusion-height': ['coalesce', ['feature-state', 'h'], 0], 'fill-extrusion-base': 0, 'fill-extrusion-opacity': 0.86, 'fill-extrusion-vertical-gradient': true } });
-    const map = this.ml = new ML.Map({ container: el, style: { version: 8, sources, layers, terrain: { source: 'dem', exaggeration: 1.6 } }, bounds: this.cam3d(), fitBoundsOptions: { padding: 24 },
+    const map = this.ml = new ML.Map({ container: el, style: { version: 8, sources, layers, terrain: { source: 'dem', exaggeration: 1.6 } }, bounds: this.cam3d(), fitBoundsOptions: { padding: this.pad3d() },
       pitch: PITCH3D, bearing: BEAR3D, maxPitch: 80, attributionControl: false, dragRotate: true, touchPitch: true });
     this.camHome = null;
-    map.on('load', () => { map.jumpTo({ zoom: map.getZoom() - 0.4 }); this.mlReady = true; this.camHome = { center: map.getCenter(), zoom: map.getZoom(), pitch: PITCH3D, bearing: BEAR3D }; this.v3Key = null; this.mlBusy = false; this.setState({ d3msg: '' }); this.sync3d(); });
-    map.on('mousemove', 'fr-3d', e => { const f = e.features && e.features[0]; if (!f) return; map.getCanvas().style.cursor = 'pointer';
+    map.on('load', () => { this.mlReady = true; this.home3d(0); this.v3Key = null; this.mlBusy = false; this.setState({ d3msg: '' }); this.sync3d(); });
+    map.on('mousemove', 'fr-3d', e => { const f = e.features && e.features[0]; if (!f || !this.inArea3d(this.fregs[f.id])) { map.getCanvas().style.cursor = ''; if (this.state.hover) this.setState({ hover: null }); return; } map.getCanvas().style.cursor = 'pointer';
       const d = this.fregs[f.id].d, h = this.state.hover; if (!h || h.d !== d || Math.abs(h.x - e.point.x) > 4 || Math.abs(h.y - e.point.y) > 4) this.setState({ hover: { d, x: e.point.x, y: e.point.y } }); });
     map.on('mouseleave', 'fr-3d', () => { map.getCanvas().style.cursor = ''; this.setState({ hover: null }); });
-    map.on('click', 'fr-3d', e => { const f = e.features && e.features[0]; if (!f) return; const d = this.fregs[f.id].d; this.setState({ sel: this.state.sel === d ? null : d }); });
+    map.on('click', 'fr-3d', e => { const f = e.features && e.features[0]; if (!f || !this.inArea3d(this.fregs[f.id])) return; const d = this.fregs[f.id].d; this.setState({ sel: this.state.sel === d ? null : d }); });
     for (const h of U.hosp || []) { const m = document.createElement('div');
       m.style.cssText = 'display:flex;align-items:center;gap:5px;font:600 12px/1 "Source Serif 4",serif;color:#201e1d;white-space:nowrap;pointer-events:none';
       const sq = document.createElement('i'); sq.style.cssText = 'display:block;width:9px;height:9px;background:#201e1d;box-shadow:0 0 0 1.5px #f3f2f2';
@@ -691,7 +701,8 @@ class Component extends DCLogic {
   }
   sync3d() {
     const map = this.ml, v = this.v3; if (!map || !this.mlReady || !v) return;
-    if (this.mlShown !== true) { this.mlShown = true; map.resize(); }
+    if (this.mlShown !== true) { this.mlShown = true; map.resize(); this.home3d(0); }
+    else if (this.camZoom !== this.state.zoom) this.home3d(900);
     const key = v.key + '|' + this.state.sel + '|' + this.state.fundo;
     if (this.v3Key === key) return; this.v3Key = key;
     for (const k of Object.keys(BASEMAPS)) map.setLayoutProperty('b-' + k, 'visibility', this.state.fundo === k ? 'visible' : 'none');
