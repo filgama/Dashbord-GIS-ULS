@@ -17,7 +17,7 @@ a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-800)}
 input[type=range]{accent-color:#0088b0}
 </style>
 </helmet>
-<div style="max-width:1560px;margin:0 auto;padding:var(--space-6) 32px 64px;font-family:var(--font-body);color:var(--color-text);box-sizing:border-box">
+<div class="urg-anim" style="max-width:1560px;margin:0 auto;padding:var(--space-6) 32px 64px;font-family:var(--font-body);color:var(--color-text);box-sizing:border-box">
 
   <div style="position:sticky;top:0;z-index:100;height:0">
     <nav id="ctxbar" aria-label="Contexto e secções" style="position:absolute;left:0;right:0;top:0;box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:2px 24px;padding:6px 0;background:#f3f2f2;border-bottom:1px solid rgba(32,30,29,.25);font-size:13px;opacity:{{ cxOp }};visibility:{{ cxVis }};transition:opacity .15s">
@@ -255,7 +255,7 @@ input[type=range]{accent-color:#0088b0}
 
         {{ labelLayer }}
         {{ hospLayer }}
-        <div ref="{{ map3dRef }}" role="img" aria-label="Mapa 3D das freguesias; os mesmos valores estão na lista de freguesias" style="position:absolute;inset:0;display:{{ d3disp }};background:#ecebea"></div>
+        <div ref="{{ map3dRef }}" role="img" aria-label="Mapa 3D das freguesias; os mesmos valores estão na lista de freguesias" style="position:absolute;inset:0;display:{{ d3disp }};opacity:{{ d3op }};pointer-events:{{ d3pe }};transition:opacity {{ d3fadeMs }}ms ease;background:#ecebea"></div>
         <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><div role="status" aria-live="polite" style="position:absolute;left:58px;top:12px;max-width:max(160px,min(300px,calc(100% - 330px)));z-index:2;font-size:13px;font-style:italic;background:var(--color-bg);padding:6px 12px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</div></sc-if>
         <div style="position:absolute;right:12px;bottom:26px;display:flex;align-items:center;gap:8px">
           <div class="seg" style="background:var(--color-bg);box-shadow:var(--shadow-sm)"><sc-for list="{{ dims }}" as="o" hint-placeholder-count="2"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="dim" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
@@ -275,7 +275,7 @@ input[type=range]{accent-color:#0088b0}
         </div>
 
         <sc-if value="{{ hasUni }}" hint-placeholder-val="{{ false }}">
-          <div style="position:absolute;right:12px;top:12px;width:min(300px,46%);max-height:calc(100% - 80px);overflow:auto;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;font-size:12.5px">
+          <div class="urg-fade" style="position:absolute;right:12px;top:12px;width:min(300px,46%);max-height:calc(100% - 80px);overflow:auto;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;font-size:12.5px">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
               <div style="min-width:0"><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Unidade de saúde · período completo</div><div style="font-weight:600;font-size:16px;line-height:1.25;margin-top:2px">{{ uniCard.title }}</div><div style="font-style:italic;color:var(--color-neutral-700);margin-top:2px">{{ uniCard.sub }}</div></div>
               <button class="btn btn-ghost" style="padding:0 6px;font-size:18px;line-height:1.1" onClick="{{ uniCard.close }}" aria-label="Fechar unidade" title="Fechar">×</button>
@@ -346,7 +346,7 @@ input[type=range]{accent-color:#0088b0}
             <div class="seg"><sc-for list="{{ speeds }}" as="o" hint-placeholder-count="3"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="vel" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
           </div>
         </div>
-        <svg viewBox="{{ tlBox }}" preserveAspectRatio="none" style="display:block;width:100%;height:84px">
+        <svg class="urg-tl" viewBox="{{ tlBox }}" preserveAspectRatio="none" style="display:block;width:100%;height:84px">
           <sc-for list="{{ months }}" as="m" hint-placeholder-count="0">
             <line x1="{{ m.x }}" x2="{{ m.x }}" y1="0" y2="84" stroke="#201e1d" stroke-opacity="0.35" stroke-width="1" vector-effect="non-scaling-stroke"></line>
           </sc-for>
@@ -395,7 +395,7 @@ input[type=range]{accent-color:#0088b0}
         </div>
         <span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ evCount }}</span>
         <sc-if value="{{ nd.show }}" hint-placeholder-val="{{ false }}">
-          <div style="display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--color-surface);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)">
+          <div class="urg-fade" style="display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--color-surface);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)">
             <span style="font-size:12.5px;font-weight:600">Nota para {{ nd.dayLabel }}</span>
             <input type="text" value="{{ nd.t }}" onChange="{{ nd.edit }}" maxlength="140" placeholder="Ex.: greve dos transportes, pico de gripe…" aria-label="Texto da nota" style="font:inherit;font-size:13px;padding:6px 8px;border:1px solid rgba(32,30,29,.3);border-radius:2px;background:var(--color-bg);color:var(--color-text)">
             <sc-if value="{{ nd.hasFr }}" hint-placeholder-val="{{ false }}"><label style="font-size:12.5px;display:flex;gap:6px;align-items:center"><input type="checkbox" checked="{{ nd.fr }}" onChange="{{ nd.toggleFr }}" style="margin:0;accent-color:#0088b0">Só para {{ nd.frName }}</label></sc-if>
@@ -683,6 +683,18 @@ const RAMP_D = ['#2166ac', '#67a9cf', '#d1e5f0', '#f4f1ee', '#fddbc7', '#ef8a62'
 const CMP = [[0, 'Nada'], ['ant', 'Janela anterior'], [7, '1 semana antes'], [28, '4 semanas antes']];
 // ligação partilhável: o estado vai no fim do endereço (#...), nunca dados
 const HASH_KEYS = { d: 'end', w: 'win', s: 'sel', m: 'mode', me: 'metric', f: 'fundo', z: 'zoom', l: 'local', o: 'orig', p: 'prios', e: 'fixed', v3: 'view3d', c: 'cmp' };
+// transições: CSS para o 2D e animações da câmara/alturas para o 3D; desligadas se o sistema pedir menos movimento
+const ANIM_CSS = `
+.urg-anim svg path, .urg-anim svg rect { transition: fill .35s ease, fill-opacity .35s ease, stroke .2s ease, stroke-width .2s ease, opacity .3s ease; }
+.urg-anim svg circle { transition: r .35s ease, fill .35s ease, fill-opacity .35s ease, stroke-width .2s ease, opacity .3s ease; }
+.urg-anim svg g { transition: opacity .3s ease; }
+.urg-anim .urg-tl rect { transition: y .3s ease, height .3s ease, fill .25s ease; }
+.urg-anim button, .urg-anim .seg-opt { transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, opacity .2s ease; }
+.urg-fade { animation: urgFade .28s ease both; }
+@keyframes urgFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .urg-anim *, .urg-fade { transition: none !important; animation: none !important; } }`;
+const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+const easeIO = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const RAMP_K = ['#f1ece4', '#e0d4c2', '#cbb89c', '#b39a76', '#957a55', '#735b3b', '#523f27'];
 const layDefault = () => Object.fromEntries(LAYERS.map(([k, , , on, op]) => [k, { on, op }]));
 const H3D = 2200, PITCH3D = 58, BEAR3D = -18;
@@ -702,7 +714,7 @@ function fitAspect(b, asp, padF) {
 
 class Component extends DCLogic {
   state = { mode: 'calor', stuck: false, sec: '', metric: 'n', local: -1, prios: [], sel: null, hover: null, zoom: 'area', fundo: 'mapa', fixed: true,
-            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, evWin: false, noteDraft: null, noteMsg: '', notesV: 0, cmp: 0, shareMsg: '', view3d: false, d3msg: '', uni: null, uniOn: true, lay: layDefault() };
+            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, evWin: false, noteDraft: null, noteMsg: '', notesV: 0, cmp: 0, shareMsg: '', d3show: false, d3fade: false, vbTick: 0, view3d: false, d3msg: '', uni: null, uniOn: true, lay: layDefault() };
   mapRef = React.createRef();
   map3dRef = React.createRef();
 
@@ -721,6 +733,7 @@ class Component extends DCLogic {
     for (let j = R.length - 6; j >= 0; j -= 6) this.off[R[j]] = j;
     for (let d = N - 1; d >= 0; d--) if (this.off[d] > this.off[d + 1]) this.off[d] = this.off[d + 1];
     this.cache = new Map();
+    if (!document.getElementById('urg-anim-css')) { const css = document.createElement('style'); css.id = 'urg-anim-css'; css.textContent = ANIM_CSS; document.head.appendChild(css); }
     this.sites = this.buildSites();
     if (!this.ttEl) {
       const T = this.ttEl = document.createElement('div');
@@ -780,11 +793,23 @@ class Component extends DCLogic {
     }
     if (stuck !== this.state.stuck || sec !== this.state.sec) this.setState({ stuck, sec });
   }
-  componentWillUnmount() { if (this.ml) { this.ml.remove(); this.ml = null; } window.removeEventListener('scroll', this.onCtxScroll); cancelAnimationFrame(this.ctxRaf); this.ctxOn = false; clearTimeout(this.waitURG); document.removeEventListener('mousemove', this.onTT); this.ttEl && this.ttEl.remove(); clearInterval(this.timer); this.ro && this.ro.disconnect(); this.mapRef.current && this.mapRef.current.removeEventListener('wheel', this.onWheel); }
-  curVB() { return this.state.vbC || (this.state.zoom === 'area' ? this.vbArea : this.vbReg); }
-  zoomAt(px, py, f) {
-    const vb = this.curVB(), nw = Math.max(30, Math.min(1400, vb[2] * f)), g = nw / vb[2], nh = vb[3] * g;
-    this.setState({ vbC: [vb[0] + px * vb[2] - px * nw, vb[1] + py * vb[3] - py * nh, nw, nh], hover: null });
+  componentWillUnmount() { cancelAnimationFrame(this.hRaf); cancelAnimationFrame(this.vbRaf); clearTimeout(this.introT); clearTimeout(this.fadeT); if (this.ml) { this.ml.remove(); this.ml = null; } window.removeEventListener('scroll', this.onCtxScroll); cancelAnimationFrame(this.ctxRaf); this.ctxOn = false; clearTimeout(this.waitURG); document.removeEventListener('mousemove', this.onTT); this.ttEl && this.ttEl.remove(); clearInterval(this.timer); this.ro && this.ro.disconnect(); this.mapRef.current && this.mapRef.current.removeEventListener('wheel', this.onWheel); }
+  curVB() { return this.vbAnim || this.baseVB(); }
+  baseVB() { return this.state.vbC || (this.state.zoom === 'area' ? this.vbArea : this.vbReg); }
+  motion(ms) { return reduceMotion() ? 0 : ms; }
+  // desliza o enquadramento 2D do atual para o que fica depois de aplicar 'patch' ao estado
+  glideVB(patch, ms = 420) {
+    const from = this.curVB(); cancelAnimationFrame(this.vbRaf); this.vbAnim = null;
+    this.setState({ ...patch, hover: null }, () => { const to = this.baseVB(), d = this.motion(ms); if (!d) return;
+      const t0 = performance.now(), step = now => { const k = Math.min(1, (now - t0) / d), e = easeIO(k);
+        this.vbAnim = k < 1 ? from.map((v, i) => v + (to[i] - v) * e) : null; this.setState({ vbTick: now });
+        if (k < 1) this.vbRaf = requestAnimationFrame(step); };
+      this.vbAnim = from; this.vbRaf = requestAnimationFrame(step); });
+  }
+  zoomAt(px, py, f, glide) {
+    const vb = this.baseVB(), nw = Math.max(30, Math.min(1400, vb[2] * f)), g = nw / vb[2], nh = vb[3] * g;
+    const vbC = [vb[0] + px * vb[2] - px * nw, vb[1] + py * vb[3] - py * nh, nw, nh];
+    glide ? this.glideVB({ vbC }) : this.setState({ vbC, hover: null });
   }
   onDown = e => {
     if (e.button !== 0) return;
@@ -949,6 +974,37 @@ class Component extends DCLogic {
     return { top: Math.round(h * 0.06), left: r ? 56 : 16, right: r ? Math.round(Math.min(230, w * 0.28)) : 16, bottom: Math.round(h * (r ? 0.24 : 0.2)) }; }
   // na vista Amadora–Sintra só as freguesias destes dois concelhos respondem ao rato
   inArea3d(f) { return this.state.zoom !== 'area' || f.c === 'Sintra' || f.c === 'Amadora'; }
+  // câmara de cima que mostra exatamente o mesmo enquadramento do mapa 2D
+  top3d() { const map = this.ml, v = this.baseVB(); if (!map) return null;
+    const c = map.cameraForBounds([this.toLL(v[0], v[1] + v[3]), this.toLL(v[0] + v[2], v[1])], { padding: 0, pitch: 0, bearing: 0 });
+    return c ? { center: c.center, zoom: c.zoom, pitch: 0, bearing: 0 } : null; }
+  // alturas: interpolação das alturas-alvo (dados) e de uma escala global (entrada/saída do 3D)
+  runH() { if (this.hRaf) return;
+    const step = now => { let more = false;
+      if (this.hTw) { const k = this.hTw.d ? Math.min(1, (now - this.hTw.t0) / this.hTw.d) : 1, e = 1 - Math.pow(1 - k, 3);
+        this.hCur = this.hTw.to.map((v, i) => this.hTw.from[i] + (v - this.hTw.from[i]) * e); if (k < 1) more = true; else this.hTw = null; }
+      if (this.sTw) { const k = this.sTw.d ? Math.min(1, (now - this.sTw.t0) / this.sTw.d) : 1;
+        this.hScale = this.sTw.from + (this.sTw.to - this.sTw.from) * easeIO(k);
+        if (k < 1) more = true; else { const cb = this.sTw.done; this.sTw = null; cb && cb(); } }
+      const m = this.ml, sc = this.hScale == null ? 1 : this.hScale;
+      if (m && this.hCur) this.hCur.forEach((h, i) => m.setFeatureState({ source: 'fr', id: i }, { h: h * sc }));
+      this.hRaf = more ? requestAnimationFrame(step) : 0; };
+    this.hRaf = requestAnimationFrame(step); }
+  tweenH(to, d) { this.hTw = { from: this.hCur ? this.hCur.slice() : to.map(() => 0), to, t0: performance.now(), d }; this.runH(); }
+  scaleH(to, d, done) { this.sTw = { from: this.hScale == null ? 1 : this.hScale, to, t0: performance.now(), d, done }; this.runH(); }
+  // 2D -> 3D: começa de cima, igual ao 2D, aparece, e só depois inclina e faz crescer as colunas
+  intro3d() { const map = this.ml; this.introPending = false; map.resize(); this.home3d(0); const home = this.camHome, top = this.top3d();
+    if (top) map.jumpTo(top); this.hScale = 0; if (this.hCur) this.runH();
+    this.setState({ d3show: true });
+    const d = this.motion(1500); clearTimeout(this.introT);
+    this.introT = setTimeout(() => { if (!this.state.view3d || this.leaving) return; map.easeTo({ ...home, duration: d, easing: easeIO }); this.scaleH(1, d); }, this.motion(380)); }
+  // 3D -> 2D: baixa as colunas e volta a ficar de cima, alinhado com o 2D, e só então mostra o 2D
+  leave3d() { const map = this.ml;
+    if (!map || !this.mlReady || !this.state.view3d || !this.state.d3show) { this.mlShown = false; this.setState({ view3d: false, d3show: false, hover: null, d3msg: '' }); return; }
+    clearTimeout(this.introT); this.leaving = true; this.setState({ hover: null }); const top = this.top3d(), d = this.motion(1100);
+    if (top) map.easeTo({ ...top, duration: d, easing: easeIO }); else map.stop();
+    this.scaleH(0, d, () => { this.leaving = false; this.mlShown = false; this.setState({ view3d: false, d3show: false, d3fade: true });
+      clearTimeout(this.fadeT); this.fadeT = setTimeout(() => this.setState({ d3fade: false }), this.motion(480) + 20); }); }
   home3d(dur) { const map = this.ml; if (!map || !this.mlReady) return;
     const cam = map.cameraForBounds(this.cam3d(), { padding: this.pad3d(), pitch: PITCH3D, bearing: BEAR3D }); if (!cam) return;
     this.camHome = { center: cam.center, zoom: cam.zoom, pitch: PITCH3D, bearing: BEAR3D }; this.camZoom = this.state.zoom;
@@ -1000,12 +1056,14 @@ class Component extends DCLogic {
       (this.hospMk || []).forEach(m => { const el = m.getElement(); el.style.display = L.hosp.on ? 'flex' : 'none'; el.style.opacity = L.hosp.op; });
       (this.uniMk || []).forEach(m => { m.getElement().style.opacity = L.uni.op; }); }
     if (this.uniMk) { const on = this.state.uniOn && L.uni.on; this.uniMk.forEach((m, i) => { const el = m.getElement(); el.style.display = on ? 'block' : 'none'; el.style.background = this.state.uni === i ? '#201e1d' : '#f3f2f2'; }); }
-    if (this.mlShown !== true) { this.mlShown = true; map.resize(); this.home3d(0); }
-    else if (this.camZoom !== this.state.zoom) this.home3d(900);
+    if (this.mlShown !== true) { this.mlShown = true; this.intro3d(); }
+    else if (this.camZoom !== this.state.zoom && !this.leaving) this.home3d(this.motion(900));
     const key = v.key + '|' + this.state.sel + '|' + this.state.fundo;
     if (this.v3Key === key) return; this.v3Key = key;
     for (const k of Object.keys(BASEMAPS)) map.setLayoutProperty('b-' + k, 'visibility', this.state.fundo === k ? 'visible' : 'none');
-    v.t.forEach((t, i) => map.setFeatureState({ source: 'fr', id: i }, { h: t == null ? 0 : 40 + t * H3D, c: v.cols ? v.cols[i] : v.color(t), sel: this.state.sel === this.fregs[i].d }));
+    v.t.forEach((t, i) => map.setFeatureState({ source: 'fr', id: i }, { c: v.cols ? v.cols[i] : v.color(t), sel: this.state.sel === this.fregs[i].d }));
+    // alturas com transição: mais curta durante a reprodução, para acompanhar o ritmo
+    this.tweenH(v.t.map(t => t == null ? 0 : 40 + t * H3D), this.motion(this.state.playing ? Math.min(380, this.state.speed * 0.8) : 520));
   }
 
   grid(s, vb) {
@@ -1072,7 +1130,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
+    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3op: '0', d3pe: 'none', d3fadeMs: '0', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -1425,10 +1483,10 @@ class Component extends DCLogic {
       agRows: U.AG.map((name, a) => { const c = A.agl[a].reduce((x, r) => x.map((v, i) => v + r[i])), cc = st.local < 0 ? c : A.agl[a][st.local], t = sum(cc) || 1;
         return { name: name === 'Outros' ? 'Outros (fora de Amadora e Sintra)' : name, n: NF.format(sum(cc)), ur: pc((cc[0] + cc[1] + cc[2]) / t), op: !st.orig.length || st.orig.includes(a) ? 1 : 0.4, pick: () => { const s = new Set(st.orig); s.has(a) ? s.delete(a) : s.add(a); set({ orig: s.size === U.AG.length ? [] : [...s].sort(), sel: null }); }, segs: cc.map((v, i) => ({ w: v / t * 100, c: PRIO[i][1], t: tt(v, sum(cc), i) })) }; }),
       locais: [[-1, 'Todos'], ...U.LOC.map((n, i) => [i, n])].map(([v, label]) => ({ label, on: st.local === v, pick: () => set({ local: v }) })),
-      zooms: [['area', 'Amadora–Sintra'], ['regiao', 'Região']].map(([v, label]) => ({ label, on: st.zoom === v, pick: () => set({ zoom: v, vbC: null }) })),
+      zooms: [['area', 'Amadora–Sintra'], ['regiao', 'Região']].map(([v, label]) => ({ label, on: st.zoom === v, pick: () => st.view3d ? set({ zoom: v, vbC: null }) : this.glideVB({ zoom: v, vbC: null }, 600) })),
       onDown: this.onDown,
-      zoomIn: () => st.view3d && this.ml ? this.ml.zoomIn() : this.zoomAt(0.5, 0.5, 1 / 1.4), zoomOut: () => st.view3d && this.ml ? this.ml.zoomOut() : this.zoomAt(0.5, 0.5, 1.4),
-      zoomReset: () => st.view3d && this.ml && this.camHome ? this.ml.easeTo({ ...this.camHome, duration: 900 }) : set({ vbC: null }),
+      zoomIn: () => st.view3d && this.ml ? this.ml.zoomIn() : this.zoomAt(0.5, 0.5, 1 / 1.4, true), zoomOut: () => st.view3d && this.ml ? this.ml.zoomOut() : this.zoomAt(0.5, 0.5, 1.4, true),
+      zoomReset: () => st.view3d && this.ml && this.camHome ? this.ml.easeTo({ ...this.camHome, duration: this.motion(900) }) : this.glideVB({ vbC: null }, 520),
       showUni, uniDots, hasUni: !!uS, uniCard, layers, layNote,
       cmpOpts: CMP.map(([v, label]) => { const off = v === 'ant' ? nD : v, ok = !v || (!!st.win && i0 - off >= 0);
         return { label, on: (st.cmp || 0) === v, off: !ok, op: ok ? 1 : 0.45, pick: () => set({ cmp: v, ...(v && !st.win ? { win: 7 } : {}) }) }; }),
@@ -1436,8 +1494,9 @@ class Component extends DCLogic {
       shareMsg: st.shareMsg, copyLink: () => this.copyLink(), exportPng: () => this.exportPng(),
       opLand: st.mode === 'freg' ? opOf('medida') : '1', opMain: opOf('medida'), opLim: opOf('limites'), opHosp: opOf('hosp'), opUni: String(L.uni.op), opCtx: opOf(ctxKey || 'idosos'),
       showCtx: !!ctxKey, ctxPaths, showCtxLeg: !!ctxKey && !st.view3d, ctxLeg,
-      map3dRef: this.map3dRef, d3disp: st.view3d ? 'block' : 'none', d3msg: st.d3msg,
-      dims: [[false, '2D'], [true, '3D']].map(([v, label]) => ({ label, on: st.view3d === v, pick: () => { this.mlShown = false; set({ view3d: v, hover: null, d3msg: '' }); } })),
+      map3dRef: this.map3dRef, d3disp: st.view3d || st.d3fade ? 'block' : 'none', d3op: st.view3d && st.d3show ? '1' : '0', d3pe: st.view3d && st.d3show ? 'auto' : 'none', d3fadeMs: String(this.motion(480)), d3msg: st.d3msg,
+      dims: [[false, '2D'], [true, '3D']].map(([v, label]) => ({ label, on: st.view3d === v, pick: () => { if (v === st.view3d) return;
+        if (v) { clearTimeout(this.fadeT); this.mlShown = false; set({ view3d: true, d3show: false, d3fade: false, hover: null, d3msg: '' }); } else this.leave3d(); } })),
       mapRef: this.mapRef, viewBox: vb.map(v => v.toFixed(1)).join(' '), aspect: `${vb[2].toFixed(1)}/${vb[3].toFixed(1)}`,
       tileLayer: base && L.fundo.on ? this.layer(this.tilesFor(vb, BM.base, BM.snap), { ...BM.baseStyle, opacity: L.fundo.op }) : null, attr: st.view3d ? (base ? BM.attr + ' · ' : '') + 'Relevo: Terrarium/AWS · MapLibre' : BM.attr,
       labelLayer: base && BM.ref && L.nomes.on ? this.layer(this.tilesFor(vb, BM.ref, BM.snap), { ...BM.refStyle, opacity: (BM.refStyle.opacity || 1) * L.nomes.op }) : null, showAttr: base || st.view3d,
