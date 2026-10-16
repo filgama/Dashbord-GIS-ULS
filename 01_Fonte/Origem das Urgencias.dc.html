@@ -219,6 +219,11 @@ input[type=range]{accent-color:#0088b0}
 
         {{ labelLayer }}
         {{ hospLayer }}
+        <div ref="{{ map3dRef }}" style="position:absolute;inset:0;display:{{ d3disp }};background:#ecebea"></div>
+        <div style="position:absolute;right:12px;bottom:26px;display:flex;align-items:center;gap:8px">
+          <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-style:italic;background:color-mix(in srgb,var(--color-bg) 92%,transparent);padding:3px 8px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</span></sc-if>
+          <div class="seg" style="background:var(--color-bg);box-shadow:var(--shadow-sm)"><sc-for list="{{ dims }}" as="o" hint-placeholder-count="2"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="dim" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+        </div>
         <div style="position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:4px">
           <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:20px;width:34px;height:34px" onClick="{{ zoomIn }}" aria-label="Aproximar" title="Aproximar">+</button>
           <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:20px;width:34px;height:34px" onClick="{{ zoomOut }}" aria-label="Afastar" title="Afastar">−</button>
@@ -506,6 +511,11 @@ const BASEMAPS = {
   sat: { base: ESRI('World_Imagery'), baseStyle: { filter: 'saturate(.35) brightness(1.75) contrast(.6)' }, ref: ESRI('Reference/World_Boundaries_and_Places'), refStyle: { filter: 'none' }, snap: Math.ceil, attr: '© Esri · Maxar · Earthstar Geographics' }
 };
 
+// vista 3D: MapLibre carregado só quando se escolhe 3D; relevo dos mosaicos públicos Terrarium (AWS Open Data)
+const ML_URL = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl';
+const DEM = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
+const H3D = 2200, PITCH3D = 58, BEAR3D = -18;
+
 function bboxOf(paths) {
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
   for (const p of paths) { const re = /(-?\d+\.?\d*),(-?\d+\.?\d*)/g; let m;
@@ -521,8 +531,9 @@ function fitAspect(b, asp, padF) {
 
 class Component extends DCLogic {
   state = { mode: 'calor', stuck: false, sec: '', metric: 'n', local: -1, prios: [], sel: null, hover: null, zoom: 'area', fundo: 'mapa', fixed: true,
-            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false };
+            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, view3d: false, d3msg: '' };
   mapRef = React.createRef();
+  map3dRef = React.createRef();
 
   componentDidMount() {
     const U = window.URG; if (!U) { this.waitURG = setTimeout(() => this.componentDidMount(), 60); return; }
@@ -563,7 +574,7 @@ class Component extends DCLogic {
     this.setState({ end: N - 2, ...saved, orig: Array.isArray(saved.orig) ? saved.orig : [], playing: false });
     this.ro = new ResizeObserver(() => { const w = this.mapRef.current && this.mapRef.current.clientWidth; if (w && Math.abs(w - this.state.mapW) > 40) this.setState({ mapW: w }); });
     setTimeout(() => this.setState({ grids: { area: this.grid(3.4, this.vbReg), regiao: this.grid(6.5, this.vbReg) } }), 0);
-    this.onWheel = e => { e.preventDefault(); const r = this.mapRef.current.getBoundingClientRect();
+    this.onWheel = e => { if (this.state.view3d) return; e.preventDefault(); const r = this.mapRef.current.getBoundingClientRect();
       this.zoomAt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, e.deltaY > 0 ? 1.18 : 1 / 1.18); };
     if (!this.ctxOn) { // barra de contexto: um só listener, limitado por rAF
       this.ctxOn = true;
@@ -619,6 +630,7 @@ class Component extends DCLogic {
   }
   componentDidUpdate() {
     this.attach();
+    if (this.state.view3d) { if (!this.ml) this.init3d(); else this.sync3d(); }
     const s = this.state, ps = this._prev || {}; this._prev = { ...s };
     if (ps.mode !== s.mode || ps.metric !== s.metric || ps.zoom !== s.zoom || ps.fundo !== s.fundo || ps.win !== s.win || ps.end !== s.end || ps.local !== s.local || ps.orig !== s.orig || ps.fixed !== s.fixed || ps.speed !== s.speed)
       try { localStorage.setItem(KEY, JSON.stringify({ mode: s.mode, metric: s.metric, zoom: s.zoom, fundo: s.fundo, win: s.win, end: s.end, local: s.local, orig: s.orig, fixed: s.fixed, speed: s.speed })); } catch (e) {}
@@ -630,6 +642,60 @@ class Component extends DCLogic {
         this.setState({ end: this.state.end + 1 });
       }, s.speed);
     }
+  }
+
+  loadML() {
+    if (window.maplibregl) return Promise.resolve();
+    return this.mlP || (this.mlP = new Promise((res, rej) => {
+      const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = ML_URL + '.css'; document.head.appendChild(css);
+      const js = document.createElement('script'); js.src = ML_URL + '.js'; js.onload = res; js.onerror = () => { this.mlP = null; rej(); }; document.head.appendChild(js);
+    }));
+  }
+  // coordenadas do SVG (Mercator normalizado, ver meta) para longitude/latitude
+  toLL(x, y) { const m = this.U.meta, wx = m.wx0 + x / m.s, wy = m.wy0 + y / m.s; return [wx * 360 - 180, Math.atan(Math.sinh(Math.PI * (1 - 2 * wy))) * 180 / Math.PI]; }
+  ringsLL(p) {
+    return p.split(/(?=M)/).map(sp => { const pts = [], re = /(-?\d+\.?\d*),(-?\d+\.?\d*)/g; let m;
+      while ((m = re.exec(sp))) pts.push(this.toLL(+m[1], +m[2]));
+      if (pts.length && (pts[0][0] !== pts[pts.length - 1][0] || pts[0][1] !== pts[pts.length - 1][1])) pts.push(pts[0]);
+      return pts; }).filter(r => r.length >= 4);
+  }
+  cam3d() { const v = this.vbArea, a = this.toLL(v[0], v[1] + v[3]), b = this.toLL(v[0] + v[2], v[1]); return [a, b]; }
+  async init3d() {
+    if (this.ml || this.mlBusy) return; this.mlBusy = true; this.setState({ d3msg: 'A carregar a vista 3D…' });
+    try { await this.loadML(); } catch (e) { this.mlBusy = false; this.setState({ view3d: false, d3msg: 'Não foi possível carregar a vista 3D (sem ligação à internet?)' }); return; }
+    const el = this.map3dRef.current; if (!el || !this.state.view3d) { this.mlBusy = false; this.setState({ d3msg: '' }); return; }
+    const ML = window.maplibregl, U = this.U;
+    const fr = { type: 'FeatureCollection', features: this.fregs.map((f, i) => ({ type: 'Feature', id: i, properties: {}, geometry: { type: 'MultiPolygon', coordinates: this.ringsLL(f.p).map(r => [r]) } })) };
+    const con = { type: 'FeatureCollection', features: this.cons.map(c => ({ type: 'Feature', properties: {}, geometry: { type: 'MultiLineString', coordinates: this.ringsLL(c.p) } })) };
+    const sources = { dem: { type: 'raster-dem', tiles: [DEM], encoding: 'terrarium', tileSize: 256, maxzoom: 13 }, dem2: { type: 'raster-dem', tiles: [DEM], encoding: 'terrarium', tileSize: 256, maxzoom: 13 }, fr: { type: 'geojson', data: fr }, con: { type: 'geojson', data: con } };
+    const layers = [{ id: 'bg', type: 'background', paint: { 'background-color': '#ecebea' } }];
+    for (const [k, B] of Object.entries(BASEMAPS)) { sources['b-' + k] = { type: 'raster', tiles: [B.base('{z}', '{x}', '{y}')], tileSize: 256, maxzoom: 17 };
+      layers.push({ id: 'b-' + k, type: 'raster', source: 'b-' + k, layout: { visibility: 'none' }, paint: { 'raster-saturation': k === 'sat' ? -0.6 : -0.85 } }); }
+    layers.push({ id: 'relevo', type: 'hillshade', source: 'dem2', paint: { 'hillshade-exaggeration': 0.45, 'hillshade-shadow-color': '#4d4844', 'hillshade-highlight-color': '#ffffff', 'hillshade-accent-color': '#6b6560' } },
+      { id: 'con', type: 'line', source: 'con', paint: { 'line-color': '#201e1d', 'line-opacity': 0.6, 'line-width': 1.4 } },
+      { id: 'fr-3d', type: 'fill-extrusion', source: 'fr', paint: { 'fill-extrusion-color': ['case', ['boolean', ['feature-state', 'sel'], false], '#201e1d', ['coalesce', ['feature-state', 'c'], '#d7d3d3']],
+        'fill-extrusion-height': ['coalesce', ['feature-state', 'h'], 0], 'fill-extrusion-base': 0, 'fill-extrusion-opacity': 0.86, 'fill-extrusion-vertical-gradient': true } });
+    const map = this.ml = new ML.Map({ container: el, style: { version: 8, sources, layers, terrain: { source: 'dem', exaggeration: 1.6 } }, bounds: this.cam3d(), fitBoundsOptions: { padding: 24 },
+      pitch: PITCH3D, bearing: BEAR3D, maxPitch: 80, attributionControl: false, dragRotate: true, touchPitch: true });
+    this.camHome = null;
+    map.on('load', () => { map.jumpTo({ zoom: map.getZoom() - 0.4 }); this.mlReady = true; this.camHome = { center: map.getCenter(), zoom: map.getZoom(), pitch: PITCH3D, bearing: BEAR3D }; this.v3Key = null; this.mlBusy = false; this.setState({ d3msg: '' }); this.sync3d(); });
+    map.on('mousemove', 'fr-3d', e => { const f = e.features && e.features[0]; if (!f) return; map.getCanvas().style.cursor = 'pointer';
+      const d = this.fregs[f.id].d, h = this.state.hover; if (!h || h.d !== d || Math.abs(h.x - e.point.x) > 4 || Math.abs(h.y - e.point.y) > 4) this.setState({ hover: { d, x: e.point.x, y: e.point.y } }); });
+    map.on('mouseleave', 'fr-3d', () => { map.getCanvas().style.cursor = ''; this.setState({ hover: null }); });
+    map.on('click', 'fr-3d', e => { const f = e.features && e.features[0]; if (!f) return; const d = this.fregs[f.id].d; this.setState({ sel: this.state.sel === d ? null : d }); });
+    for (const h of U.hosp || []) { const m = document.createElement('div');
+      m.style.cssText = 'display:flex;align-items:center;gap:5px;font:600 12px/1 "Source Serif 4",serif;color:#201e1d;white-space:nowrap;pointer-events:none';
+      const sq = document.createElement('i'); sq.style.cssText = 'display:block;width:9px;height:9px;background:#201e1d;box-shadow:0 0 0 1.5px #f3f2f2';
+      const lb = document.createElement('span'); lb.textContent = h.n; lb.title = h.t || ''; lb.style.cssText = 'background:#f3f2f2;padding:3px 5px;border-radius:2px;box-shadow:0 1px 3px rgba(32,30,29,.3)';
+      m.append(sq, lb); new ML.Marker({ element: m, anchor: 'left', offset: [-4, 0] }).setLngLat(this.toLL(h.x, h.y)).addTo(map); }
+  }
+  sync3d() {
+    const map = this.ml, v = this.v3; if (!map || !this.mlReady || !v) return;
+    if (this.mlShown !== true) { this.mlShown = true; map.resize(); }
+    const key = v.key + '|' + this.state.sel + '|' + this.state.fundo;
+    if (this.v3Key === key) return; this.v3Key = key;
+    for (const k of Object.keys(BASEMAPS)) map.setLayoutProperty('b-' + k, 'visibility', this.state.fundo === k ? 'visible' : 'none');
+    v.t.forEach((t, i) => map.setFeatureState({ source: 'fr', id: i }, { h: t == null ? 0 : 40 + t * H3D, c: v.color(t), sel: this.state.sel === this.fregs[i].d }));
   }
 
   grid(s, vb) {
@@ -696,7 +762,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [] };
+    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [] };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -725,6 +791,7 @@ class Component extends DCLogic {
     const minN = isRel ? Math.max(5, Math.round(MIN_N * Math.min(1, frac * 3))) : 1;
     rows.forEach(r => { r.t = isPct ? (r.tot >= minN ? Math.max(0, Math.min(1, (r.share - sLo) / ((sHi - sLo) || 1))) : null) : isTx ? (r.pop && r.n > 0 ? Math.min(1, r.tx / maxT) : null) : (r.n > 0 ? Math.min(1, r.n / maxN) : null); });
     const colorOf = t => t == null ? '#d7d3d3' : ramp[Math.min(6, Math.floor(t * 7))];
+    this.v3 = { t: rows.map(r => r.t), color: colorOf, key: rows.map(r => r.t == null ? '' : r.t.toFixed(3)).join(',') + st.metric };
 
     const parishes = rows.map(r => ({ p: r.f.p, fill: st.mode === 'freg' ? colorOf(r.t) : (base ? 'none' : '#e2dfdf') }));
     const circ = (x, y, rr) => `M${(x - rr).toFixed(2)},${y.toFixed(2)}a${rr.toFixed(2)},${rr.toFixed(2)} 0 1,0 ${(2 * rr).toFixed(2)},0a${rr.toFixed(2)},${rr.toFixed(2)} 0 1,0 -${(2 * rr).toFixed(2)},0`;
@@ -971,10 +1038,14 @@ class Component extends DCLogic {
         return { name: name === 'Outros' ? 'Outros (fora de Amadora e Sintra)' : name, n: NF.format(sum(cc)), ur: pc((cc[0] + cc[1] + cc[2]) / t), op: !st.orig.length || st.orig.includes(a) ? 1 : 0.4, pick: () => { const s = new Set(st.orig); s.has(a) ? s.delete(a) : s.add(a); set({ orig: s.size === U.AG.length ? [] : [...s].sort(), sel: null }); }, segs: cc.map((v, i) => ({ w: v / t * 100, c: PRIO[i][1], t: tt(v, sum(cc), i) })) }; }),
       locais: [[-1, 'Todos'], ...U.LOC.map((n, i) => [i, n])].map(([v, label]) => ({ label, on: st.local === v, pick: () => set({ local: v }) })),
       zooms: [['area', 'Amadora–Sintra'], ['regiao', 'Região']].map(([v, label]) => ({ label, on: st.zoom === v, pick: () => set({ zoom: v, vbC: null }) })),
-      onDown: this.onDown, zoomIn: () => this.zoomAt(0.5, 0.5, 1 / 1.4), zoomOut: () => this.zoomAt(0.5, 0.5, 1.4), zoomReset: () => set({ vbC: null }),
+      onDown: this.onDown,
+      zoomIn: () => st.view3d && this.ml ? this.ml.zoomIn() : this.zoomAt(0.5, 0.5, 1 / 1.4), zoomOut: () => st.view3d && this.ml ? this.ml.zoomOut() : this.zoomAt(0.5, 0.5, 1.4),
+      zoomReset: () => st.view3d && this.ml && this.camHome ? this.ml.easeTo({ ...this.camHome, duration: 900 }) : set({ vbC: null }),
+      map3dRef: this.map3dRef, d3disp: st.view3d ? 'block' : 'none', d3msg: st.d3msg,
+      dims: [[false, '2D'], [true, '3D']].map(([v, label]) => ({ label, on: st.view3d === v, pick: () => { this.mlShown = false; set({ view3d: v, hover: null, d3msg: '' }); } })),
       mapRef: this.mapRef, viewBox: vb.map(v => v.toFixed(1)).join(' '), aspect: `${vb[2].toFixed(1)}/${vb[3].toFixed(1)}`,
-      tileLayer: base ? this.layer(this.tilesFor(vb, BM.base, BM.snap), BM.baseStyle) : null, attr: BM.attr,
-      labelLayer: base && BM.ref ? this.layer(this.tilesFor(vb, BM.ref, BM.snap), BM.refStyle) : null, showAttr: base,
+      tileLayer: base ? this.layer(this.tilesFor(vb, BM.base, BM.snap), BM.baseStyle) : null, attr: st.view3d ? (base ? BM.attr + ' · ' : '') + 'Relevo: Terrarium/AWS · MapLibre' : BM.attr,
+      labelLayer: base && BM.ref ? this.layer(this.tilesFor(vb, BM.ref, BM.snap), BM.refStyle) : null, showAttr: base || st.view3d,
       landOp: st.mode === 'freg' ? (base ? '0.8' : '1') : '1', landStroke: base && st.mode !== 'freg' ? '#201e1d' : '#f3f2f2', landStrokeOp: base && st.mode !== 'freg' ? '0.22' : '1',
       blur: Math.max(1.5, 9 * k).toFixed(2), heatFilter: isRel ? 'url(#heat-m)' : 'url(#heat-c)',
       hair: (0.5 * k).toFixed(2), conStroke: (1.1 * k).toFixed(2), labelSize: (13 * k).toFixed(1), labelHalo: (3 * k).toFixed(1),
@@ -984,7 +1055,7 @@ class Component extends DCLogic {
       conLabels: [], // nomes dos concelhos passam para hospLayer (HTML)
       clearHover: () => set({ hover: null }),
       legend: ramp.map(c => ({ c })), legendTitle,
-      legendLo: isPct ? pc(sLo) : '0', legendHi: isPct ? pc(sHi) : isTx ? f0(maxT) : `${NF.format(Math.round(maxN))}`, legendNote: isTx ? (st.mode === 'freg' ? 'Cor pela taxa · Censos 2021' : 'Tamanho pelas admissões · cor pela taxa') : isPct ? (st.mode === 'freg' ? 'Cor pela proporção' : 'Tamanho pelas admissões · cor pela proporção') : ({ freg: 'Cor proporcional às admissões', circ: 'Área proporcional às admissões', calor: 'Área e intensidade proporcionais às admissões', ret: 'Área de cada ponto proporcional às admissões' })[st.mode],
+      legendLo: isPct ? pc(sLo) : '0', legendHi: isPct ? pc(sHi) : isTx ? f0(maxT) : `${NF.format(Math.round(maxN))}`, legendNote: st.view3d ? `Altura e cor: ${isTx ? 'taxa por 1 000 hab.' : isPct ? 'proporção' : 'admissões'} · arraste com o botão direito para rodar` : isTx ? (st.mode === 'freg' ? 'Cor pela taxa · Censos 2021' : 'Tamanho pelas admissões · cor pela taxa') : isPct ? (st.mode === 'freg' ? 'Cor pela proporção' : 'Tamanho pelas admissões · cor pela proporção') : ({ freg: 'Cor proporcional às admissões', circ: 'Área proporcional às admissões', calor: 'Área e intensidade proporcionais às admissões', ret: 'Área de cada ponto proporcional às admissões' })[st.mode],
       ov: { n: NF.format(winN), sub: `admissões em ${nD} ${nD === 1 ? 'dia' : 'dias'} · média ${(winN / nD).toLocaleString('pt-PT', { maximumFractionDigits: 1 })}/dia`, topLabel: 'Freguesias com mais admissões',
         top: byN.slice(0, (this.state.mapW || 900) < 700 ? 4 : 7).filter(r => r.n).map(r => ({ name: nice(r.f.n), n: NF.format(r.n) })) },
       cxOp: st.stuck ? 1 : 0, cxVis: st.stuck ? 'visible' : 'hidden', cxParts, cxItems, cxHasSel: !!selF, cxSelName: selF ? nice(selF.n) : '', cxClear: () => set({ sel: null }), cxFilters: () => this.ctxScrollTo(this.mapRef.current),
