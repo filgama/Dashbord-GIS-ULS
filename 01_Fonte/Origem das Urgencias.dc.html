@@ -231,8 +231,8 @@ input[type=range]{accent-color:#0088b0}
 
         {{ labelLayer }}
         {{ hospLayer }}
-        <div ref="{{ map3dRef }}" style="position:absolute;inset:0;display:{{ d3disp }};background:#ecebea"></div>
-        <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><div style="position:absolute;left:58px;top:12px;max-width:max(160px,min(300px,calc(100% - 330px)));z-index:2;font-size:13px;font-style:italic;background:var(--color-bg);padding:6px 12px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</div></sc-if>
+        <div ref="{{ map3dRef }}" role="img" aria-label="Mapa 3D das freguesias; os mesmos valores estão na lista de freguesias" style="position:absolute;inset:0;display:{{ d3disp }};background:#ecebea"></div>
+        <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><div role="status" aria-live="polite" style="position:absolute;left:58px;top:12px;max-width:max(160px,min(300px,calc(100% - 330px)));z-index:2;font-size:13px;font-style:italic;background:var(--color-bg);padding:6px 12px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</div></sc-if>
         <div style="position:absolute;right:12px;bottom:26px;display:flex;align-items:center;gap:8px">
           <div class="seg" style="background:var(--color-bg);box-shadow:var(--shadow-sm)"><sc-for list="{{ dims }}" as="o" hint-placeholder-count="2"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="dim" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
         </div>
@@ -687,7 +687,7 @@ class Component extends DCLogic {
     }
     if (stuck !== this.state.stuck || sec !== this.state.sec) this.setState({ stuck, sec });
   }
-  componentWillUnmount() { window.removeEventListener('scroll', this.onCtxScroll); cancelAnimationFrame(this.ctxRaf); this.ctxOn = false; clearTimeout(this.waitURG); document.removeEventListener('mousemove', this.onTT); this.ttEl && this.ttEl.remove(); clearInterval(this.timer); this.ro && this.ro.disconnect(); this.mapRef.current && this.mapRef.current.removeEventListener('wheel', this.onWheel); }
+  componentWillUnmount() { if (this.ml) { this.ml.remove(); this.ml = null; } window.removeEventListener('scroll', this.onCtxScroll); cancelAnimationFrame(this.ctxRaf); this.ctxOn = false; clearTimeout(this.waitURG); document.removeEventListener('mousemove', this.onTT); this.ttEl && this.ttEl.remove(); clearInterval(this.timer); this.ro && this.ro.disconnect(); this.mapRef.current && this.mapRef.current.removeEventListener('wheel', this.onWheel); }
   curVB() { return this.state.vbC || (this.state.zoom === 'area' ? this.vbArea : this.vbReg); }
   zoomAt(px, py, f) {
     const vb = this.curVB(), nw = Math.max(30, Math.min(1400, vb[2] * f)), g = nw / vb[2], nh = vb[3] * g;
@@ -728,8 +728,8 @@ class Component extends DCLogic {
   loadML() {
     if (window.maplibregl) return Promise.resolve();
     return this.mlP || (this.mlP = new Promise((res, rej) => {
-      const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = ML_URL + '.css'; document.head.appendChild(css);
-      const js = document.createElement('script'); js.src = ML_URL + '.js'; js.onload = res; js.onerror = () => { this.mlP = null; rej(); }; document.head.appendChild(js);
+      if (!document.getElementById('ml-css')) { const css = document.createElement('link'); css.id = 'ml-css'; css.rel = 'stylesheet'; css.href = ML_URL + '.css'; document.head.appendChild(css); }
+      const js = document.createElement('script'); js.src = ML_URL + '.js'; js.onload = res; js.onerror = () => { this.mlP = null; js.remove(); rej(); }; document.head.appendChild(js);
     }));
   }
   // coordenadas do SVG (Mercator normalizado, ver meta) para longitude/latitude
@@ -780,7 +780,9 @@ class Component extends DCLogic {
     const map = this.ml = new ML.Map({ container: el, style: { version: 8, sources, layers, terrain: { source: 'dem', exaggeration: 1.6 } }, bounds: this.cam3d(), fitBoundsOptions: { padding: this.pad3d() },
       pitch: PITCH3D, bearing: BEAR3D, maxPitch: 80, attributionControl: false, dragRotate: true, touchPitch: true });
     this.camHome = null;
-    map.on('load', () => { this.mlReady = true; this.home3d(0); this.v3Key = null; this.mlBusy = false; this.setState({ d3msg: '' }); this.sync3d(); });
+    // se o mapa não chegar a carregar (estilo ou rede), desiste ao fim de 30 s e volta ao 2D com aviso, para se poder tentar de novo
+    const t3d = setTimeout(() => { if (this.mlReady) return; map.remove(); this.ml = null; this.mlBusy = false; this.setState({ view3d: false, d3msg: 'A vista 3D demorou demasiado a carregar. Tente de novo.' }); }, 30000);
+    map.on('load', () => { clearTimeout(t3d); this.mlReady = true; this.home3d(0); this.v3Key = null; this.mlBusy = false; this.setState({ d3msg: '' }); this.sync3d(); });
     map.on('mousemove', 'fr-3d', e => { const f = e.features && e.features[0]; if (!f || !this.inArea3d(this.fregs[f.id])) { map.getCanvas().style.cursor = ''; if (this.state.hover) this.setState({ hover: null }); return; } map.getCanvas().style.cursor = 'pointer';
       const d = this.fregs[f.id].d, h = this.state.hover; if (!h || h.d !== d || Math.abs(h.x - e.point.x) > 4 || Math.abs(h.y - e.point.y) > 4) this.setState({ hover: { d, x: e.point.x, y: e.point.y } }); });
     map.on('mouseleave', 'fr-3d', () => { map.getCanvas().style.cursor = ''; this.setState({ hover: null }); });
