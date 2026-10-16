@@ -88,6 +88,10 @@ input[type=range]{accent-color:#0088b0}
             <div class="seg"><sc-for list="{{ zooms }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="zoom" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
           </div>
           <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:13px;color:var(--color-neutral-700)">Unidades de saúde</span>
+            <div class="seg"><sc-for list="{{ uniOpts }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="unidades" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Escala de cor</span>
             <div class="seg"><sc-for list="{{ scales }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="escala" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
           </div>
@@ -215,6 +219,14 @@ input[type=range]{accent-color:#0088b0}
               <path d="{{ f.p }}" fill="transparent" stroke="{{ f.stroke }}" stroke-width="{{ f.sw }}" style="cursor:pointer" onMouseMove="{{ f.move }}" onClick="{{ f.click }}"></path>
             </sc-for>
           </g>
+          <sc-if value="{{ showUni }}" hint-placeholder-val="{{ false }}">
+            <g onMouseMove="{{ clearHover }}">
+              <sc-for list="{{ uniDots }}" as="u" hint-placeholder-count="0">
+                <circle cx="{{ u.x }}" cy="{{ u.y }}" r="{{ u.r }}" fill="{{ u.fill }}" fill-opacity="0.92" stroke="#201e1d" stroke-width="{{ u.sw }}" style="cursor:pointer" onClick="{{ u.pick }}"><title>{{ u.t }}</title></circle>
+                <circle cx="{{ u.x }}" cy="{{ u.y }}" r="{{ u.dot }}" fill="{{ u.ink }}" pointer-events="none"></circle>
+              </sc-for>
+            </g>
+          </sc-if>
         </svg>
 
         {{ labelLayer }}
@@ -237,6 +249,27 @@ input[type=range]{accent-color:#0088b0}
             <div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;line-height:1.55"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ r.n }}</span></div>
           </sc-for>
         </div>
+
+        <sc-if value="{{ hasUni }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;right:12px;top:12px;width:min(300px,46%);max-height:calc(100% - 80px);overflow:auto;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;font-size:12.5px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+              <div style="min-width:0"><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Unidade de saúde · período completo</div><div style="font-weight:600;font-size:16px;line-height:1.25;margin-top:2px">{{ uniCard.title }}</div><div style="font-style:italic;color:var(--color-neutral-700);margin-top:2px">{{ uniCard.sub }}</div></div>
+              <button class="btn btn-ghost" style="padding:0 6px;font-size:18px;line-height:1.1" onClick="{{ uniCard.close }}" aria-label="Fechar unidade" title="Fechar">×</button>
+            </div>
+            <sc-for list="{{ uniCard.units }}" as="r" hint-placeholder-count="1">
+              <div style="border-top:1px solid rgba(32,30,29,.15);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:3px">
+                <div style="display:flex;justify-content:space-between;gap:10px"><span style="font-weight:600">{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ r.n }}</span></div>
+                <div style="font-style:italic;color:var(--color-neutral-700)">{{ r.meta }}</div>
+                <div style="display:flex;height:8px;margin:4px 0 2px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></div>
+                <div style="display:flex;justify-content:space-between;gap:10px"><span>Urgentes (V+L+A)</span><span style="font-variant-numeric:tabular-nums">{{ r.ur }}</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px"><span>Não urgentes (verde+azul)</span><span style="font-variant-numeric:tabular-nums">{{ r.nu }}</span></div>
+                <div style="display:flex;justify-content:space-between;gap:10px"><span>{{ r.fqLabel }}</span><span style="font-variant-numeric:tabular-nums">{{ r.fq }}</span></div>
+                <div style="color:var(--color-neutral-700)">{{ r.loc }}</div>
+              </div>
+            </sc-for>
+            <div style="margin-top:10px;font-size:11px;font-style:italic;color:var(--color-neutral-700)">{{ uniCard.src }}</div>
+          </div>
+        </sc-if>
 
         <sc-if value="{{ tip.show }}" hint-placeholder-val="{{ false }}">
           <div style="position:absolute;left:{{ tip.x }}px;top:{{ tip.y }}px;transform:translate(14px,-50%);pointer-events:none;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:10px 12px;min-width:190px;max-width:260px;font-size:13px;line-height:1.35">
@@ -416,13 +449,13 @@ input[type=range]{accent-color:#0088b0}
     <p style="margin:0 0 18px;font-size:14px;line-height:1.5;max-width:52em;color:var(--color-neutral-800)">{{ csLede }}</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
       <sc-for list="{{ csRows }}" as="r" hint-placeholder-count="12">
-        <div style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;font:inherit;font-size:14px;color:var(--color-text);text-align:left;border-radius:var(--radius-md)">
+        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:{{ r.cur }};border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
           <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
           <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
           <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
           <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></span>
           <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
-        </div>
+        </button>
       </sc-for>
     </div>
     <sc-if value="{{ csMore }}" hint-placeholder-val="{{ false }}">
@@ -514,6 +547,52 @@ const BASEMAPS = {
 // vista 3D: MapLibre carregado só quando se escolhe 3D; relevo dos mosaicos públicos Terrarium (AWS Open Data)
 const ML_URL = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl';
 const DEM = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
+// localização das unidades: morada do ficheiro de códigos GLN da ULS (jan. 2026), geolocalizada no OpenStreetMap (out. 2026).
+// Quando o OSM tem o edifício na mesma morada usa-se esse ponto; senão, o da rua. As que faltam ficam fora do mapa.
+// Para acrescentar ou corrigir: "nome tal como na lista": [latitude, longitude, "morada · origem do ponto"]
+const UNI_LL = {
+  "UCSP Antonio Arnaut": [38.74440, -9.20890, "Rua Óscar Lopes , nº 2A a 2D Edificio Águas Livres · ponto aproximado (rua)"],
+  "USF Aguas Livres": [38.74440, -9.20890, "Rua Óscar Lopes , nº 2A a 2D Edificio Águas Livres · ponto aproximado (rua)"],
+  "UCSP Brandoa": [38.76382, -9.20930, "Rua Joaquim Barradas de Carvalho · edifício no OpenStreetMap (Centro de Saúde da Brandoa)"],
+  "USF Ribeiro Sanches": [38.76826, -9.23137, "Rua Francisco Bugalho, nº 5B · ponto aproximado (rua)"],
+  "USF Conde da Lousã": [38.74587, -9.22034, "Praça Conde da Lousã · edifício no OpenStreetMap (Centro de Saúde Conde Lousã)"],
+  "USF Alma Mater": [38.75158, -9.23004, "Largo da Igreja, n.º1 A a 1E · ponto aproximado (rua)"],
+  "USF Amato Lusitano": [38.75347, -9.21355, "Rua Joao de Deus, nº 2 · edifício no OpenStreetMap (Centro de Saúde da Venda Nova - Centro Diagnóstico Pneumológico)"],
+  "USF Venda Nova": [38.75347, -9.21355, "Rua Joao de Deus, nº 2 · edifício no OpenStreetMap (Centro de Saúde da Venda Nova - Centro Diagnóstico Pneumológico)"],
+  "UCSP Amadora": [38.75819, -9.23477, "Largo Dr. Dário Gandra Nunes, nº 1 · edifício no OpenStreetMap (Centro de Saúde da Amadora)"],
+  "USF Arco Iris": [38.75819, -9.23477, "Largo Dr. Dário Gandra Nunes, nº 1 · edifício no OpenStreetMap (Centro de Saúde da Amadora)"],
+  "USF Colares": [38.80495, -9.44991, "Al. Coronel Linhares de Lima, 11, 2705-351 Colares · edifício no OpenStreetMap (Centro de Saúde de Colares)"],
+  "USF Mira Sintra": [38.78317, -9.30268, "Av. 25 de Abril, Lt. 246-250, 2735-417 Mira Sintra · ponto aproximado (rua)"],
+  "USF Monte da Luz": [38.76162, -9.26074, "Av. da Liberdade, 36/37, 1º, 2745-298 Queluz · edifício no OpenStreetMap (Centro de Saúde de Queluz)"],
+  "UCSP Monte Abraão": [38.76162, -9.26074, "Av. da Liberdade, 36/37, 1º, 2745-298 Queluz · edifício no OpenStreetMap (Centro de Saúde de Queluz)"],
+  "USF Cynthia": [38.80236, -9.38141, "Av. Doutor Desidério Cambournac, nº 4, 2710-553 Sintra · edifício no OpenStreetMap (USF Cynthia)"],
+  "USF Alphamouro": [38.78615, -9.32662, "Av. Infante Dom Henrique, 39/41, 2635-367 Rio de Mouro · edifício no OpenStreetMap (Centro de Saúde de Rio de Mouro)"],
+  "USF Rio de Mouro": [38.78615, -9.32662, "Av. Infante Dom Henrique, 39/41, 2635-367 Rio de Mouro · edifício no OpenStreetMap (Centro de Saúde de Rio de Mouro)"],
+  "USF Albasaúde": [38.75139, -9.34829, "Bairro da Tabaqueira. Albarraque, 2635-101 Rio de Mouro · edifício no OpenStreetMap (Unidade de Saúde Familiar da Tabaqueira)"],
+  "USF Lapiás": [38.85801, -9.32460, "Rua Alto do Pina, s/n, 2715-852 Pêro Pinheiro · ponto aproximado (rua)"],
+  "USF São Marcos": [38.74829, -9.29608, "Rua Cidade Vitória, São Marcos, 2735-654 Cacém · edifício no OpenStreetMap (Unidade de Saúde Familiar de São Marcos)"],
+  "USF Natividade": [38.79120, -9.35150, "Rua das Eiras, 50, 2725-297 Algueirão - Mem Martins · edifício no OpenStreetMap (USF Natividade)"],
+  "USF D. Fernando II": [38.79106, -9.35177, "Rua das Eiras, 50, 2725-297 Algueirão - Mem Martins · edifício no OpenStreetMap (USF D. Fernando II)"],
+  "UCSP Algueirão": [38.79086, -9.35217, "Rua das Eiras, 50, 2725-297 Algueirão - Mem Martins · edifício no OpenStreetMap (UCSP Algueirão)"],
+  "USF Terra": [38.84933, -9.37776, "Rua do Cruzeiro, 2705-854 Terrugem · ponto aproximado (rua)"],
+  "UCSP Terrugem/s. João Lampas": [38.87393, -9.39950, "Rua do Fontanário, nº 13, 2705-737 São João das Lampas · ponto aproximado (rua)"],
+  "UCSP Agualva": [38.77462, -9.29512, "Rua do Mercado de Agualva, 2735-112 Agualva · edifício no OpenStreetMap (UCSP Agualva (Centro de Saúde))"],
+  "USF Flor de Lotus": [38.76934, -9.30868, "Rua do Olival, 13-15, 2735-304 Cacém · edifício no OpenStreetMap (Centro de Saúde do Olival)"],
+  "UCSP Olival": [38.76934, -9.30868, "Rua do Olival, 13-15. 2735-304 Cacém · edifício no OpenStreetMap (Centro de Saúde do Olival)"],
+  "USF Queluz": [38.75488, -9.25390, "Rua Dom Fernando II, 2745-107 Queluz · edifício no OpenStreetMap (Centro de Saúde de Queluz)"],
+  "USF Mãe D. Maria I": [38.75488, -9.25390, "Rua Dom Fernando II, 2745-107 Queluz · edifício no OpenStreetMap (Centro de Saúde de Queluz)"],
+  "UCSP Almargem do Bispo": [38.85154, -9.26468, "Rua dos Canais, s/n - Casal do Rebolo, 2715-311 Almargem do Bispo · edifício no OpenStreetMap (Centro de Saúde de Almargem do Bispo)"],
+  "UCSP Casal de Cambra": [38.80074, -9.22761, "Rua Inês de Castro, 2605-073 Casal de Cambra · ponto aproximado (rua)"],
+  "UCSP Belas": [38.77638, -9.26638, "Rua Oliveira Gomes, 17, 2605-046 Belas · ponto aproximado (rua)"],
+  "USF da Tapada": [38.79425, -9.32909, "Rua Prof. Dr. Rui Luís Gomes, 40, 2725-556 Tapada das Mercês · ponto aproximado (rua)"],
+  "USF Mactama": [38.75240, -9.27529, "Rua Teixeira Pascoais, 2745-852 Massamá · edifício no OpenStreetMap (USF MACTAMÃ)"],
+  "USF Mãe D´agua": [38.75240, -9.27529, "Rua Teixeira Pascoais, 2745-852 Massamá · edifício no OpenStreetMap (USF MACTAMÃ)"],
+  "USF Monte da Lua": [38.81534, -9.39674, "Urbanização Sopé da Serra, Caminho do Murtal, nº28, 2710-663 Várzea de Sintra · ponto aproximado (rua)"],
+  "UCSP Venda Nova": [38.75347, -9.21355, "sem morada no ficheiro da ULS · edifício no OpenStreetMap (Centro de Saúde da Venda Nova - Centro Diagnóstico Pneumológico)"],
+  "UCSP Reboleira": [38.75819, -9.23477, "sem morada no ficheiro da ULS · edifício no OpenStreetMap (Centro de Saúde da Amadora)"],
+  "UCSP Rio Mouro": [38.78615, -9.32662, "sem morada no ficheiro da ULS · edifício no OpenStreetMap (Centro de Saúde de Rio de Mouro)"],
+  "CS Sintra": [38.80236, -9.38141, "sem morada no ficheiro da ULS · edifício no OpenStreetMap (Centro de Saúde de Sintra)"]
+};
 const H3D = 2200, PITCH3D = 58, BEAR3D = -18;
 
 function bboxOf(paths) {
@@ -531,7 +610,7 @@ function fitAspect(b, asp, padF) {
 
 class Component extends DCLogic {
   state = { mode: 'calor', stuck: false, sec: '', metric: 'n', local: -1, prios: [], sel: null, hover: null, zoom: 'area', fundo: 'mapa', fixed: true,
-            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, view3d: false, d3msg: '' };
+            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, view3d: false, d3msg: '', uni: null, uniOn: true };
   mapRef = React.createRef();
   map3dRef = React.createRef();
 
@@ -549,6 +628,7 @@ class Component extends DCLogic {
     for (let j = R.length - 6; j >= 0; j -= 6) this.off[R[j]] = j;
     for (let d = N - 1; d >= 0; d--) if (this.off[d] > this.off[d + 1]) this.off[d] = this.off[d + 1];
     this.cache = new Map();
+    this.sites = this.buildSites();
     if (!this.ttEl) {
       const T = this.ttEl = document.createElement('div');
       T.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;display:none;background:#f3f2f2;color:#201e1d;box-shadow:0 2px 10px rgba(32,30,29,.28);border-radius:2px;padding:8px 10px;font:13px/1.45 Source Serif 4,serif;font-variant-numeric:tabular-nums;white-space:nowrap';
@@ -659,6 +739,18 @@ class Component extends DCLogic {
       if (pts.length && (pts[0][0] !== pts[pts.length - 1][0] || pts[0][1] !== pts[pts.length - 1][1])) pts.push(pts[0]);
       return pts; }).filter(r => r.length >= 4);
   }
+  fromLL(lon, lat) { const m = this.U.meta, s = Math.sin(lat * Math.PI / 180), wx = (lon + 180) / 360, wy = 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI); return [(wx - m.wx0) * m.s, (wy - m.wy0) * m.s]; }
+  // unidades com localização, juntas por edifício (a menos de ~130 m umas das outras)
+  buildSites() {
+    const rows = (this.U.cs && this.U.cs.rows) || [], out = [];
+    for (const r of rows) { const ll = UNI_LL[r.n]; if (!ll) continue;
+      let st = out.find(o => Math.hypot(o.lat - ll[0], (o.lon - ll[1]) * 0.78) < 0.0012);
+      if (!st) { const [x, y] = this.fromLL(ll[1], ll[0]); out.push(st = { lat: ll[0], lon: ll[1], x, y, place: ll[2].split(' · ')[0], src: ll[2], units: [] }); }
+      st.units.push(r); }
+    out.forEach((st, i) => { st.i = i; st.tot = st.units.reduce((a, r) => a + sum(r.c), 0); });
+    this.siteOf = new Map(); out.forEach(st => st.units.forEach(r => this.siteOf.set(r.n, st.i)));
+    return out;
+  }
   cam3d() { const v = this.vbArea, a = this.toLL(v[0], v[1] + v[3]), b = this.toLL(v[0] + v[2], v[1]); return [a, b]; }
   async init3d() {
     if (this.ml || this.mlBusy) return; this.mlBusy = true; this.setState({ d3msg: 'A carregar a vista 3D…' });
@@ -688,9 +780,16 @@ class Component extends DCLogic {
       const sq = document.createElement('i'); sq.style.cssText = 'display:block;width:9px;height:9px;background:#201e1d;box-shadow:0 0 0 1.5px #f3f2f2';
       const lb = document.createElement('span'); lb.textContent = h.n; lb.title = h.t || ''; lb.style.cssText = 'background:#f3f2f2;padding:3px 5px;border-radius:2px;box-shadow:0 1px 3px rgba(32,30,29,.3)';
       m.append(sq, lb); new ML.Marker({ element: m, anchor: 'left', offset: [-4, 0] }).setLngLat(this.toLL(h.x, h.y)).addTo(map); }
+    const uMax = Math.max(1, ...this.sites.map(st => st.tot));
+    this.uniMk = this.sites.map(st => { const el = document.createElement('div'), d = Math.round(8 + 18 * Math.sqrt(st.tot / uMax));
+      el.title = `${st.units.length > 1 ? st.place + ': ' : ''}${st.units.map(r => r.n).join(', ')} · ${NF.format(st.tot)} admissões`;
+      el.style.cssText = `width:${d}px;height:${d}px;border-radius:50%;border:1.5px solid #201e1d;background:#f3f2f2;box-shadow:0 1px 4px rgba(32,30,29,.35);cursor:pointer`;
+      el.addEventListener('click', e => { e.stopPropagation(); this.setState({ uni: this.state.uni === st.i ? null : st.i }); });
+      return new ML.Marker({ element: el }).setLngLat([st.lon, st.lat]).addTo(map); });
   }
   sync3d() {
     const map = this.ml, v = this.v3; if (!map || !this.mlReady || !v) return;
+    if (this.uniMk) { const on = this.state.uniOn; this.uniMk.forEach((m, i) => { const el = m.getElement(); el.style.display = on ? 'block' : 'none'; el.style.background = this.state.uni === i ? '#201e1d' : '#f3f2f2'; }); }
     if (this.mlShown !== true) { this.mlShown = true; map.resize(); }
     const key = v.key + '|' + this.state.sel + '|' + this.state.fundo;
     if (this.v3Key === key) return; this.v3Key = key;
@@ -762,7 +861,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [] };
+    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [], showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [] };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -978,16 +1077,35 @@ class Component extends DCLogic {
       const sorted = pool.slice().sort((a, b) => csS === 'nu' ? b.nu - a.nu : csS === 'fq' ? b.fq - a.fq : b.tot - a.tot);
       csMore = sorted.length > CS_LINES;
       csToggleLabel = st.csAll ? 'Ver menos' : `Ver todas (${NF.format(sorted.length)})`;
-      csRows = (st.csAll ? sorted : sorted.slice(0, CS_LINES)).map((x, i) => ({ i: i + 1, name: x.r.n,
-        con: `${x.r.t === 'USF' || x.r.t === 'UCSP' ? x.r.t : 'Outra unidade'} · ${U.AG[x.r.ag] || ''}`,
+      csRows = (st.csAll ? sorted : sorted.slice(0, CS_LINES)).map((x, i) => { const si = this.siteOf ? this.siteOf.get(x.r.n) : undefined, has = si !== undefined; return { i: i + 1, name: x.r.n,
+        con: `${x.r.t === 'USF' || x.r.t === 'UCSP' ? x.r.t : 'Outra unidade'} · ${U.AG[x.r.ag] || ''}${has ? ' · ver no mapa' : ''}`,
+        bg: has && st.uni === si ? 'color-mix(in srgb,#0088b0 10%,transparent)' : 'transparent', cur: has ? 'pointer' : 'default',
+        click: () => { if (!has) return; set({ uni: si, uniOn: true }); this.ctxScrollTo(this.mapRef.current); },
         n: NF.format(x.tot), pct: csS === 'fq' ? pc(x.fq, 1) : pc(x.nu),
-        segs: x.r.c.map((v, j) => ({ w: x.tot ? v / x.tot * 100 : 0, c: PRIO[j][1], t: tt(v, x.tot, j) })) }));
+        segs: x.r.c.map((v, j) => ({ w: x.tot ? v / x.tot * 100 : 0, c: PRIO[j][1], t: tt(v, x.tot, j) })) }; });
       const totCs = sum(all.map(x => x.tot)), nuCs = sum(CS.rows.map(r => r.c[3] + r.c[4]));
       csLede = `${NF.format(CS.rows.length)} unidades com utentes sobretudo de Amadora e Sintra e pelo menos 20 admissões no período completo somam ${NF.format(totCs)} admissões; ${pc(totCs ? nuCs / totCs : NaN, 1)} foram triadas verde ou azul (não urgentes).` + (CS.fora ? ` Ficam de fora ${NF.format(CS.fora.a)} admissões de ${NF.format(CS.fora.u)} unidades de outras zonas ou com poucos casos, e ${NF.format(CS.sem)} sem unidade registada.` : '');
-      csNote = `Por linha: admissões da unidade, triagem (barra) e, à direita, ${csS === 'fq' ? `a percentagem de utentes da unidade com ${CS.k} ou mais idas à urgência (utentes frequentes)` : 'a percentagem de admissões não urgentes (verde e azul)'}.` + (csS === 'n' ? '' : ` Só entram unidades com pelo menos ${CS_MIN} admissões.`);
+      csNote = `Por linha: admissões da unidade, triagem (barra) e, à direita, ${csS === 'fq' ? `a percentagem de utentes da unidade com ${CS.k} ou mais idas à urgência (utentes frequentes)` : 'a percentagem de admissões não urgentes (verde e azul)'}.` + (csS === 'n' ? '' : ` Só entram unidades com pelo menos ${CS_MIN} admissões.`)
+        + (() => { const big = all.filter(x => x.tot >= CS_MIN), miss = big.filter(x => !(this.siteOf && this.siteOf.has(x.r.n)));
+          return ` No mapa: ${NF.format(big.length - miss.length)} das ${NF.format(big.length)} unidades com pelo menos ${CS_MIN} admissões (moradas da ULS, pontos do OpenStreetMap)` + (miss.length ? `; sem localização: ${miss.map(x => x.r.n).join(', ')}.` : '.'); })();
     }
     const csOpts = [['n', 'Admissões'], ['nu', 'Não urgentes'], ['fq', 'Frequentes']].map(([v, label]) => ({ label, on: (st.csSort === 'nu' || st.csSort === 'fq' ? st.csSort : 'n') === v, pick: () => set({ csSort: v }) }));
     const csToggle = () => set({ csAll: !st.csAll });
+    // unidades de saúde no mapa: tamanho pelas admissões do período completo (como a lista), clicar abre o cartão
+    const sites = this.sites || [], showUni = !!(st.uniOn && sites.length), uMax = Math.max(1, ...sites.map(x => x.tot));
+    const uniDots = sites.map(x => { const on = st.uni === x.i, r = (3.2 + 8 * Math.sqrt(x.tot / uMax)) * k;
+      return { x: x.x.toFixed(2), y: x.y.toFixed(2), r: r.toFixed(2), dot: (on ? 0 : 1.2 * k).toFixed(2), sw: ((on ? 2 : 1.3) * k).toFixed(2), fill: on ? '#201e1d' : '#f3f2f2', ink: '#201e1d',
+        t: `${x.units.length > 1 ? x.place + ': ' : ''}${x.units.map(r => r.n).join(', ')} · ${NF.format(x.tot)} admissões`,
+        pick: () => { if (!this.dragged) set({ uni: on ? null : x.i }); } }; });
+    const uS = st.uni != null && sites[st.uni];
+    const uniCard = uS ? { title: uS.units.length > 1 ? uS.place : uS.units[0].n,
+        sub: uS.units.length > 1 ? `${uS.units.length} unidades no mesmo local · ${NF.format(uS.tot)} admissões` : `${uS.units[0].t} · ${U.AG[uS.units[0].ag] || ''}`,
+        src: `Localização: ${uS.src} · Não segue a janela nem os filtros`, close: () => set({ uni: null }),
+        units: uS.units.map(r => { const tot = sum(r.c) || 1;
+          return { name: r.n, meta: `${r.t === 'USF' || r.t === 'UCSP' ? r.t : 'Outra unidade'} · utentes sobretudo de ${U.AG[r.ag] || '—'}`, n: NF.format(sum(r.c)), ur: pc((r.c[0] + r.c[1] + r.c[2]) / tot, 1), nu: pc((r.c[3] + r.c[4]) / tot, 1),
+            fqLabel: `Utentes com ${U.cs.k}+ idas`, fq: r.u ? `${NF.format(r.f)} · ${pc(r.f / r.u, 1)}` : '—',
+            loc: U.LOC.map((l, i) => [l, r.loc[i]]).filter(z => z[1]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([l, v]) => `${l} ${pc(v / tot)}`).join(' · '),
+            segs: r.c.map((v, j) => ({ w: v / tot * 100, c: PRIO[j][1], t: tt(v, tot, j) })) }; }) } : { title: '', sub: '', src: '', close: () => {}, units: [] };
     const hosps = (U.hosp || []).map(h => ({ n: h.n, t: h.t, rx: (h.x - 4 * k).toFixed(2), ry: (h.y - 4 * k).toFixed(2), s: (8 * k).toFixed(2), sw: (1.5 * k).toFixed(2) }));
     // nomes dos hospitais em HTML por cima do mapa (texto interpolado dentro de <text> SVG não é desenhado)
     const hospLayer = React.createElement('div', { style: { position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' } },
@@ -1041,6 +1159,8 @@ class Component extends DCLogic {
       onDown: this.onDown,
       zoomIn: () => st.view3d && this.ml ? this.ml.zoomIn() : this.zoomAt(0.5, 0.5, 1 / 1.4), zoomOut: () => st.view3d && this.ml ? this.ml.zoomOut() : this.zoomAt(0.5, 0.5, 1.4),
       zoomReset: () => st.view3d && this.ml && this.camHome ? this.ml.easeTo({ ...this.camHome, duration: 900 }) : set({ vbC: null }),
+      showUni, uniDots, hasUni: !!uS, uniCard,
+      uniOpts: [[true, 'Mostrar'], [false, 'Esconder']].map(([v, label]) => ({ label, on: !!st.uniOn === v, pick: () => set({ uniOn: v, uni: v ? st.uni : null }) })),
       map3dRef: this.map3dRef, d3disp: st.view3d ? 'block' : 'none', d3msg: st.d3msg,
       dims: [[false, '2D'], [true, '3D']].map(([v, label]) => ({ label, on: st.view3d === v, pick: () => { this.mlShown = false; set({ view3d: v, hover: null, d3msg: '' }); } })),
       mapRef: this.mapRef, viewBox: vb.map(v => v.toFixed(1)).join(' '), aspect: `${vb[2].toFixed(1)}/${vb[3].toFixed(1)}`,
