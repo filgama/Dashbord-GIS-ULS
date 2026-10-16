@@ -49,7 +49,7 @@ def main():
     # o template fica como string JSON dentro de <script>: escapar "</" para nao fechar a tag
     enc = json.dumps(novo, ensure_ascii=False).replace('</', '<\\u002F')
     html = html[:m.start(2)] + enc + html[m.end(2):]
-    open(DESTINO, 'w', encoding='utf-8').write(html)
+    open(DESTINO, 'w', encoding='utf-8', newline='\n').write(html)  # LF, também no Windows
     print('HTML atualizado:', DESTINO)
 
 
