@@ -1,5 +1,6 @@
-Scripts que geraram os dados acrescentados ao dashboard em 13/10/2026.
-Ficam aqui como referência; nao correm tal como estao sem ajustar caminhos.
+ATUALIZAR OS DADOS (nova extracao do CSV): usar o script 5.
+Os scripts 1 a 3 geraram os dados acrescentados ao dashboard em 13/10/2026 e ficam como
+referencia; nao correm tal como estao sem ajustar caminhos.
 
 1_populacao_censos_e_sns.py
    Populacao por freguesia (INE, Censos 2021, indicador 0011609) e inscritos sem medico
@@ -24,7 +25,25 @@ urgencias-data.js, e preciso voltar a embebe-los no HTML.
    da raiz esta em dia. Nao atualiza os dados: se o urgencias-data.js mudar, e preciso
    voltar a exportar o pacote.
 
-5_contexto_social.py
+5_atualizar_dados.py
+   Atualiza o dashboard a partir de uma nova extracao BD_Urgencia_Admissoes.csv (separador ;).
+   Recalcula dias, admissoes por freguesia, horas, utentes frequentes e unidades; mantem a
+   geometria, a populacao (Censos), o SNS e os hospitais; e volta a por os dados no HTML da raiz.
+   Correr a partir da raiz do repositorio:
+
+     1. Primeira vez, com o CSV que gerou os dados atuais (cria freguesias_csv.json e confirma):
+          python 01_Fonte/scripts/5_atualizar_dados.py 02_Dados/BD_Urgencia_Admissoes.csv --verificar
+          python 01_Fonte/scripts/5_atualizar_dados.py 02_Dados/BD_Urgencia_Admissoes.csv
+        Com --verificar, tudo deve aparecer como "igual"; se freq ou cs derem DIFERENTE, avisar.
+     2. Daqui para a frente, com cada CSV novo:
+          python 01_Fonte/scripts/5_atualizar_dados.py 02_Dados/<novo>.csv
+
+   Freguesias com nomes que o script nao conhece aparecem listadas e contam como "sem
+   freguesia": acrescentar "NOME EM MAIUSCULAS SEM ACENTOS": "dicofre" ao freguesias_csv.json.
+   Se a coluna da hora tiver outro nome: --coluna-hora NOME. So os dados agregados vao para o
+   dashboard; o cartao de utente so serve para contar utentes frequentes e por unidade.
+
+6_contexto_social.py
    Contexto social por freguesia (INE, Censos 2021, Ficheiro Sintese por seccao, totais por
    freguesia): 65+ anos, desemprego, ensino superior (25+ anos) e edificios a precisar de
    reparacao. Descarrega o ficheiro do INE (ou usa um .zip/.xlsx ja descarregado), acrescenta

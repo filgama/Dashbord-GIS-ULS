@@ -13,7 +13,7 @@ Guarda, para cada freguesia do mapa (código DICOFRE de 6 algarismos), pares num
 
 Correr a partir da raiz do repositório (precisa de openpyxl). Sem argumentos descarrega o ficheiro
 do INE; com um argumento usa um .zip ou .xlsx já descarregado:
-    python 01_Fonte/scripts/5_contexto_social.py [FS2021SeccaoTot.zip]
+    python 01_Fonte/scripts/6_contexto_social.py [FS2021SeccaoTot.zip]
 Acrescenta (ou substitui) window.URG.soc no 01_Fonte/urgencias-data.js e volta a embeber esse
 ficheiro no "Origem das Urgencias.html" da raiz.
 """
