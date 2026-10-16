@@ -87,9 +87,18 @@ input[type=range]{accent-color:#0088b0}
             <span style="font-size:13px;color:var(--color-neutral-700)">Vista</span>
             <div class="seg"><sc-for list="{{ zooms }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="zoom" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <span style="font-size:13px;color:var(--color-neutral-700)">Unidades de saúde</span>
-            <div class="seg"><sc-for list="{{ uniOpts }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="unidades" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-size:13px;color:var(--color-neutral-700)">Camadas</span>
+            <sc-for list="{{ layers }}" as="l" hint-placeholder-count="8">
+              <div style="display:grid;grid-template-columns:18px 14px minmax(0,1fr) 84px 34px;gap:8px;align-items:center;font-size:13px;opacity:{{ l.dim }}" title="{{ l.note }}">
+                <input type="checkbox" checked="{{ l.on }}" onChange="{{ l.toggle }}" aria-label="{{ l.aria }}" style="margin:0;accent-color:#0088b0">
+                <i style="display:block;width:14px;height:14px;border-radius:2px;background:{{ l.sw }};box-shadow:inset 0 0 0 1px rgba(32,30,29,.25)"></i>
+                <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
+                <input type="range" min="0" max="100" step="5" value="{{ l.pct }}" disabled="{{ l.off }}" onChange="{{ l.slide }}" aria-label="{{ l.ariaOp }}" style="width:84px;margin:0">
+                <span style="text-align:right;font-variant-numeric:tabular-nums;font-size:12px;color:var(--color-neutral-700)">{{ l.pctTxt }}</span>
+              </div>
+            </sc-for>
+            <span style="font-size:11.5px;font-style:italic;color:var(--color-neutral-700)">{{ layNote }}</span>
           </div>
           <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Escala de cor</span>
@@ -183,30 +192,35 @@ input[type=range]{accent-color:#0088b0}
             </filter>
             <filter id="paper" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0.15"></feColorMatrix></filter>
           </defs>
-                    <g style="mix-blend-mode:multiply" pointer-events="none">
+                    <g style="mix-blend-mode:multiply" pointer-events="none" opacity="{{ opLand }}">
             <sc-for list="{{ parishes }}" as="f" hint-placeholder-count="0">
               <path d="{{ f.p }}" fill="{{ f.fill }}" fill-opacity="{{ landOp }}" stroke="{{ landStroke }}" stroke-opacity="{{ landStrokeOp }}" stroke-width="{{ hair }}" stroke-linejoin="round"></path>
             </sc-for>
           </g>
+          <sc-if value="{{ showCtx }}" hint-placeholder-val="{{ false }}">
+            <g style="mix-blend-mode:multiply" pointer-events="none" opacity="{{ opCtx }}">
+              <sc-for list="{{ ctxPaths }}" as="f" hint-placeholder-count="0"><path d="{{ f.p }}" fill="{{ f.fill }}" stroke="#f3f2f2" stroke-width="{{ hair }}" stroke-linejoin="round"></path></sc-for>
+            </g>
+          </sc-if>
           <sc-if value="{{ showHeat }}" hint-placeholder-val="{{ false }}">
-            <g filter="{{ heatFilter }}" style="mix-blend-mode:multiply" pointer-events="none">
+            <g filter="{{ heatFilter }}" style="mix-blend-mode:multiply" pointer-events="none" opacity="{{ opMain }}">
               <sc-for list="{{ heat }}" as="f" hint-placeholder-count="0"><path d="{{ f.p }}" fill="#000" fill-opacity="{{ f.op }}"></path></sc-for>
             </g>
           </sc-if>
           <sc-if value="{{ showDots }}" hint-placeholder-val="{{ false }}">
-            <g pointer-events="none">
+            <g pointer-events="none" opacity="{{ opMain }}">
               <sc-for list="{{ dots }}" as="f" hint-placeholder-count="0"><path d="{{ f.p }}" fill="{{ dotInk }}"></path></sc-for>
             </g>
           </sc-if>
-          <g fill="none" stroke="#201e1d" stroke-width="{{ conStroke }}" stroke-opacity="0.6" stroke-linejoin="round" pointer-events="none">
+          <g fill="none" stroke="#201e1d" stroke-width="{{ conStroke }}" stroke-opacity="0.6" stroke-linejoin="round" pointer-events="none" opacity="{{ opLim }}">
             <sc-for list="{{ concelhos }}" as="c" hint-placeholder-count="0"><path d="{{ c.p }}"></path></sc-for>
           </g>
           <sc-if value="{{ showCircles }}" hint-placeholder-val="{{ false }}">
-            <g pointer-events="none">
+            <g pointer-events="none" opacity="{{ opMain }}">
               <sc-for list="{{ circles }}" as="c" hint-placeholder-count="0"><circle cx="{{ c.x }}" cy="{{ c.y }}" r="{{ c.r }}" fill="{{ c.fill }}" fill-opacity="0.72" stroke="#f3f2f2" stroke-width="{{ hair }}"></circle></sc-for>
             </g>
           </sc-if>
-                    <g pointer-events="none" font-family="Source Serif 4, serif" fill="#201e1d">
+                    <g pointer-events="none" font-family="Source Serif 4, serif" fill="#201e1d" opacity="{{ opHosp }}">
             <sc-for list="{{ hosps }}" as="h" hint-placeholder-count="0">
               <rect x="{{ h.rx }}" y="{{ h.ry }}" width="{{ h.s }}" height="{{ h.s }}" fill="#201e1d" stroke="#f3f2f2" stroke-width="{{ h.sw }}"><title>{{ h.t }}</title></rect>
             </sc-for>
@@ -220,7 +234,7 @@ input[type=range]{accent-color:#0088b0}
             </sc-for>
           </g>
           <sc-if value="{{ showUni }}" hint-placeholder-val="{{ false }}">
-            <g onMouseMove="{{ clearHover }}">
+            <g onMouseMove="{{ clearHover }}" opacity="{{ opUni }}">
               <sc-for list="{{ uniDots }}" as="u" hint-placeholder-count="0">
                 <circle cx="{{ u.x }}" cy="{{ u.y }}" r="{{ u.r }}" fill="{{ u.fill }}" fill-opacity="0.92" stroke="#201e1d" stroke-width="{{ u.sw }}" style="cursor:pointer" onClick="{{ u.pick }}"><title>{{ u.t }}</title></circle>
                 <circle cx="{{ u.x }}" cy="{{ u.y }}" r="{{ u.dot }}" fill="{{ u.ink }}" pointer-events="none"></circle>
@@ -292,6 +306,16 @@ input[type=range]{accent-color:#0088b0}
             <span style="font-variant-numeric:tabular-nums">{{ legendHi }}</span>
           </div>
           <span style="font-style:italic;color:var(--color-neutral-700)">{{ legendNote }}</span>
+          <sc-if value="{{ showCtxLeg }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:1px solid rgba(32,30,29,.15);padding-top:6px;display:flex;flex-direction:column;gap:4px">
+              <span>{{ ctxLeg.title }}</span>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-variant-numeric:tabular-nums">{{ ctxLeg.lo }}</span>
+                <div style="display:flex;gap:2px"><sc-for list="{{ ctxLeg.ramp }}" as="l" hint-placeholder-count="7"><i style="display:block;width:22px;height:10px;background:{{ l.c }}"></i></sc-for></div>
+                <span style="font-variant-numeric:tabular-nums">{{ ctxLeg.hi }}</span>
+              </div>
+            </div>
+          </sc-if>
         </div>
         <sc-if value="{{ showAttr }}" hint-placeholder-val="{{ false }}">
           <div style="position:absolute;right:0;bottom:0;font-size:10px;padding:1px 6px;background:color-mix(in srgb,var(--color-bg) 85%,transparent)">{{ attr }}</div>
@@ -593,6 +617,12 @@ const UNI_LL = {
   "UCSP Rio Mouro": [38.78615, -9.32662, "sem morada no ficheiro da ULS · edifício no OpenStreetMap (Centro de Saúde de Rio de Mouro)"],
   "CS Sintra": [38.80236, -9.38141, "sem morada no ficheiro da ULS · edifício no OpenStreetMap (Centro de Saúde de Sintra)"]
 };
+// camadas do mapa: [chave, nome, cor da amostra, ligada por omissão, opacidade por omissão]
+const LAYERS = [['fundo', 'Fundo do mapa', '#d9d6d2', true, 1], ['nomes', 'Nomes de lugares', '#a8a4a0', true, 0.9], ['medida', 'Admissões (medida)', '#1186ac', true, 1],
+  ['idosos', '65 e mais anos (Censos)', '#b39a76', false, 0.8], ['freq', 'Utentes frequentes', '#957a55', false, 0.8],
+  ['limites', 'Limites dos concelhos', '#201e1d', true, 1], ['hosp', 'Hospitais', '#201e1d', true, 1], ['uni', 'Unidades de saúde', '#f3f2f2', true, 1]];
+const RAMP_K = ['#f1ece4', '#e0d4c2', '#cbb89c', '#b39a76', '#957a55', '#735b3b', '#523f27'];
+const layDefault = () => Object.fromEntries(LAYERS.map(([k, , , on, op]) => [k, { on, op }]));
 const H3D = 2200, PITCH3D = 58, BEAR3D = -18;
 
 function bboxOf(paths) {
@@ -610,7 +640,7 @@ function fitAspect(b, asp, padF) {
 
 class Component extends DCLogic {
   state = { mode: 'calor', stuck: false, sec: '', metric: 'n', local: -1, prios: [], sel: null, hover: null, zoom: 'area', fundo: 'mapa', fixed: true,
-            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, view3d: false, d3msg: '', uni: null, uniOn: true };
+            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, view3d: false, d3msg: '', uni: null, uniOn: true, lay: layDefault() };
   mapRef = React.createRef();
   map3dRef = React.createRef();
 
@@ -713,8 +743,8 @@ class Component extends DCLogic {
     this.attach();
     if (this.state.view3d) { if (!this.ml) this.init3d(); else this.sync3d(); }
     const s = this.state, ps = this._prev || {}; this._prev = { ...s };
-    if (ps.mode !== s.mode || ps.metric !== s.metric || ps.zoom !== s.zoom || ps.fundo !== s.fundo || ps.win !== s.win || ps.end !== s.end || ps.local !== s.local || ps.orig !== s.orig || ps.fixed !== s.fixed || ps.speed !== s.speed)
-      try { localStorage.setItem(KEY, JSON.stringify({ mode: s.mode, metric: s.metric, zoom: s.zoom, fundo: s.fundo, win: s.win, end: s.end, local: s.local, orig: s.orig, fixed: s.fixed, speed: s.speed })); } catch (e) {}
+    if (ps.mode !== s.mode || ps.metric !== s.metric || ps.zoom !== s.zoom || ps.fundo !== s.fundo || ps.win !== s.win || ps.end !== s.end || ps.local !== s.local || ps.orig !== s.orig || ps.fixed !== s.fixed || ps.speed !== s.speed || ps.lay !== s.lay)
+      try { localStorage.setItem(KEY, JSON.stringify({ mode: s.mode, metric: s.metric, zoom: s.zoom, fundo: s.fundo, win: s.win, end: s.end, local: s.local, orig: s.orig, fixed: s.fixed, speed: s.speed, lay: s.lay })); } catch (e) {}
     if (ps.playing !== s.playing || (s.playing && ps.speed !== s.speed)) {
       clearInterval(this.timer);
       if (s.playing) this.timer = setInterval(() => {
@@ -740,6 +770,8 @@ class Component extends DCLogic {
       if (pts.length && (pts[0][0] !== pts[pts.length - 1][0] || pts[0][1] !== pts[pts.length - 1][1])) pts.push(pts[0]);
       return pts; }).filter(r => r.length >= 4);
   }
+  // estado das camadas, sempre completo (o que vem do browser pode ser de uma versão anterior)
+  layOf() { const d = layDefault(), s = this.state.lay || {}; for (const k in d) if (s[k]) d[k] = { on: !!s[k].on, op: Math.max(0, Math.min(1, +s[k].op)) }; return d; }
   fromLL(lon, lat) { const m = this.U.meta, s = Math.sin(lat * Math.PI / 180), wx = (lon + 180) / 360, wy = 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI); return [(wx - m.wx0) * m.s, (wy - m.wy0) * m.s]; }
   // unidades com localização, juntas por edifício (a menos de ~130 m umas das outras)
   buildSites() {
@@ -791,7 +823,7 @@ class Component extends DCLogic {
       m.style.cssText = 'display:flex;align-items:center;gap:5px;font:600 12px/1 "Source Serif 4",serif;color:#201e1d;white-space:nowrap;pointer-events:none';
       const sq = document.createElement('i'); sq.style.cssText = 'display:block;width:9px;height:9px;background:#201e1d;box-shadow:0 0 0 1.5px #f3f2f2';
       const lb = document.createElement('span'); lb.textContent = h.n; lb.title = h.t || ''; lb.style.cssText = 'background:#f3f2f2;padding:3px 5px;border-radius:2px;box-shadow:0 1px 3px rgba(32,30,29,.3)';
-      m.append(sq, lb); new ML.Marker({ element: m, anchor: 'left', offset: [-4, 0] }).setLngLat(this.toLL(h.x, h.y)).addTo(map); }
+      m.append(sq, lb); (this.hospMk || (this.hospMk = [])).push(new ML.Marker({ element: m, anchor: 'left', offset: [-4, 0] }).setLngLat(this.toLL(h.x, h.y)).addTo(map)); }
     const uMax = Math.max(1, ...this.sites.map(st => st.tot));
     this.uniMk = this.sites.map(st => { const el = document.createElement('div'), d = Math.round(8 + 18 * Math.sqrt(st.tot / uMax));
       el.title = `${st.units.length > 1 ? st.place + ': ' : ''}${st.units.map(r => r.n).join(', ')} · ${NF.format(st.tot)} admissões`;
@@ -801,7 +833,14 @@ class Component extends DCLogic {
   }
   sync3d() {
     const map = this.ml, v = this.v3; if (!map || !this.mlReady || !v) return;
-    if (this.uniMk) { const on = this.state.uniOn; this.uniMk.forEach((m, i) => { const el = m.getElement(); el.style.display = on ? 'block' : 'none'; el.style.background = this.state.uni === i ? '#201e1d' : '#f3f2f2'; }); }
+    const L = this.layOf();
+    if (this.layKey3 !== JSON.stringify(L) + this.state.fundo) { this.layKey3 = JSON.stringify(L) + this.state.fundo;
+      for (const k of Object.keys(BASEMAPS)) map.setPaintProperty('b-' + k, 'raster-opacity', L.fundo.on ? L.fundo.op : 0);
+      map.setLayoutProperty('fr-3d', 'visibility', L.medida.on ? 'visible' : 'none'); map.setPaintProperty('fr-3d', 'fill-extrusion-opacity', 0.86 * L.medida.op);
+      map.setLayoutProperty('con', 'visibility', L.limites.on ? 'visible' : 'none'); map.setPaintProperty('con', 'line-opacity', 0.6 * L.limites.op);
+      (this.hospMk || []).forEach(m => { const el = m.getElement(); el.style.display = L.hosp.on ? 'flex' : 'none'; el.style.opacity = L.hosp.op; });
+      (this.uniMk || []).forEach(m => { m.getElement().style.opacity = L.uni.op; }); }
+    if (this.uniMk) { const on = this.state.uniOn && L.uni.on; this.uniMk.forEach((m, i) => { const el = m.getElement(); el.style.display = on ? 'block' : 'none'; el.style.background = this.state.uni === i ? '#201e1d' : '#f3f2f2'; }); }
     if (this.mlShown !== true) { this.mlShown = true; map.resize(); this.home3d(0); }
     else if (this.camZoom !== this.state.zoom) this.home3d(900);
     const key = v.key + '|' + this.state.sel + '|' + this.state.fundo;
@@ -874,7 +913,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [], showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [] };
+    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [], showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -1093,7 +1132,7 @@ class Component extends DCLogic {
       csRows = (st.csAll ? sorted : sorted.slice(0, CS_LINES)).map((x, i) => { const si = this.siteOf ? this.siteOf.get(x.r.n) : undefined, has = si !== undefined; return { i: i + 1, name: x.r.n,
         con: `${x.r.t === 'USF' || x.r.t === 'UCSP' ? x.r.t : 'Outra unidade'} · ${U.AG[x.r.ag] || ''}${has ? ' · ver no mapa' : ''}`,
         bg: has && st.uni === si ? 'color-mix(in srgb,#0088b0 10%,transparent)' : 'transparent', cur: has ? 'pointer' : 'default',
-        click: () => { if (!has) return; set({ uni: si, uniOn: true }); this.ctxScrollTo(this.mapRef.current); },
+        click: () => { if (!has) return; set({ uni: si, uniOn: true, lay: { ...this.layOf(), uni: { ...this.layOf().uni, on: true } } }); this.ctxScrollTo(this.mapRef.current); },
         n: NF.format(x.tot), pct: csS === 'fq' ? pc(x.fq, 1) : pc(x.nu),
         segs: x.r.c.map((v, j) => ({ w: x.tot ? v / x.tot * 100 : 0, c: PRIO[j][1], t: tt(v, x.tot, j) })) }; });
       const totCs = sum(all.map(x => x.tot)), nuCs = sum(CS.rows.map(r => r.c[3] + r.c[4]));
@@ -1105,7 +1144,7 @@ class Component extends DCLogic {
     const csOpts = [['n', 'Admissões'], ['nu', 'Não urgentes'], ['fq', 'Frequentes']].map(([v, label]) => ({ label, on: (st.csSort === 'nu' || st.csSort === 'fq' ? st.csSort : 'n') === v, pick: () => set({ csSort: v }) }));
     const csToggle = () => set({ csAll: !st.csAll });
     // unidades de saúde no mapa: tamanho pelas admissões do período completo (como a lista), clicar abre o cartão
-    const sites = this.sites || [], showUni = !!(st.uniOn && sites.length), uMax = Math.max(1, ...sites.map(x => x.tot));
+    const sites = this.sites || [], showUni = !!(st.uniOn && this.layOf().uni.on && sites.length), uMax = Math.max(1, ...sites.map(x => x.tot));
     const uniDots = sites.map(x => { const on = st.uni === x.i, r = (3.2 + 8 * Math.sqrt(x.tot / uMax)) * k;
       return { x: x.x.toFixed(2), y: x.y.toFixed(2), r: r.toFixed(2), dot: (on ? 0 : 1.2 * k).toFixed(2), sw: ((on ? 2 : 1.3) * k).toFixed(2), fill: on ? '#201e1d' : '#f3f2f2', ink: '#201e1d',
         t: `${x.units.length > 1 ? x.place + ': ' : ''}${x.units.map(r => r.n).join(', ')} · ${NF.format(x.tot)} admissões`,
@@ -1119,6 +1158,25 @@ class Component extends DCLogic {
             fqLabel: `Utentes com ${U.cs.k}+ idas`, fq: r.u ? `${NF.format(r.f)} · ${pc(r.f / r.u, 1)}` : '—',
             loc: U.LOC.map((l, i) => [l, r.loc[i]]).filter(z => z[1]).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([l, v]) => `${l} ${pc(v / tot)}`).join(' · '),
             segs: r.c.map((v, j) => ({ w: v / tot * 100, c: PRIO[j][1], t: tt(v, tot, j) })) }; }) } : { title: '', sub: '', src: '', close: () => {}, units: [] };
+    // painel de camadas: ligar/desligar e opacidade; as camadas de contexto (65+ e frequentes) excluem-se uma à outra
+    const L = this.layOf(), setLay = (key, v) => { const n = { ...L, [key]: { ...L[key], ...v } };
+      if (v.on && (key === 'idosos' || key === 'freq')) n[key === 'idosos' ? 'freq' : 'idosos'] = { ...L[key === 'idosos' ? 'freq' : 'idosos'], on: false };
+      set({ lay: n, ...(key === 'uni' && v.on === false ? { uni: null } : {}), ...(key === 'uni' && v.on ? { uniOn: true } : {}) }); };
+    const ctxKey = L.idosos.on ? 'idosos' : L.freq.on ? 'freq' : null;
+    const ctxVal = f => { if (ctxKey === 'idosos') { const P = this.pop[f.d]; return P && P[0] ? P[2] / P[0] : NaN; } const q = fqOf(f.d); return q ? q[1] / q[0] : NaN; };
+    let ctxPaths = [], ctxLeg = { title: '', lo: '', hi: '', ramp: [] };
+    if (ctxKey) { const vals = this.fregs.map(f => ({ f, v: ctxVal(f) })).filter(x => isFinite(x.v)), srt = vals.map(x => x.v).sort((a, b) => a - b);
+      const lo = srt[Math.floor(srt.length * 0.05)] || 0, hi = srt[Math.min(srt.length - 1, Math.floor(srt.length * 0.95))] || 1;
+      ctxPaths = vals.map(x => ({ p: x.f.p, fill: RAMP_K[Math.max(0, Math.min(6, Math.floor((x.v - lo) / ((hi - lo) || 1) * 7)))] }));
+      ctxLeg = { title: ctxKey === 'idosos' ? 'Contexto: residentes com 65 e mais anos (Censos 2021)' : `Contexto: utentes com ${FQ.k}+ idas, por freguesia`, lo: pc(lo, 1), hi: pc(hi, 1), ramp: RAMP_K.map(c => ({ c })) }; }
+    const opOf = k => L[k].on ? String(L[k].op) : '0';
+    const layers = LAYERS.map(([k, name, sw]) => { const ctxOnly = k === 'idosos' || k === 'freq', noData = (k === 'freq' && !FQ) || (k === 'uni' && !sites.length) || (k === 'nomes' && !BM.ref);
+      const on = k === 'uni' ? L.uni.on && st.uniOn : L[k].on;
+      return { name: k === 'medida' ? (isTx ? 'Taxa por 1 000 hab. (medida)' : isPct ? 'Proporção (medida)' : name) : name, sw: k === 'medida' ? ramp[4] : sw, on, off: !on, pct: Math.round(L[k].op * 100), pctTxt: `${Math.round(L[k].op * 100)}%`,
+        dim: noData || (st.view3d && (ctxOnly || k === 'nomes')) ? 0.45 : 1, note: st.view3d && (ctxOnly || k === 'nomes') ? 'Só na vista 2D' : noData ? 'Sem dados para esta camada' : '',
+        aria: `Mostrar ${name}`, ariaOp: `Opacidade de ${name}`,
+        toggle: e => setLay(k, { on: e.target.checked }), slide: e => setLay(k, { op: +e.target.value / 100 }) }; });
+    const layNote = st.view3d ? 'Em 3D, os nomes de lugares e as camadas de contexto não se aplicam.' : ctxKey ? (st.mode === 'freg' && L.medida.on ? 'A cor das freguesias (medida) tapa o contexto: experimente Calor, Círculos ou Retícula, ou baixe a opacidade.' : 'Contexto por baixo da medida; passe o rato numa linha para mais informação.') : (st.view3d ? 'Em 3D, os nomes de lugares e as camadas de contexto não se aplicam.' : 'Ligue uma camada de contexto para a ver por baixo da medida.');
     const hosps = (U.hosp || []).map(h => ({ n: h.n, t: h.t, rx: (h.x - 4 * k).toFixed(2), ry: (h.y - 4 * k).toFixed(2), s: (8 * k).toFixed(2), sw: (1.5 * k).toFixed(2) }));
     // nomes dos hospitais em HTML por cima do mapa (texto interpolado dentro de <text> SVG não é desenhado)
     const hospLayer = React.createElement('div', { style: { position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' } },
@@ -1157,7 +1215,7 @@ class Component extends DCLogic {
         { label: 'Não urgentes', value: pc(nuW / totW), sub: `verde + azul · ${NF.format(nuW)}`, delta: kD[2], dc: kC[2] },
         { label: 'Sem freguesia', value: NF.format(semW), sub: `${pc(semW / totW, 1)} fora do mapa`, delta: '', dc: NEUT },
         ...extraKpis
-      ], foot2, hosps, hospLayer, exportCsv, fqRows, fqLede, hasFq: fqRows.length > 0, hasCs, csRows, csLede, csNote, csOpts, csMore, alRows, alLede, alMore, alToggleLabel, alToggle, csToggleLabel, csToggle,
+      ], foot2, hosps, hospLayer: L.hosp.on ? React.createElement('div', { style: { position: 'absolute', inset: 0, opacity: L.hosp.op, pointerEvents: 'none' } }, hospLayer) : null, exportCsv, fqRows, fqLede, hasFq: fqRows.length > 0, hasCs, csRows, csLede, csNote, csOpts, csMore, alRows, alLede, alMore, alToggleLabel, alToggle, csToggleLabel, csToggle,
       mapTitle: isTx ? (sp ? `Onde se recorre mais à urgência com pulseira ${selNames}, por habitante` : 'Onde se recorre mais à urgência, por habitante') : isPct ? (sp ? `Onde pesam mais as pulseiras ${selNames}` : 'Onde pesam mais as admissões urgentes') : (sp ? `De onde vêm as admissões ${selNames}` : 'De onde vêm as admissões'),
       modes: [['calor', 'Calor'], ['freg', 'Freguesias'], ['circ', 'Círculos'], ['ret', 'Retícula']].map(([v, label]) => ({ label, on: st.mode === v, pick: () => set({ mode: v }) })),
       metrics: [['n', 'Admissões'], ['pct', 'Proporção'], ['tx', 'Por 1 000 hab.']].map(([v, label]) => ({ label, on: st.metric === v, pick: () => set({ metric: v }) })),
@@ -1172,13 +1230,14 @@ class Component extends DCLogic {
       onDown: this.onDown,
       zoomIn: () => st.view3d && this.ml ? this.ml.zoomIn() : this.zoomAt(0.5, 0.5, 1 / 1.4), zoomOut: () => st.view3d && this.ml ? this.ml.zoomOut() : this.zoomAt(0.5, 0.5, 1.4),
       zoomReset: () => st.view3d && this.ml && this.camHome ? this.ml.easeTo({ ...this.camHome, duration: 900 }) : set({ vbC: null }),
-      showUni, uniDots, hasUni: !!uS, uniCard,
-      uniOpts: [[true, 'Mostrar'], [false, 'Esconder']].map(([v, label]) => ({ label, on: !!st.uniOn === v, pick: () => set({ uniOn: v, uni: v ? st.uni : null }) })),
+      showUni, uniDots, hasUni: !!uS, uniCard, layers, layNote,
+      opLand: st.mode === 'freg' ? opOf('medida') : '1', opMain: opOf('medida'), opLim: opOf('limites'), opHosp: opOf('hosp'), opUni: String(L.uni.op), opCtx: opOf(ctxKey || 'idosos'),
+      showCtx: !!ctxKey, ctxPaths, showCtxLeg: !!ctxKey && !st.view3d, ctxLeg,
       map3dRef: this.map3dRef, d3disp: st.view3d ? 'block' : 'none', d3msg: st.d3msg,
       dims: [[false, '2D'], [true, '3D']].map(([v, label]) => ({ label, on: st.view3d === v, pick: () => { this.mlShown = false; set({ view3d: v, hover: null, d3msg: '' }); } })),
       mapRef: this.mapRef, viewBox: vb.map(v => v.toFixed(1)).join(' '), aspect: `${vb[2].toFixed(1)}/${vb[3].toFixed(1)}`,
-      tileLayer: base ? this.layer(this.tilesFor(vb, BM.base, BM.snap), BM.baseStyle) : null, attr: st.view3d ? (base ? BM.attr + ' · ' : '') + 'Relevo: Terrarium/AWS · MapLibre' : BM.attr,
-      labelLayer: base && BM.ref ? this.layer(this.tilesFor(vb, BM.ref, BM.snap), BM.refStyle) : null, showAttr: base || st.view3d,
+      tileLayer: base && L.fundo.on ? this.layer(this.tilesFor(vb, BM.base, BM.snap), { ...BM.baseStyle, opacity: L.fundo.op }) : null, attr: st.view3d ? (base ? BM.attr + ' · ' : '') + 'Relevo: Terrarium/AWS · MapLibre' : BM.attr,
+      labelLayer: base && BM.ref && L.nomes.on ? this.layer(this.tilesFor(vb, BM.ref, BM.snap), { ...BM.refStyle, opacity: (BM.refStyle.opacity || 1) * L.nomes.op }) : null, showAttr: base || st.view3d,
       landOp: st.mode === 'freg' ? (base ? '0.8' : '1') : '1', landStroke: base && st.mode !== 'freg' ? '#201e1d' : '#f3f2f2', landStrokeOp: base && st.mode !== 'freg' ? '0.22' : '1',
       blur: Math.max(1.5, 9 * k).toFixed(2), heatFilter: isRel ? 'url(#heat-m)' : 'url(#heat-c)',
       hair: (0.5 * k).toFixed(2), conStroke: (1.1 * k).toFixed(2), labelSize: (13 * k).toFixed(1), labelHalo: (3 * k).toFixed(1),
