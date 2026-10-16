@@ -380,19 +380,45 @@ input[type=range]{accent-color:#0088b0}
       <aside aria-label="Eventos-chave" style="flex:1 1 260px;max-width:100%;min-width:0;display:flex;flex-direction:column;gap:8px;padding-top:6px">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">
           <h3 style="font-size:18px;margin:0">Eventos-chave</h3>
+          <button class="btn btn-secondary" style="font-size:12.5px;padding:3px 9px;margin-left:auto" onClick="{{ nd.open }}" title="Acrescentar uma nota ao dia da janela">+ Nota</button>
           <div class="seg"><sc-for list="{{ evOpts }}" as="o" hint-placeholder-count="2"><label class="seg-opt" style="padding:3px 9px;font-size:12.5px"><input type="radio" name="evfiltro" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
         </div>
         <span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ evCount }}</span>
+        <sc-if value="{{ nd.show }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--color-surface);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)">
+            <span style="font-size:12.5px;font-weight:600">Nota para {{ nd.dayLabel }}</span>
+            <input type="text" value="{{ nd.t }}" onChange="{{ nd.edit }}" maxlength="140" placeholder="Ex.: greve dos transportes, pico de gripe…" aria-label="Texto da nota" style="font:inherit;font-size:13px;padding:6px 8px;border:1px solid rgba(32,30,29,.3);border-radius:2px;background:var(--color-bg);color:var(--color-text)">
+            <sc-if value="{{ nd.hasFr }}" hint-placeholder-val="{{ false }}"><label style="font-size:12.5px;display:flex;gap:6px;align-items:center"><input type="checkbox" checked="{{ nd.fr }}" onChange="{{ nd.toggleFr }}" style="margin:0;accent-color:#0088b0">Só para {{ nd.frName }}</label></sc-if>
+            <div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-ghost" style="font-size:12.5px;padding:3px 9px" onClick="{{ nd.cancel }}">Cancelar</button><button class="btn btn-primary" style="font-size:12.5px;padding:3px 9px" onClick="{{ nd.save }}" disabled="{{ nd.off }}">Guardar nota</button></div>
+          </div>
+        </sc-if>
         <div data-ev-list="1" style="position:relative;display:flex;flex-direction:column;max-height:420px;overflow:auto;border-top:1px solid rgba(32,30,29,.2)">
           <sc-for list="{{ evList }}" as="e" hint-placeholder-count="6">
+            <sc-if value="{{ e.isEv }}" hint-placeholder-val="{{ false }}">
             <button onClick="{{ e.pick }}" title="{{ e.t }}" data-in="{{ e.inw }}" style="display:grid;grid-template-columns:14px 74px minmax(0,1fr) 48px;gap:8px;align-items:center;padding:7px 6px;border:0;border-bottom:1px solid rgba(32,30,29,.1);background:{{ e.bg }};font:inherit;font-size:13px;font-weight:{{ e.fw }};color:var(--color-text);text-align:left;cursor:pointer;box-shadow:inset 3px 0 0 {{ e.bar }}" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
               <svg width="12" height="11" viewBox="0 0 12 11" style="display:block"><path d="{{ e.d }}" fill="{{ e.fill }}" stroke="{{ e.stroke }}" stroke-width="1.3" stroke-linejoin="round"></path></svg>
               <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ e.dt }}</span>
               <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.name }}</span><span style="font-size:11.5px;font-style:italic;font-weight:400;color:var(--color-neutral-700)">{{ e.sub }}</span></span>
               <span style="text-align:right;font-variant-numeric:tabular-nums">{{ e.dev }}</span>
             </button>
+            </sc-if>
+            <sc-if value="{{ e.isNote }}" hint-placeholder-val="{{ false }}">
+            <div data-in="{{ e.inw }}" style="display:grid;grid-template-columns:minmax(0,1fr) 30px;align-items:center;border-bottom:1px solid rgba(32,30,29,.1);background:{{ e.bg }};box-shadow:inset 3px 0 0 {{ e.bar }}">
+              <button onClick="{{ e.pick }}" title="{{ e.t }}" style="display:grid;grid-template-columns:14px 74px minmax(0,1fr);gap:8px;align-items:center;padding:7px 6px;border:0;background:transparent;font:inherit;font-size:13px;font-weight:{{ e.fw }};color:var(--color-text);text-align:left;cursor:pointer">
+                <svg width="12" height="11" viewBox="0 0 12 11" style="display:block"><path d="{{ e.d }}" fill="{{ e.fill }}" stroke="{{ e.stroke }}" stroke-width="1.3" stroke-linejoin="round"></path></svg>
+                <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ e.dt }}</span>
+                <span style="display:flex;flex-direction:column;min-width:0"><span style="overflow-wrap:anywhere">{{ e.name }}</span><span style="font-size:11.5px;font-style:italic;font-weight:400;color:var(--color-neutral-700)">{{ e.sub }}</span></span>
+              </button>
+              <button class="btn btn-ghost" style="padding:0;font-size:16px;line-height:1" onClick="{{ e.del }}" aria-label="Apagar nota" title="Apagar nota">×</button>
+            </div>
+            </sc-if>
           </sc-for>
           <sc-if value="{{ evEmpty }}" hint-placeholder-val="{{ false }}"><p style="margin:10px 0 0;font-size:13px;font-style:italic;color:var(--color-neutral-700)">{{ evEmpty }}</p></sc-if>
+        </div>
+        <div style="display:flex;gap:4px 12px;flex-wrap:wrap;align-items:center;font-size:12px">
+          <button class="btn btn-ghost" style="font-size:12px;padding:2px 6px" onClick="{{ nd.exportAll }}" disabled="{{ nd.noNotes }}">↓ Exportar notas</button>
+          <label class="btn btn-ghost" style="font-size:12px;padding:2px 6px;cursor:pointer">↑ Importar notas<input type="file" accept="application/json,.json" onChange="{{ nd.importFile }}" style="display:none"></label>
+          <span style="font-style:italic;color:var(--color-neutral-700)">{{ nd.msg }}</span>
         </div>
       </aside>
       </div>
@@ -641,6 +667,7 @@ const UNI_LL = {
 const LAYERS = [['fundo', 'Fundo do mapa', '#d9d6d2', true, 1], ['nomes', 'Nomes de lugares', '#a8a4a0', true, 0.9], ['medida', 'Admissões (medida)', '#1186ac', true, 1],
   ['idosos', '65 e mais anos (Censos)', '#b39a76', false, 0.8], ['freq', 'Utentes frequentes', '#957a55', false, 0.8],
   ['limites', 'Limites dos concelhos', '#201e1d', true, 1], ['hosp', 'Hospitais', '#201e1d', true, 1], ['uni', 'Unidades de saúde', '#f3f2f2', true, 1]];
+const NOTES_KEY = 'urg-notas-v1', NOTE_D = 'M6,0.8L11.2,5.5L6,10.2L0.8,5.5Z';
 const RAMP_K = ['#f1ece4', '#e0d4c2', '#cbb89c', '#b39a76', '#957a55', '#735b3b', '#523f27'];
 const layDefault = () => Object.fromEntries(LAYERS.map(([k, , , on, op]) => [k, { on, op }]));
 const H3D = 2200, PITCH3D = 58, BEAR3D = -18;
@@ -660,7 +687,7 @@ function fitAspect(b, asp, padF) {
 
 class Component extends DCLogic {
   state = { mode: 'calor', stuck: false, sec: '', metric: 'n', local: -1, prios: [], sel: null, hover: null, zoom: 'area', fundo: 'mapa', fixed: true,
-            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, evWin: false, view3d: false, d3msg: '', uni: null, uniOn: true, lay: layDefault() };
+            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, evWin: false, noteDraft: null, noteMsg: '', notesV: 0, view3d: false, d3msg: '', uni: null, uniOn: true, lay: layDefault() };
   mapRef = React.createRef();
   map3dRef = React.createRef();
 
@@ -767,7 +794,7 @@ class Component extends DCLogic {
       try { localStorage.setItem(KEY, JSON.stringify({ mode: s.mode, metric: s.metric, zoom: s.zoom, fundo: s.fundo, win: s.win, end: s.end, local: s.local, orig: s.orig, fixed: s.fixed, speed: s.speed, lay: s.lay })); } catch (e) {}
     // eventos-chave: ao mudar a janela, a lista desliza até ao primeiro evento dentro dela (sem mexer na página)
     if (ps.end !== s.end || ps.win !== s.win) requestAnimationFrame(() => { const box = document.querySelector('[data-ev-list]'); if (!box) return;
-      const r = box.querySelector('button[data-in="1"]'); if (r && (r.offsetTop < box.scrollTop || r.offsetTop + r.offsetHeight > box.scrollTop + box.clientHeight)) box.scrollTop = Math.max(0, r.offsetTop - 8); });
+      const r = box.querySelector('[data-in="1"]'); if (r && (r.offsetTop < box.scrollTop || r.offsetTop + r.offsetHeight > box.scrollTop + box.clientHeight)) box.scrollTop = Math.max(0, r.offsetTop - 8); });
     if (ps.playing !== s.playing || (s.playing && ps.speed !== s.speed)) {
       clearInterval(this.timer);
       if (s.playing) this.timer = setInterval(() => {
@@ -793,6 +820,21 @@ class Component extends DCLogic {
       if (pts.length && (pts[0][0] !== pts[pts.length - 1][0] || pts[0][1] !== pts[pts.length - 1][1])) pts.push(pts[0]);
       return pts; }).filter(r => r.length >= 4);
   }
+  // notas do utilizador: só no browser (localStorage); exportáveis em JSON para partilhar
+  notesOf() {
+    if (!this._notes) { try { const a = JSON.parse(localStorage.getItem(NOTES_KEY) || '[]');
+      this._notes = Array.isArray(a) ? a.filter(n => n && typeof n.t === 'string' && typeof n.dia === 'string' && n.t.trim()).map(n => ({ id: String(n.id || Math.random().toString(36).slice(2)), dia: n.dia, d: typeof n.d === 'string' ? n.d : null, t: n.t.slice(0, 140) })) : []; } catch (e) { this._notes = []; } }
+    return this._notes;
+  }
+  saveNotes(a, msg) { this._notes = a; try { localStorage.setItem(NOTES_KEY, JSON.stringify(a)); } catch (e) {} this.setState({ notesV: this.state.notesV + 1, noteMsg: msg || '' }); }
+  exportNotes() { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(this.notesOf(), null, 1)], { type: 'application/json' }));
+    a.download = 'notas-urgencias.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000); }
+  importNotes(e) { const f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+    f.text().then(txt => { const a = JSON.parse(txt); if (!Array.isArray(a)) throw new Error();
+      const cur = this.notesOf(), ids = new Set(cur.map(n => n.id)), add = a.filter(n => n && typeof n.t === 'string' && typeof n.dia === 'string' && n.t.trim() && !ids.has(String(n.id)))
+        .map(n => ({ id: String(n.id || Math.random().toString(36).slice(2)), dia: n.dia, d: typeof n.d === 'string' ? n.d : null, t: n.t.slice(0, 140) }));
+      this.saveNotes(cur.concat(add), `${add.length} ${add.length === 1 ? 'nota importada' : 'notas importadas'}.`); })
+      .catch(() => this.setState({ noteMsg: 'Ficheiro de notas inválido.' })); }
   // estado das camadas, sempre completo (o que vem do browser pode ser de uma versão anterior)
   layOf() { const d = layDefault(), s = this.state.lay || {}; for (const k in d) if (s[k]) d[k] = { on: !!s[k].on, op: Math.max(0, Math.min(1, +s[k].op)) }; return d; }
   fromLL(lon, lat) { const m = this.U.meta, s = Math.sin(lat * Math.PI / 180), wx = (lon + 180) / 360, wy = 0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI); return [(wx - m.wx0) * m.s, (wy - m.wy0) * m.s]; }
@@ -936,7 +978,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [], showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
+    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3msg: '', dims: [], showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -1097,13 +1139,29 @@ class Component extends DCLogic {
     // eventos-chave: a mesma lista do "Fora do padrão", por ordem cronológica, ao lado da timeline
     const evIn = x => !!st.win && x.i >= i0 && x.i <= i1;
     const evAll = alF.slice().sort((a, b) => a.i - b.i || Math.abs(b.z) - Math.abs(a.z)), evNWin = evAll.filter(evIn).length;
-    const evList = (st.evWin ? evAll.filter(evIn) : evAll).map(x => { const up = x.z > 0, sev = x.z >= 3 ? 2 : up ? 1 : 0, f = x.d ? alFm.get(x.d) : null, r = x.m > 0 ? Math.round((x.v / x.m - 1) * 100) : null, dy = U.days[x.i], now = !!st.win && x.i === i1;
+    let evList = (st.evWin ? evAll.filter(evIn) : evAll).map(x => { const up = x.z > 0, sev = x.z >= 3 ? 2 : up ? 1 : 0, f = x.d ? alFm.get(x.d) : null, r = x.m > 0 ? Math.round((x.v / x.m - 1) * 100) : null, dy = U.days[x.i], now = !!st.win && x.i === i1;
       return { d: up ? 'M6,1.2L10.8,9.8H1.2Z' : 'M1.2,1.2H10.8L6,9.8Z', fill: sev === 2 ? ATT : '#f3f2f2', stroke: sev ? ATT : '#7a7676',
         dt: `${dy.slice(8)}/${dy.slice(5, 7)} · ${DNS[alDow[x.i]]}`, name: f ? nice(f.n) : 'Toda a área', sub: `${NF.format(x.v)} admissões · normal ${NF.format(Math.round(x.m))}${f ? ' · ' + f.c : ''}`,
         dev: r == null ? '—' : sgnP(r), t: `${['abaixo', 'acima', 'muito acima'][sev]} do normal · clique para ir a este dia`,
         bg: now ? 'color-mix(in srgb,#0088b0 18%,transparent)' : evIn(x) ? 'color-mix(in srgb,#0088b0 8%,transparent)' : 'transparent', fw: now ? 600 : 400, bar: evIn(x) ? '#0088b0' : 'transparent', inw: evIn(x) ? '1' : '0',
-        pick: () => goDay(x.i, x.d || st.sel) }; });
-    const evCount = `${alPl(evAll.length, 'evento', 'eventos')} no período` + (st.win ? ` · ${alPl(evNWin, 'na janela', 'na janela')}` : '') + ' · segue origem, local e prioridades';
+        pick: () => goDay(x.i, x.d || st.sel), _i: x.i, isEv: true, isNote: false, del: () => {} }; });
+    // notas: entram na lista por ordem do dia e na timeline como losangos azuis
+    const notes = this.notesOf(), nDay = n => U.days.indexOf(n.dia);
+    const noteAll = notes.map(n => ({ n, i: nDay(n) })).filter(x => x.i >= 0), noteIn = noteAll.filter(evIn).length;
+    const noteRows = (st.evWin ? noteAll.filter(evIn) : noteAll).map(({ n, i }) => { const f = n.d ? alFm.get(n.d) : null, dy = U.days[i], now = !!st.win && i === i1, inw = evIn({ i });
+      return { isNote: true, isEv: false, _i: i, d: NOTE_D, fill: '#0088b0', stroke: '#0088b0', dt: `${dy.slice(8)}/${dy.slice(5, 7)} · ${DNS[alDow[i]]}`, name: n.t, sub: `Nota${f ? ' · ' + nice(f.n) : ''}`, dev: '',
+        t: 'Nota · clique para ir a este dia', bg: now ? 'color-mix(in srgb,#0088b0 18%,transparent)' : inw ? 'color-mix(in srgb,#0088b0 8%,transparent)' : 'transparent', fw: now ? 600 : 400, bar: inw ? '#0088b0' : 'transparent', inw: inw ? '1' : '0',
+        pick: () => goDay(i, n.d || st.sel), del: () => this.saveNotes(notes.filter(z => z.id !== n.id)) }; });
+    evList = evList.concat(noteRows).sort((a, b) => a._i - b._i || (a.isNote ? 1 : 0) - (b.isNote ? 1 : 0));
+    const noteMarks = noteAll.map(({ n, i }) => ({ pct: ((i + 0.5) / N * 100).toFixed(2), d: NOTE_D, fill: '#0088b0', stroke: '#0088b0', t: `${fdy(U.days[i])} · nota: ${n.t}`, pick: () => goDay(i, n.d || st.sel) }));
+    const ndDay = st.win ? i1 : Math.max(0, N - 2), nd0 = st.noteDraft;
+    const nd = { show: !!nd0, t: nd0 ? nd0.t : '', fr: !!(nd0 && nd0.fr), hasFr: !!selF, frName: selF ? nice(selF.n) : '', dayLabel: fdy(U.days[ndDay]) + (st.win ? '' : ' (último dia completo)'),
+      off: !(nd0 && nd0.t.trim()), noNotes: !notes.length, msg: st.noteMsg,
+      open: () => set({ noteDraft: { t: '', fr: !!selF }, noteMsg: '' }), cancel: () => set({ noteDraft: null }),
+      edit: e => set({ noteDraft: { ...nd0, t: e.target.value.slice(0, 140) } }), toggleFr: e => set({ noteDraft: { ...nd0, fr: e.target.checked } }),
+      save: () => { if (!nd0 || !nd0.t.trim()) return; this.saveNotes(notes.concat([{ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), dia: U.days[ndDay], d: nd0.fr && selF ? selF.d : null, t: nd0.t.trim().slice(0, 140) }]), 'Nota guardada neste browser.'); this.setState({ noteDraft: null }); },
+      exportAll: () => this.exportNotes(), importFile: e => this.importNotes(e) };
+    const evCount = `${alPl(evAll.length, 'evento', 'eventos')} no período` + (noteAll.length ? ` · ${alPl(noteAll.length, 'nota', 'notas')}` : '') + (st.win ? ` · ${alPl(evNWin + noteIn, 'na janela', 'na janela')}` : '') + ' · segue origem, local e prioridades';
     const evEmpty = evList.length ? '' : (st.evWin ? 'Nenhum evento na janela atual.' : 'Nenhum dia fora do padrão com os filtros atuais.');
     const evOpts = [[false, 'Todos'], [true, 'Na janela']].map(([v, label]) => ({ label, on: !!st.evWin === v, pick: () => set({ evWin: v }) }));
 
@@ -1291,7 +1349,7 @@ class Component extends DCLogic {
       togglePlay: () => { if (st.playing) return set({ playing: false }); const w = st.win || 7; set({ win: w, end: end >= N - 1 ? w - 1 : end, playing: true }); },
       wins: [[1, '1 dia'], [7, '7 dias'], [14, '14'], [30, '30'], [0, 'Tudo']].map(([w, label]) => ({ label, on: st.win === w, pick: () => set({ win: w, playing: w ? st.playing : false, end: Math.max(end, w ? w - 1 : end) }) })),
       speeds: [[800, 'Lenta'], [450, 'Normal'], [180, 'Rápida']].map(([v, label]) => ({ label, on: st.speed === v, pick: () => set({ speed: v }) })),
-      tlBox: `0 0 ${N * BW} 84`, bars, months, evMarks, evNote, syncCharts, evList, evCount, evEmpty, evOpts, maxIdx: N - 1, sliderVal: st.win ? end : N - 1, sliderOff: !st.win,
+      tlBox: `0 0 ${N * BW} 84`, bars, months, evMarks: evMarks.concat(noteMarks), evNote, syncCharts, evList, evCount, evEmpty, evOpts, nd, maxIdx: N - 1, sliderVal: st.win ? end : N - 1, sliderOff: !st.win,
       onSlide: e => set({ end: Math.max(+e.target.value, st.win - 1), playing: false }),
       tlNote: st.win ? 'Arraste o cursor ou clique num dia para mover a janela; Reproduzir anima o mapa dia a dia. Com a escala fixa, as cores comparam-se entre janelas.' : 'A ver o período completo. Escolha uma janela para percorrer os dias.',
       panelTitle: selF ? nice(selF.n) : 'Toda a área de influência', panelSub: selF ? `${selF.c} · ${NF.format(curTot)} admissões` + (this.pop[selF.d] ? ` · ${NF.format(this.pop[selF.d][0])} residentes` : "") : `${NF.format(areaTot)} admissões${locName}`,
