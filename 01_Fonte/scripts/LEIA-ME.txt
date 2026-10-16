@@ -17,3 +17,9 @@ Ficam aqui como referência; nao correm tal como estao sem ajustar caminhos.
 Nota: o "Origem das Urgencias.html" da raiz e um ficheiro unico com tudo embebido. Nao e
 gerado automaticamente a partir destes ficheiros: depois de alterar o .dc.html ou o
 urgencias-data.js, e preciso voltar a embebe-los no HTML.
+
+4_embeber_no_html.py
+   Volta a embeber o .dc.html no "Origem das Urgencias.html" da raiz, depois de alterar o
+   dashboard. Correr a partir da raiz do repositorio. Com --verificar so confirma que o HTML
+   da raiz esta em dia. Nao atualiza os dados: se o urgencias-data.js mudar, e preciso
+   voltar a exportar o pacote.

@@ -284,8 +284,35 @@ input[type=range]{accent-color:#0088b0}
         <div style="position:relative;height:0">
           <sc-for list="{{ months }}" as="m" hint-placeholder-count="0"><span style="position:absolute;left:{{ m.pct }}%;top:-104px;font-size:11px;font-style:italic;padding-left:4px;color:var(--color-neutral-700)">{{ m.label }}</span></sc-for>
         </div>
+        <div style="position:relative;height:14px;margin-top:-6px" aria-label="Dias fora do padrão">
+          <sc-for list="{{ evMarks }}" as="e" hint-placeholder-count="0"><button onClick="{{ e.pick }}" title="{{ e.t }}" aria-label="{{ e.t }}" style="position:absolute;left:{{ e.pct }}%;top:0;transform:translateX(-50%);width:14px;height:14px;padding:0;border:0;background:transparent;cursor:pointer;line-height:0;outline-offset:1px"><svg width="12" height="11" viewBox="0 0 12 11" style="display:block;margin:auto"><path d="{{ e.d }}" fill="{{ e.fill }}" stroke="{{ e.stroke }}" stroke-width="1.3" stroke-linejoin="round"></path></svg></button></sc-for>
+        </div>
         <input type="range" min="0" max="{{ maxIdx }}" step="1" value="{{ sliderVal }}" disabled="{{ sliderOff }}" onChange="{{ onSlide }}" style="width:100%;margin:0" aria-label="Último dia da janela">
         <p style="margin:0;font-size:12.5px;font-style:italic;color:var(--color-neutral-700)">{{ tlNote }}</p>
+        <p style="margin:0;font-size:12.5px;color:var(--color-neutral-700);display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center">
+          <span style="display:inline-flex;align-items:center;gap:5px"><svg width="12" height="11" viewBox="0 0 12 11"><path d="M6,1.2L10.8,9.8H1.2Z" fill="#c8501e" stroke="#c8501e" stroke-width="1.3" stroke-linejoin="round"></path></svg>muito acima do normal</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><svg width="12" height="11" viewBox="0 0 12 11"><path d="M6,1.2L10.8,9.8H1.2Z" fill="#f3f2f2" stroke="#c8501e" stroke-width="1.3" stroke-linejoin="round"></path></svg>acima</span>
+          <span style="display:inline-flex;align-items:center;gap:5px"><svg width="12" height="11" viewBox="0 0 12 11"><path d="M1.2,1.2H10.8L6,9.8Z" fill="#f3f2f2" stroke="#7a7676" stroke-width="1.3" stroke-linejoin="round"></path></svg>abaixo</span>
+          <span style="font-style:italic">{{ evNote }}</span>
+        </p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px 32px;padding-top:14px">
+          <sc-for list="{{ syncCharts }}" as="c" hint-placeholder-count="3">
+            <div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px"><span style="font-weight:600">{{ c.title }}</span><span style="font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--color-neutral-700)">{{ c.now }}</span></div>
+              <svg viewBox="{{ c.box }}" preserveAspectRatio="none" style="display:block;width:100%;height:72px;border-bottom:1px solid rgba(32,30,29,.25)">
+                <rect x="{{ c.wx }}" y="0" width="{{ c.ww }}" height="72" fill="#0088b0" fill-opacity="0.12"></rect>
+                <line x1="0" x2="{{ c.w }}" y1="{{ c.ry }}" y2="{{ c.ry }}" stroke="#201e1d" stroke-opacity="0.35" stroke-dasharray="3 3" stroke-width="1" vector-effect="non-scaling-stroke"></line>
+                <path d="{{ c.pos }}" fill="{{ c.posFill }}"></path>
+                <path d="{{ c.neg }}" fill="#bab6b6"></path>
+                <path d="{{ c.area }}" fill="{{ c.color }}" fill-opacity="0.14"></path>
+                <path d="{{ c.line }}" fill="none" stroke="{{ c.color }}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
+                <line x1="{{ c.cx }}" x2="{{ c.cx }}" y1="0" y2="72" stroke="#201e1d" stroke-opacity="{{ c.cOp }}" stroke-width="1.2" vector-effect="non-scaling-stroke"></line>
+                <sc-for list="{{ c.hits }}" as="h" hint-placeholder-count="0"><rect x="{{ h.x }}" y="0" width="{{ h.w }}" height="72" fill="transparent" style="cursor:pointer" onClick="{{ h.pick }}"><title>{{ h.t }}</title></rect></sc-for>
+              </svg>
+              <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;font-style:italic;color:var(--color-neutral-700)"><span>{{ c.lo }}</span><span>{{ c.hi }}</span></div>
+            </div>
+          </sc-for>
+        </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:32px 48px;padding-top:28px;align-items:start">
         <div style="display:flex;flex-direction:column;gap:12px">
@@ -669,7 +696,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84' };
+    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', evMarks: [], evNote: '', syncCharts: [] };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -817,6 +844,55 @@ class Component extends DCLogic {
     const alN = alF.length, alNf = alN - this.alVal.nArea, alPl = (n, s, p) => `${NF.format(n)} ${n === 1 ? s : p}`;
     const alLede = (alN ? `Em ${alPl(this.alVal.nArea, 'dia', 'dias')} o total de admissões ficou fora do padrão e, em ${alPl(alNf, 'caso', 'casos')}, uma freguesia de Amadora ou Sintra num determinado dia (${alPl(this.alVal.nFr, 'freguesia analisada', 'freguesias analisadas')}, com pelo menos ${AL_MINF} admissões por dia).` : `Nenhum dia ficou fora do padrão com os filtros atuais, nem para o total nem para as ${alPl(this.alVal.nFr, 'freguesia analisada', 'freguesias analisadas')}.`)
       + ` O normal é a média dos outros dias com o mesmo dia da semana no período (por exemplo, as outras segundas-feiras), tendo em conta a variação habitual; o último dia fica de fora por estar incompleto. Com ${NF.format(this.alVal.nComp)} comparações, alguns desvios acontecem por acaso. Segue os filtros de origem, local e prioridades, mas não a janela.`;
+    // marcas na timeline: dias fora do padrão da área e, com uma freguesia escolhida, os dessa freguesia; clicar leva a janela a esse dia
+    const sgnP = r => `${r > 0 ? '+' : r < 0 ? '−' : ''}${Math.abs(r)}%`;
+    const goDay = (i, d) => set({ end: i, win: 1, sel: d === undefined ? st.sel : d, playing: false });
+    const evMarks = alF.filter(x => !x.d || x.d === st.sel).map(x => { const up = x.z > 0, sev = x.z >= 3 ? 2 : up ? 1 : 0, f = x.d ? alFm.get(x.d) : null, r = x.m > 0 ? Math.round((x.v / x.m - 1) * 100) : null;
+      return { pct: ((x.i + 0.5) / N * 100).toFixed(2), d: up ? 'M6,1.2L10.8,9.8H1.2Z' : 'M1.2,1.2H10.8L6,9.8Z', fill: sev === 2 ? ATT : '#f3f2f2', stroke: sev ? ATT : '#7a7676',
+        t: `${fdy(U.days[x.i])} · ${f ? nice(f.n) : 'Toda a área'}: ${NF.format(x.v)} admissões, normal ${NF.format(Math.round(x.m))}` + (r == null ? '' : ` (${sgnP(r)})`) + ` · ${['abaixo', 'acima', 'muito acima'][sev]}`,
+        pick: () => goDay(x.i, x.d || st.sel) }; });
+    const evNote = evMarks.length ? `${alPl(evMarks.length, 'dia marcado', 'dias marcados')} ${selF ? `(toda a área e ${nice(selF.n)})` : '(toda a área)'} · clique numa marca para ir a esse dia` : (selF ? `Sem dias fora do padrão para toda a área nem para ${nice(selF.n)}.` : 'Sem dias fora do padrão com os filtros atuais.');
+
+    // gráficos sincronizados com a timeline: mesmo eixo de dias, janela sombreada, cursor no último dia da janela
+    const totD = new Float64Array(N), urgD = new Float64Array(N), selD = new Float64Array(N);
+    for (let j = 0; j < R.length; j += 6) { if ((li >= 0 && R[j + 2] !== li) || (og.length && !og.includes(R[j + 4]))) continue;
+      const i = R[j], c = R[j + 5]; totD[i] += c; if (R[j + 3] <= 2) urgD[i] += c;
+      if (st.sel && (!sp || sp.includes(R[j + 3])) && U.pd[R[j + 1]] === st.sel) selD[i] += c; }
+    const expD = daily.map((v, i) => { let S = 0, n = 0; for (let k2 = i % 7; k2 < alL; k2 += 7) if (k2 !== i) { S += daily[k2]; n++; } return n ? S / n : NaN; });
+    const CH = 72, PAD = 5, W = N * BW, cxOf = i => i * BW + BW / 2;
+    const yOf = (v, lo, hi) => (CH - PAD - (v - lo) / ((hi - lo) || 1) * (CH - 2 * PAD)).toFixed(1);
+    const lineOf = (s, lo, hi) => { let p = '', pen = false; for (let i = 0; i < N; i++) { const v = s[i]; if (!isFinite(v)) { pen = false; continue; } p += `${pen ? 'L' : 'M'}${cxOf(i)},${yOf(v, lo, hi)}`; pen = true; } return p; };
+    const areaOf = (s, lo, hi) => { const ln = lineOf(s, lo, hi); return ln ? `${ln}L${cxOf(N - 1)},${CH}L${cxOf(0)},${CH}Z` : ''; };
+    const hitsOf = fmt => U.days.map((d, i) => ({ x: i * BW, w: BW, t: `${fdy(d)} · ${fmt(i)}`, pick: () => goDay(i) }));
+    const winBand = st.win ? { wx: i0 * BW, ww: nD * BW, cx: cxOf(i1), cOp: 0.7 } : { wx: 0, ww: 0, cx: -10, cOp: 0 };
+    const nowIdx = st.win ? i1 : null, atNow = (f, s) => nowIdx == null ? s : f(nowIdx);
+    const pU = Array.from(totD, (t, i) => t ? urgD[i] / t : NaN);
+    // escala pelos percentis 3–97 (dias como 1 de janeiro, quase sem triagem, não esmagam a linha); os extremos ficam encostados à margem
+    const pUv = pU.filter(isFinite).sort((x, y) => x - y), pq = q => pUv[Math.min(pUv.length - 1, Math.floor(pUv.length * q))] || 0;
+    const pLo = Math.max(0, Math.floor(pq(0.03) * 20) / 20), pHi = Math.min(1, Math.ceil(pq(0.97) * 20) / 20) || 1;
+    const pUc = pU.map(v => isFinite(v) ? Math.min(pHi, Math.max(pLo, v)) : v);
+    const pAll = sum(urgD) / (sum(totD) || 1);
+    const devD = daily.map((v, i) => i < alL && expD[i] > 0 ? v / expD[i] - 1 : NaN), devAbs = Math.max(0.1, ...devD.filter(isFinite).map(Math.abs));
+    const y0 = CH / 2, bh = v => Math.abs(v) / devAbs * (CH / 2 - PAD);
+    let pos = '', neg = ''; devD.forEach((v, i) => { if (!isFinite(v) || !v) return; const h = bh(v).toFixed(1), x = i * BW + 1;
+      if (v > 0) pos += `M${x},${(y0 - bh(v)).toFixed(1)}h${BW - 2}v${h}h-${BW - 2}Z`; else neg += `M${x},${y0}h${BW - 2}v${h}h-${BW - 2}Z`; });
+    const devTxt = i => isFinite(devD[i]) ? `${NF.format(daily[i])} admissões, normal ${NF.format(Math.round(expD[i]))} (${sgnP(Math.round(devD[i] * 100))})` : `${NF.format(daily[i])} admissões (dia incompleto)`;
+    const ma7 = Array.from(daily, (v, i) => i < 6 ? NaN : sum(daily.slice(i - 6, i + 1)) / 7);
+    const third = selF ? { s: selD, title: `Admissões/dia · ${nice(selF.n)}`, fmt: i => `${NF.format(selD[i])} admissões de ${nice(selF.n)}`, sub: sp ? `só ${selNames}` : 'todas as prioridades' }
+      : { s: ma7, title: 'Média de 7 dias', fmt: i => isFinite(ma7[i]) ? `média de 7 dias: ${NF.format(Math.round(ma7[i]))}` : 'sem 7 dias anteriores', sub: 'admissões por dia' };
+    const tMax = Math.max(1, ...Array.from(third.s).filter(isFinite)) * 1.05, tLo = selF ? 0 : Math.floor(Math.min(...ma7.filter(isFinite)) * 0.95);
+    const syncCharts = [
+      { title: 'Urgentes (V+L+A)', color: '#ef8a22', line: lineOf(pUc, pLo, pHi), area: '', ry: yOf(pAll, pLo, pHi), pos: '', neg: '', posFill: ATT,
+        now: atNow(i => pc(pU[i], 1), `média ${pc(pAll, 1)}`), lo: `${pc(pLo)} – ${pc(pHi)} · linha: média do período`, hi: 'segue origem e local',
+        hits: hitsOf(i => `${pc(pU[i], 1)} urgentes · ${NF.format(urgD[i])} de ${NF.format(totD[i])}`) },
+      { title: 'Desvio face ao normal', color: '#201e1d', line: '', area: '', ry: y0, pos, neg, posFill: ATT,
+        now: atNow(i => isFinite(devD[i]) ? sgnP(Math.round(devD[i] * 100)) : '—', `±${Math.round(devAbs * 100)}% no máximo`), lo: 'normal: média do mesmo dia da semana', hi: `escala ±${Math.round(devAbs * 100)}%`,
+        hits: hitsOf(devTxt) },
+      { title: third.title, color: '#0088b0', line: lineOf(third.s, tLo, tMax), area: selF ? areaOf(third.s, tLo, tMax) : '', ry: -10, pos: '', neg: '', posFill: ATT,
+        now: atNow(i => isFinite(third.s[i]) ? NF.format(Math.round(third.s[i])) : '—', ''), lo: third.sub, hi: `máx. ${NF.format(Math.round(tMax / 1.05))}`,
+        hits: hitsOf(third.fmt) }
+    ].map(c => ({ ...c, box: `0 0 ${W} ${CH}`, w: W, ...winBand }));
+
     // desvios dos indicadores do topo face ao período completo (só quando há janela)
     const sgn = r => r > 0 ? '+' : r < 0 ? '−' : '';
     const kD = ['', '', ''], kC = [NEUT, NEUT, NEUT];
@@ -916,7 +992,7 @@ class Component extends DCLogic {
       togglePlay: () => { if (st.playing) return set({ playing: false }); const w = st.win || 7; set({ win: w, end: end >= N - 1 ? w - 1 : end, playing: true }); },
       wins: [[1, '1 dia'], [7, '7 dias'], [14, '14'], [30, '30'], [0, 'Tudo']].map(([w, label]) => ({ label, on: st.win === w, pick: () => set({ win: w, playing: w ? st.playing : false, end: Math.max(end, w ? w - 1 : end) }) })),
       speeds: [[800, 'Lenta'], [450, 'Normal'], [180, 'Rápida']].map(([v, label]) => ({ label, on: st.speed === v, pick: () => set({ speed: v }) })),
-      tlBox: `0 0 ${N * BW} 84`, bars, months, maxIdx: N - 1, sliderVal: st.win ? end : N - 1, sliderOff: !st.win,
+      tlBox: `0 0 ${N * BW} 84`, bars, months, evMarks, evNote, syncCharts, maxIdx: N - 1, sliderVal: st.win ? end : N - 1, sliderOff: !st.win,
       onSlide: e => set({ end: Math.max(+e.target.value, st.win - 1), playing: false }),
       tlNote: st.win ? 'Arraste o cursor ou clique num dia para mover a janela; Reproduzir anima o mapa dia a dia. Com a escala fixa, as cores comparam-se entre janelas.' : 'A ver o período completo. Escolha uma janela para percorrer os dias.',
       panelTitle: selF ? nice(selF.n) : 'Toda a área de influência', panelSub: selF ? `${selF.c} · ${NF.format(curTot)} admissões` + (this.pop[selF.d] ? ` · ${NF.format(this.pop[selF.d][0])} residentes` : "") : `${NF.format(areaTot)} admissões${locName}`,
