@@ -17,12 +17,12 @@ a{color:var(--color-accent-700)}a:hover{color:var(--color-accent-800)}
 input[type=range]{accent-color:#0088b0}
 </style>
 </helmet>
-<div class="urg-anim" style="max-width:1560px;margin:0 auto;padding:var(--space-6) 32px 64px;font-family:var(--font-body);color:var(--color-text);box-sizing:border-box">
+<div class="urg-anim" style="font-variant-numeric:tabular-nums;max-width:1560px;margin:0 auto;padding:var(--space-6) 32px 64px;font-family:var(--font-body);color:var(--color-text);box-sizing:border-box">
 
   <div style="position:sticky;top:0;z-index:100;height:0">
     <nav id="ctxbar" aria-label="Contexto e secções" style="position:absolute;left:0;right:0;top:0;box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:2px 24px;padding:6px 0;background:#f3f2f2;border-bottom:1px solid rgba(32,30,29,.25);font-size:13px;opacity:{{ cxOp }};visibility:{{ cxVis }};transition:opacity .15s">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px 0;min-width:0;flex:1 1 420px">
-        <sc-for list="{{ cxParts }}" as="p" hint-placeholder-count="3"><span style="white-space:pre-wrap;font-weight:{{ p.fw }}">{{ p.sep }}{{ p.txt }}</span></sc-for>
+        <sc-for list="{{ cxParts }}" as="p" hint-placeholder-count="3"><span class="cx-part" style="white-space:pre-wrap;font-weight:{{ p.fw }}">{{ p.sep }}{{ p.txt }}</span></sc-for>
         <sc-if value="{{ cxHasSel }}" hint-placeholder-val="{{ false }}"><span style="white-space:pre-wrap"> · {{ cxSelName }}</span><button class="btn btn-ghost" style="padding:0 6px;font-size:15px;line-height:1.2" onClick="{{ cxClear }}" aria-label="Limpar freguesia selecionada" title="Limpar freguesia selecionada">×</button></sc-if>
         <button class="btn btn-ghost" style="padding:2px 8px;margin-left:8px;font-size:13px" onClick="{{ cxFilters }}">Alterar filtros</button>
       </div>
@@ -37,11 +37,11 @@ input[type=range]{accent-color:#0088b0}
     <div style="height:1px;background:var(--color-text)"></div>
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:10px 0 8px;flex-wrap:wrap">
       <span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase">ULS Amadora/Sintra · Serviço de Urgência</span>
-      <span style="font-size:13px;font-style:italic">Origem e prioridade das admissões · 1.º trimestre de 2026</span>
+      <span style="font-size:13px">Origem e prioridade das admissões · 1.º trimestre de 2026</span>
     </div>
     <div style="height:1px;background:var(--color-text)"></div>
-    <div style="display:flex;gap:28px;padding:7px 0;font-size:12px;flex-wrap:wrap">
-      <span>31 dez 2025 – 31 mar 2026</span><span>{{ totalLabel }} admissões</span><span>5 locais de entrada</span><span>Triagem de Manchester</span><span style="margin-left:auto;font-style:italic">Fonte: BD_Urgencia_Admissoes.csv</span>
+    <div style="display:flex;gap:28px;padding:7px 0;font-size:13px;flex-wrap:wrap">
+      <span>31 dez 2025 – 31 mar 2026</span><span>{{ totalLabel }} admissões</span><span>5 locais de entrada</span><span>Triagem de Manchester</span><span style="margin-left:auto">Fonte: BD_Urgencia_Admissoes.csv</span>
     </div>
     <div style="height:1px;background:var(--color-text)"></div>
   </header>
@@ -50,28 +50,28 @@ input[type=range]{accent-color:#0088b0}
     <div style="flex:1 1 380px;min-width:0">
       <h1 style="font-size:clamp(30px,3.2vw,42px);line-height:1.08;letter-spacing:-.015em;margin:0;max-width:15em;text-wrap:balance">De onde vêm os doentes da urgência, e com que prioridade chegam</h1>
     </div>
-    <div style="flex:1 1 520px;max-width:680px;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:18px 24px">
+    <div style="flex:1 1 min(520px,100%);min-width:0;max-width:680px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr));gap:18px 24px">
       <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
         <div style="display:flex;flex-direction:column;gap:2px">
-          <span style="font-size:12px;color:var(--color-neutral-700)">{{ k.label }}</span>
+          <span style="font-size:13px;color:var(--color-neutral-700)">{{ k.label }}</span>
           <span style="font-size:34px;line-height:1.05;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em">{{ k.value }}</span>
-          <span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ k.sub }}</span>
-          <span style="font-size:12px;font-weight:600;color:{{ k.dc }}">{{ k.delta }}</span>
+          <span style="font-size:13px;color:var(--color-neutral-700)">{{ k.sub }}</span>
+          <span style="font-size:13px;font-weight:600;color:{{ k.dc }}">{{ k.delta }}</span>
         </div>
       </sc-for>
-      <span style="grid-column:1/-1;font-size:12px;color:var(--color-neutral-700)">{{ kpiFoot }}</span>
+      <span style="grid-column:1/-1;font-size:13px;color:var(--color-neutral-700)">{{ kpiFoot }}</span>
     </div>
   </section>
 
   <section aria-label="Em destaque" style="padding:0 0 40px">
     <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap">
-      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Em destaque</div>
+      <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Em destaque</div>
       <span style="font-size:13px;color:var(--color-neutral-700)">{{ hlWhen }}</span>
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px">
       <sc-for list="{{ hl }}" as="h" hint-placeholder-count="4">
         <button onClick="{{ h.go }}" style="text-align:left;display:flex;flex-direction:column;gap:6px;padding:14px 16px 12px;border:0;border-left:4px solid {{ h.c }};background:var(--color-neutral-100);border-radius:var(--radius-md);font:inherit;color:var(--color-text);cursor:pointer">
-          <span style="font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--color-neutral-700)">{{ h.k }}</span>
+          <span style="font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--color-neutral-700)">{{ h.k }}</span>
           <span style="font-size:21px;line-height:1.2;font-weight:600;color:{{ h.bc }}">{{ h.big }}</span>
           <span style="font-size:13.5px;line-height:1.4;color:var(--color-neutral-800)">{{ h.sm }}</span>
           <span style="font-size:13px;color:var(--color-accent-700);margin-top:4px">{{ h.cta }} →</span>
@@ -80,18 +80,18 @@ input[type=range]{accent-color:#0088b0}
     </div>
   </section>
 
-  <div data-grp="onde" role="group" aria-label="Onde: De onde vêm os doentes?" style="padding-top:40px;margin-bottom:0px">
-    <div style="border-top:1px solid var(--color-neutral-300);padding-top:10px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
-      <span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Onde</span>
-      <span style="font-size:15px;font-style:italic;color:var(--color-neutral-700)">De onde vêm os doentes?</span>
+  <div data-grp="onde" role="group" aria-label="Onde: De onde vêm os doentes?" style="padding-top:64px;margin-bottom:0px">
+    <div style="border-top:2px solid var(--color-neutral-700);padding-top:12px;display:flex;align-items:baseline;gap:6px 16px;flex-wrap:wrap">
+      <span style="font-size:15px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--color-accent-700)">Onde</span>
+      <span style="font-size:20px;line-height:1.25;font-weight:500;color:var(--color-neutral-800)">De onde vêm os doentes?</span>
     </div>
   </div>
 
   <section style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start">
 
-    <aside style="flex:0 0 310px;min-width:0;display:flex;flex-direction:column;gap:34px">
+    <aside class="opt-aside" style="flex:0 0 310px;min-width:0;display:flex;flex-direction:column;gap:34px">
       <div style="display:flex;flex-direction:column;gap:16px">
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Opções do mapa</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Opções do mapa</div>
         <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Medir</span>
             <div class="seg"><sc-for list="{{ metrics }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="metrica" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
@@ -101,7 +101,7 @@ input[type=range]{accent-color:#0088b0}
             <div class="seg"><sc-for list="{{ zooms }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="zoom" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
           </div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          <span style="font-size:13px;color:var(--color-neutral-700)">Origem <span style="font-style:italic">· pode escolher várias</span></span>
+          <span style="font-size:13px;color:var(--color-neutral-700)">Origem <span style="">· pode escolher várias</span></span>
           <div class="seg" style="align-self:flex-start"><sc-for list="{{ origens }}" as="o" hint-placeholder-count="4"><label class="seg-opt"><input type="checkbox" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
         </div>
         <button onClick="{{ moreToggle }}" aria-expanded="{{ moreOpen }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:6px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ moreRot }}deg);transition:transform .2s">▸</span>{{ moreLabel }}</button>
@@ -123,15 +123,15 @@ input[type=range]{accent-color:#0088b0}
                 <i style="display:block;width:14px;height:14px;border-radius:2px;background:{{ l.sw }};box-shadow:inset 0 0 0 1px rgba(32,30,29,.25)"></i>
                 <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
                 <input type="range" min="0" max="100" step="5" value="{{ l.pct }}" disabled="{{ l.off }}" onChange="{{ l.slide }}" aria-label="{{ l.ariaOp }}" style="width:84px;margin:0">
-                <span style="text-align:right;font-variant-numeric:tabular-nums;font-size:12px;color:var(--color-neutral-700)">{{ l.pctTxt }}</span>
+                <span style="text-align:right;font-variant-numeric:tabular-nums;font-size:13px;color:var(--color-neutral-700)">{{ l.pctTxt }}</span>
               </div>
             </sc-for>
-            <span style="font-size:11.5px;font-style:italic;color:var(--color-neutral-700)">{{ layNote }}</span>
+            <span style="font-size:12.5px;color:var(--color-neutral-700)">{{ layNote }}</span>
           </div>
         <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Comparar com</span>
             <div class="seg" style="flex-wrap:wrap"><sc-for list="{{ cmpOpts }}" as="o" hint-placeholder-count="4"><label class="seg-opt" style="opacity:{{ o.op }}"><input type="radio" name="comparar" checked="{{ o.on }}" disabled="{{ o.off }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
-            <span style="font-size:11.5px;font-style:italic;color:var(--color-neutral-700)">{{ cmpNote }}</span>
+            <span style="font-size:12.5px;color:var(--color-neutral-700)">{{ cmpNote }}</span>
           </div>
         <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Escala de cor</span>
@@ -149,10 +149,10 @@ input[type=range]{accent-color:#0088b0}
 
       <div style="display:flex;flex-direction:column;gap:14px">
         <div>
-          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Triagem de Manchester</div>
+          <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Triagem de Manchester</div>
           <h2 style="font-size:26px;line-height:1.15;margin:0">{{ panelTitle }}</h2>
           <div style="display:flex;gap:10px;align-items:baseline;margin-top:4px;font-size:13px;flex-wrap:wrap">
-            <span style="font-style:italic;color:var(--color-neutral-700)">{{ panelSub }}</span>
+            <span style="color:var(--color-neutral-700)">{{ panelSub }}</span>
             <sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}"><button class="btn btn-ghost" style="padding:2px 5px;font-size:13px" onClick="{{ clearSel }}">Ver toda a área</button></sc-if>
           </div>
           <p style="margin:8px 0 0;font-size:16px;line-height:1.4;color:var(--color-text)">{{ cl.tri }}</p>
@@ -172,7 +172,7 @@ input[type=range]{accent-color:#0088b0}
             <button onClick="{{ p.toggle }}" style="display:grid;grid-template-columns:14px minmax(0,1fr) 58px 50px;align-items:center;gap:10px;padding:7px 6px;margin:0 -6px;border:0;background:{{ p.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md);opacity:{{ p.op }}" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
               <i style="display:block;width:12px;height:12px;border-radius:50%;background:{{ p.c }};box-shadow:inset 0 0 0 1px rgba(32,30,29,.25)"></i>
               <span style="display:flex;flex-direction:column;gap:3px;min-width:0">
-                <span>{{ p.name }} <span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ p.hint }}</span></span>
+                <span>{{ p.name }} <span style="font-size:13px;color:var(--color-neutral-700)">{{ p.hint }}</span></span>
                 <span style="display:block;height:3px;background:var(--color-neutral-200)"><i style="display:block;height:3px;width:{{ p.w }}%;background:{{ p.c }}"></i></span>
               </span>
               <span style="text-align:right;font-variant-numeric:tabular-nums">{{ p.n }}</span>
@@ -198,12 +198,12 @@ input[type=range]{accent-color:#0088b0}
     <div style="flex:1 1 420px;display:flex;flex-direction:column;gap:14px;min-width:0">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
         <div>
-          <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Mapa · {{ rangeLabel }}</div>
+          <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Mapa · {{ rangeLabel }}</div>
           <h2 style="font-size:28px;line-height:1.15;margin:0">{{ mapTitle }}</h2>
           <p style="margin:8px 0 0;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.map }}</p>
         </div>
         <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span role="status" aria-live="polite" style="font-size:12.5px;font-style:italic;color:var(--color-neutral-700)">{{ shareMsg }}</span>
+          <span role="status" aria-live="polite" style="font-size:13px;color:var(--color-neutral-700)">{{ shareMsg }}</span>
           <button class="btn btn-secondary" style="font-size:13px;padding:4px 10px" onClick="{{ copyLink }}" title="Copia uma ligação que abre o dashboard com esta janela, filtros e vista">🔗 Copiar ligação</button>
           <button class="btn btn-secondary" style="font-size:13px;padding:4px 10px" onClick="{{ exportPng }}" title="Guarda o mapa, com título e legenda, numa imagem PNG">↓ Imagem PNG</button>
         </div>
@@ -268,7 +268,7 @@ input[type=range]{accent-color:#0088b0}
               <rect x="{{ h.rx }}" y="{{ h.ry }}" width="{{ h.s }}" height="{{ h.s }}" fill="#201e1d" stroke="#f3f2f2" stroke-width="{{ h.sw }}"><title>{{ h.t }}</title></rect>
             </sc-for>
           </g>
-          <g pointer-events="none" font-family="Source Serif 4, serif" font-style="italic" text-anchor="middle" fill="#201e1d">
+          <g pointer-events="none" font-family="Source Serif 4, serif" text-anchor="middle" fill="#201e1d">
             <sc-for list="{{ conLabels }}" as="c" hint-placeholder-count="0"><text x="{{ c.x }}" y="{{ c.y }}" font-size="{{ labelSize }}" stroke="#f3f2f2" stroke-width="{{ labelHalo }}" paint-order="stroke" stroke-linejoin="round">{{ c.n }}</text></sc-for>
           </g>
           <g>
@@ -289,34 +289,34 @@ input[type=range]{accent-color:#0088b0}
         {{ labelLayer }}
         {{ hospLayer }}
         <div ref="{{ map3dRef }}" role="img" aria-label="Mapa 3D das freguesias; os mesmos valores estão na lista de freguesias" style="position:absolute;inset:0;display:{{ d3disp }};opacity:{{ d3op }};pointer-events:{{ d3pe }};transition:opacity {{ d3fadeMs }}ms ease;background:#ecebea"></div>
-        <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><div role="status" aria-live="polite" style="position:absolute;left:58px;top:12px;max-width:max(160px,min(300px,calc(100% - 330px)));z-index:2;font-size:13px;font-style:italic;background:var(--color-bg);padding:6px 12px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</div></sc-if>
+        <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><div role="status" aria-live="polite" style="position:absolute;left:58px;top:12px;max-width:max(160px,min(300px,calc(100% - 330px)));z-index:2;font-size:13px;background:var(--color-bg);padding:6px 12px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</div></sc-if>
         <div style="position:absolute;right:12px;bottom:26px;display:flex;align-items:center;gap:8px">
           <div class="seg" style="background:var(--color-bg);box-shadow:var(--shadow-sm)"><sc-for list="{{ dims }}" as="o" hint-placeholder-count="2"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="dim" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
         </div>
         <div style="position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:4px">
           <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:20px;width:34px;height:34px" onClick="{{ zoomIn }}" aria-label="Aproximar" title="Aproximar">+</button>
           <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:20px;width:34px;height:34px" onClick="{{ zoomOut }}" aria-label="Afastar" title="Afastar">−</button>
-          <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:12px;width:34px;height:34px" onClick="{{ zoomReset }}" aria-label="Repor vista" title="Repor vista">⟲</button>
+          <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:13px;width:34px;height:34px" onClick="{{ zoomReset }}" aria-label="Repor vista" title="Repor vista">⟲</button>
         </div>
         <div style="position:absolute;right:12px;top:12px;width:min(250px,38%);background:color-mix(in srgb,var(--color-bg) 94%,transparent);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;pointer-events:none">
           <div style="font-size:clamp(26px,3vw,38px);line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent-700)">{{ ov.n }}</div>
-          <div style="font-size:12px;font-style:italic;color:var(--color-neutral-700);margin:4px 0 12px">{{ ov.sub }}</div>
-          <div style="font-size:12px;font-weight:600;margin-bottom:4px">{{ ov.topLabel }}</div>
+          <div style="font-size:13px;color:var(--color-neutral-700);margin:4px 0 12px">{{ ov.sub }}</div>
+          <div style="font-size:13px;font-weight:600;margin-bottom:4px">{{ ov.topLabel }}</div>
           <sc-for list="{{ ov.top }}" as="r" hint-placeholder-count="6">
-            <div style="display:flex;justify-content:space-between;gap:10px;font-size:12.5px;line-height:1.55"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ r.n }}</span></div>
+            <div style="display:flex;justify-content:space-between;gap:10px;font-size:13px;line-height:1.55"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ r.n }}</span></div>
           </sc-for>
         </div>
 
         <sc-if value="{{ hasUni }}" hint-placeholder-val="{{ false }}">
-          <div class="urg-fade" style="position:absolute;right:12px;top:12px;width:min(300px,46%);max-height:calc(100% - 80px);overflow:auto;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;font-size:12.5px">
+          <div class="urg-fade" style="position:absolute;right:12px;top:12px;width:min(300px,46%);max-height:calc(100% - 80px);overflow:auto;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;font-size:13px">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-              <div style="min-width:0"><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Unidade de saúde · período completo</div><div style="font-weight:600;font-size:16px;line-height:1.25;margin-top:2px">{{ uniCard.title }}</div><div style="font-style:italic;color:var(--color-neutral-700);margin-top:2px">{{ uniCard.sub }}</div></div>
+              <div style="min-width:0"><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Unidade de saúde · período completo</div><div style="font-weight:600;font-size:16px;line-height:1.25;margin-top:2px">{{ uniCard.title }}</div><div style="color:var(--color-neutral-700);margin-top:2px">{{ uniCard.sub }}</div></div>
               <button class="btn btn-ghost" style="padding:0 6px;font-size:18px;line-height:1.1" onClick="{{ uniCard.close }}" aria-label="Fechar unidade" title="Fechar">×</button>
             </div>
             <sc-for list="{{ uniCard.units }}" as="r" hint-placeholder-count="1">
               <div style="border-top:1px solid rgba(32,30,29,.15);margin-top:10px;padding-top:10px;display:flex;flex-direction:column;gap:3px">
                 <div style="display:flex;justify-content:space-between;gap:10px"><span style="font-weight:600">{{ r.name }}</span><span style="font-variant-numeric:tabular-nums;font-weight:600">{{ r.n }}</span></div>
-                <div style="font-style:italic;color:var(--color-neutral-700)">{{ r.meta }}</div>
+                <div style="color:var(--color-neutral-700)">{{ r.meta }}</div>
                 <div style="display:flex;height:8px;margin:4px 0 2px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></div>
                 <div style="display:flex;justify-content:space-between;gap:10px"><span>Urgentes (V+L+A)</span><span style="font-variant-numeric:tabular-nums">{{ r.ur }}</span></div>
                 <div style="display:flex;justify-content:space-between;gap:10px"><span>Não urgentes (verde+azul)</span><span style="font-variant-numeric:tabular-nums">{{ r.nu }}</span></div>
@@ -324,14 +324,14 @@ input[type=range]{accent-color:#0088b0}
                 <div style="color:var(--color-neutral-700)">{{ r.loc }}</div>
               </div>
             </sc-for>
-            <div style="margin-top:10px;font-size:11px;font-style:italic;color:var(--color-neutral-700)">{{ uniCard.src }}</div>
+            <div style="margin-top:10px;font-size:12px;color:var(--color-neutral-700)">{{ uniCard.src }}</div>
           </div>
         </sc-if>
 
         <sc-if value="{{ tip.show }}" hint-placeholder-val="{{ false }}">
           <div style="position:absolute;left:{{ tip.x }}px;top:{{ tip.y }}px;transform:translate(14px,-50%);pointer-events:none;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:10px 12px;min-width:190px;max-width:260px;font-size:13px;line-height:1.35">
             <div style="font-weight:600;font-size:15px;margin-bottom:2px">{{ tip.name }}</div>
-            <div style="font-style:italic;color:var(--color-neutral-700);margin-bottom:6px">{{ tip.con }}</div>
+            <div style="color:var(--color-neutral-700);margin-bottom:6px">{{ tip.con }}</div>
             <div style="display:flex;justify-content:space-between;gap:12px"><span>Admissões</span><span style="font-variant-numeric:tabular-nums">{{ tip.n }}</span></div>
             <div style="display:flex;justify-content:space-between;gap:12px"><span>{{ tip.pctLabel }}</span><span style="font-variant-numeric:tabular-nums">{{ tip.pct }}</span></div>
             <sc-for list="{{ tip.extra }}" as="x" hint-placeholder-count="0"><div style="display:flex;justify-content:space-between;gap:12px"><span>{{ x.k }}</span><span style="font-variant-numeric:tabular-nums">{{ x.v }}</span></div></sc-for>
@@ -341,14 +341,14 @@ input[type=range]{accent-color:#0088b0}
           </div>
         </sc-if>
 
-        <div style="position:absolute;left:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;background:color-mix(in srgb,var(--color-bg) 94%,transparent);box-shadow:var(--shadow-sm);padding:10px 12px;border-radius:var(--radius-md);font-size:12px">
+        <div style="position:absolute;left:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;background:color-mix(in srgb,var(--color-bg) 94%,transparent);box-shadow:var(--shadow-sm);padding:10px 12px;border-radius:var(--radius-md);font-size:13px">
           <span>{{ legendTitle }}</span>
           <div style="display:flex;align-items:center;gap:8px">
             <span style="font-variant-numeric:tabular-nums">{{ legendLo }}</span>
             <div style="display:flex;gap:2px"><sc-for list="{{ legend }}" as="l" hint-placeholder-count="7"><i style="display:block;width:22px;height:10px;background:{{ l.c }}"></i></sc-for></div>
             <span style="font-variant-numeric:tabular-nums">{{ legendHi }}</span>
           </div>
-          <span style="font-style:italic;color:var(--color-neutral-700)">{{ legendNote }}</span>
+          <span style="color:var(--color-neutral-700)">{{ legendNote }}</span>
           <sc-if value="{{ showCtxLeg }}" hint-placeholder-val="{{ false }}">
             <div style="border-top:1px solid rgba(32,30,29,.15);padding-top:6px;display:flex;flex-direction:column;gap:4px">
               <span>{{ ctxLeg.title }}</span>
@@ -388,13 +388,13 @@ input[type=range]{accent-color:#0088b0}
           </sc-for>
         </svg>
         <div style="position:relative;height:0">
-          <sc-for list="{{ months }}" as="m" hint-placeholder-count="0"><span style="position:absolute;left:{{ m.pct }}%;top:-104px;font-size:11px;font-style:italic;padding-left:4px;color:var(--color-neutral-700)">{{ m.label }}</span></sc-for>
+          <sc-for list="{{ months }}" as="m" hint-placeholder-count="0"><span style="position:absolute;left:{{ m.pct }}%;top:-104px;font-size:12px;padding-left:4px;color:var(--color-neutral-700)">{{ m.label }}</span></sc-for>
         </div>
         <div style="position:relative;height:14px;margin-top:-6px" aria-label="Dias fora do padrão">
           <sc-for list="{{ evMarks }}" as="e" hint-placeholder-count="0"><button onClick="{{ e.pick }}" title="{{ e.t }}" aria-label="{{ e.t }}" style="position:absolute;left:{{ e.pct }}%;top:0;transform:translateX(-50%);width:14px;height:14px;padding:0;border:0;background:transparent;cursor:pointer;line-height:0;outline-offset:1px"><svg width="12" height="11" viewBox="0 0 12 11" style="display:block;margin:auto"><path d="{{ e.d }}" fill="{{ e.fill }}" stroke="{{ e.stroke }}" stroke-width="1.3" stroke-linejoin="round"></path></svg></button></sc-for>
         </div>
         <input type="range" min="0" max="{{ maxIdx }}" step="1" value="{{ sliderVal }}" disabled="{{ sliderOff }}" onChange="{{ onSlide }}" style="width:100%;margin:0" aria-label="Último dia da janela">
-        <p style="margin:0;font-size:12.5px;color:var(--color-neutral-700);display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center">
+        <p style="margin:0;font-size:13px;color:var(--color-neutral-700);display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center">
           <span style="display:inline-flex;align-items:center;gap:5px"><svg width="12" height="11" viewBox="0 0 12 11"><path d="M6,1.2L10.8,9.8H1.2Z" fill="#c8501e" stroke="#c8501e" stroke-width="1.3" stroke-linejoin="round"></path></svg>muito acima do normal</span>
           <span style="display:inline-flex;align-items:center;gap:5px"><svg width="12" height="11" viewBox="0 0 12 11"><path d="M6,1.2L10.8,9.8H1.2Z" fill="#f3f2f2" stroke="#c8501e" stroke-width="1.3" stroke-linejoin="round"></path></svg>acima</span>
           <span style="display:inline-flex;align-items:center;gap:5px"><svg width="12" height="11" viewBox="0 0 12 11"><path d="M1.2,1.2H10.8L6,9.8Z" fill="#f3f2f2" stroke="#7a7676" stroke-width="1.3" stroke-linejoin="round"></path></svg>abaixo</span>
@@ -420,7 +420,7 @@ input[type=range]{accent-color:#0088b0}
                 <line x1="{{ c.cx }}" x2="{{ c.cx }}" y1="0" y2="72" stroke="#201e1d" stroke-opacity="{{ c.cOp }}" stroke-width="1.2" vector-effect="non-scaling-stroke"></line>
                 <sc-for list="{{ c.hits }}" as="h" hint-placeholder-count="0"><rect x="{{ h.x }}" y="0" width="{{ h.w }}" height="72" fill="transparent" style="cursor:pointer" onClick="{{ h.pick }}"><title>{{ h.t }}</title></rect></sc-for>
               </svg>
-              <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;font-style:italic;color:var(--color-neutral-700)"><span>{{ c.lo }}</span><span>{{ c.hi }}</span></div>
+              <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--color-neutral-700)"><span>{{ c.lo }}</span><span>{{ c.hi }}</span></div>
             </div>
           </sc-for>
         </div>
@@ -428,16 +428,16 @@ input[type=range]{accent-color:#0088b0}
       <aside aria-label="Eventos-chave" style="flex:1 1 260px;max-width:100%;min-width:0;display:flex;flex-direction:column;gap:8px;padding-top:6px">
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap">
           <h3 style="font-size:18px;margin:0">Eventos-chave</h3>
-          <button class="btn btn-secondary" style="font-size:12.5px;padding:3px 9px;margin-left:auto" onClick="{{ nd.open }}" title="Acrescentar uma nota ao dia da janela">+ Nota</button>
-          <div class="seg"><sc-for list="{{ evOpts }}" as="o" hint-placeholder-count="2"><label class="seg-opt" style="padding:3px 9px;font-size:12.5px"><input type="radio" name="evfiltro" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+          <button class="btn btn-secondary" style="font-size:13px;padding:3px 9px;margin-left:auto" onClick="{{ nd.open }}" title="Acrescentar uma nota ao dia da janela">+ Nota</button>
+          <div class="seg"><sc-for list="{{ evOpts }}" as="o" hint-placeholder-count="2"><label class="seg-opt" style="padding:3px 9px;font-size:13px"><input type="radio" name="evfiltro" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
         </div>
-        <span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ evCount }}</span>
+        <span style="font-size:13px;color:var(--color-neutral-700)">{{ evCount }}</span>
         <sc-if value="{{ nd.show }}" hint-placeholder-val="{{ false }}">
           <div class="urg-fade" style="display:flex;flex-direction:column;gap:6px;padding:10px;background:var(--color-surface);border-radius:var(--radius-md);box-shadow:var(--shadow-sm)">
-            <span style="font-size:12.5px;font-weight:600">Nota para {{ nd.dayLabel }}</span>
+            <span style="font-size:13px;font-weight:600">Nota para {{ nd.dayLabel }}</span>
             <input type="text" value="{{ nd.t }}" onChange="{{ nd.edit }}" maxlength="140" placeholder="Ex.: greve dos transportes, pico de gripe…" aria-label="Texto da nota" style="font:inherit;font-size:13px;padding:6px 8px;border:1px solid rgba(32,30,29,.3);border-radius:2px;background:var(--color-bg);color:var(--color-text)">
-            <sc-if value="{{ nd.hasFr }}" hint-placeholder-val="{{ false }}"><label style="font-size:12.5px;display:flex;gap:6px;align-items:center"><input type="checkbox" checked="{{ nd.fr }}" onChange="{{ nd.toggleFr }}" style="margin:0;accent-color:#0088b0">Só para {{ nd.frName }}</label></sc-if>
-            <div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-ghost" style="font-size:12.5px;padding:3px 9px" onClick="{{ nd.cancel }}">Cancelar</button><button class="btn btn-primary" style="font-size:12.5px;padding:3px 9px" onClick="{{ nd.save }}" disabled="{{ nd.off }}">Guardar nota</button></div>
+            <sc-if value="{{ nd.hasFr }}" hint-placeholder-val="{{ false }}"><label style="font-size:13px;display:flex;gap:6px;align-items:center"><input type="checkbox" checked="{{ nd.fr }}" onChange="{{ nd.toggleFr }}" style="margin:0;accent-color:#0088b0">Só para {{ nd.frName }}</label></sc-if>
+            <div style="display:flex;gap:6px;justify-content:flex-end"><button class="btn btn-ghost" style="font-size:13px;padding:3px 9px" onClick="{{ nd.cancel }}">Cancelar</button><button class="btn btn-primary" style="font-size:13px;padding:3px 9px" onClick="{{ nd.save }}" disabled="{{ nd.off }}">Guardar nota</button></div>
           </div>
         </sc-if>
         <div data-ev-list="1" style="position:relative;display:flex;flex-direction:column;max-height:420px;overflow:auto;border-top:1px solid rgba(32,30,29,.2)">
@@ -446,7 +446,7 @@ input[type=range]{accent-color:#0088b0}
             <button onClick="{{ e.pick }}" title="{{ e.t }}" data-in="{{ e.inw }}" style="display:grid;grid-template-columns:14px 74px minmax(0,1fr) 48px;gap:8px;align-items:center;padding:7px 6px;border:0;border-bottom:1px solid rgba(32,30,29,.1);background:{{ e.bg }};font:inherit;font-size:13px;font-weight:{{ e.fw }};color:var(--color-text);text-align:left;cursor:pointer;box-shadow:inset 3px 0 0 {{ e.bar }}" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
               <svg width="12" height="11" viewBox="0 0 12 11" style="display:block"><path d="{{ e.d }}" fill="{{ e.fill }}" stroke="{{ e.stroke }}" stroke-width="1.3" stroke-linejoin="round"></path></svg>
               <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ e.dt }}</span>
-              <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.name }}</span><span style="font-size:11.5px;font-style:italic;font-weight:400;color:var(--color-neutral-700)">{{ e.sub }}</span></span>
+              <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.name }}</span><span style="font-size:12.5px;font-weight:400;color:var(--color-neutral-700)">{{ e.sub }}</span></span>
               <span style="text-align:right;font-variant-numeric:tabular-nums">{{ e.dev }}</span>
             </button>
             </sc-if>
@@ -455,18 +455,18 @@ input[type=range]{accent-color:#0088b0}
               <button onClick="{{ e.pick }}" title="{{ e.t }}" style="display:grid;grid-template-columns:14px 74px minmax(0,1fr);gap:8px;align-items:center;padding:7px 6px;border:0;background:transparent;font:inherit;font-size:13px;font-weight:{{ e.fw }};color:var(--color-text);text-align:left;cursor:pointer">
                 <svg width="12" height="11" viewBox="0 0 12 11" style="display:block"><path d="{{ e.d }}" fill="{{ e.fill }}" stroke="{{ e.stroke }}" stroke-width="1.3" stroke-linejoin="round"></path></svg>
                 <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ e.dt }}</span>
-                <span style="display:flex;flex-direction:column;min-width:0"><span style="overflow-wrap:anywhere">{{ e.name }}</span><span style="font-size:11.5px;font-style:italic;font-weight:400;color:var(--color-neutral-700)">{{ e.sub }}</span></span>
+                <span style="display:flex;flex-direction:column;min-width:0"><span style="overflow-wrap:anywhere">{{ e.name }}</span><span style="font-size:12.5px;font-weight:400;color:var(--color-neutral-700)">{{ e.sub }}</span></span>
               </button>
               <button class="btn btn-ghost" style="padding:0;font-size:16px;line-height:1" onClick="{{ e.del }}" aria-label="Apagar nota" title="Apagar nota">×</button>
             </div>
             </sc-if>
           </sc-for>
-          <sc-if value="{{ evEmpty }}" hint-placeholder-val="{{ false }}"><p style="margin:10px 0 0;font-size:13px;font-style:italic;color:var(--color-neutral-700)">{{ evEmpty }}</p></sc-if>
+          <sc-if value="{{ evEmpty }}" hint-placeholder-val="{{ false }}"><p style="margin:10px 0 0;font-size:13px;color:var(--color-neutral-700)">{{ evEmpty }}</p></sc-if>
         </div>
-        <div style="display:flex;gap:4px 12px;flex-wrap:wrap;align-items:center;font-size:12px">
-          <button class="btn btn-ghost" style="font-size:12px;padding:2px 6px" onClick="{{ nd.exportAll }}" disabled="{{ nd.noNotes }}">↓ Exportar notas</button>
-          <label class="btn btn-ghost" style="font-size:12px;padding:2px 6px;cursor:pointer">↑ Importar notas<input type="file" accept="application/json,.json" onChange="{{ nd.importFile }}" style="display:none"></label>
-          <span style="font-style:italic;color:var(--color-neutral-700)">{{ nd.msg }}</span>
+        <div style="display:flex;gap:4px 12px;flex-wrap:wrap;align-items:center;font-size:13px">
+          <button class="btn btn-ghost" style="font-size:13px;padding:2px 6px" onClick="{{ nd.exportAll }}" disabled="{{ nd.noNotes }}">↓ Exportar notas</button>
+          <label class="btn btn-ghost" style="font-size:13px;padding:2px 6px;cursor:pointer">↑ Importar notas<input type="file" accept="application/json,.json" onChange="{{ nd.importFile }}" style="display:none"></label>
+          <span style="color:var(--color-neutral-700)">{{ nd.msg }}</span>
         </div>
       </aside>
       </div>
@@ -501,7 +501,7 @@ input[type=range]{accent-color:#0088b0}
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:18px;flex-wrap:wrap">
       <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Freguesias · {{ rangeLabel }}</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Freguesias · {{ rangeLabel }}</div>
         <h2 style="font-size:28px;line-height:1.15;margin:0">{{ rankTitle }}</h2>
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -513,8 +513,8 @@ input[type=range]{accent-color:#0088b0}
       <sc-for list="{{ rank }}" as="r" hint-placeholder-count="12">
         <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
           <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
-          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
-          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:13px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.n }}</span>
           <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></span>
           <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
         </button>
@@ -537,7 +537,7 @@ input[type=range]{accent-color:#0088b0}
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
       <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Determinantes sociais · Amadora e Sintra · período completo</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Determinantes sociais · Amadora e Sintra · período completo</div>
         <h2 style="font-size:28px;line-height:1.15;margin:0">Urgência e contexto social</h2>
       </div>
       <div style="display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap">
@@ -548,27 +548,27 @@ input[type=range]{accent-color:#0088b0}
     <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.soc }}</p>
     <div style="display:flex;flex-wrap:wrap;gap:24px 56px;align-items:flex-start">
       <div style="flex:1 1 520px;min-width:0">
-        <div style="font-size:12px;color:var(--color-neutral-700);margin:0 0 10px 44px">Admissões por 1 000 residentes, ritmo anual</div>
+        <div style="font-size:13px;color:var(--color-neutral-700);margin:0 0 10px 44px">Admissões por 1 000 residentes, ritmo anual</div>
         <div ref="{{ socRef }}" style="position:relative;height:380px;margin:0 16px 34px 44px">
-          <sc-for list="{{ socTicksY }}" as="t" hint-placeholder-count="5"><div style="position:absolute;left:0;right:0;bottom:{{ t.b }}%;border-top:1px solid var(--color-neutral-200)"><span style="position:absolute;right:calc(100% + 8px);top:-8px;font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ t.t }}</span></div></sc-for>
-          <sc-for list="{{ socTicksX }}" as="t" hint-placeholder-count="5"><span style="position:absolute;top:calc(100% + 6px);left:{{ t.l }}%;transform:translateX(-50%);font-size:11.5px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ t.t }}</span></sc-for>
+          <sc-for list="{{ socTicksY }}" as="t" hint-placeholder-count="5"><div style="position:absolute;left:0;right:0;bottom:{{ t.b }}%;border-top:1px solid var(--color-neutral-200)"><span style="position:absolute;right:calc(100% + 8px);top:-8px;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ t.t }}</span></div></sc-for>
+          <sc-for list="{{ socTicksX }}" as="t" hint-placeholder-count="5"><span style="position:absolute;top:calc(100% + 6px);left:{{ t.l }}%;transform:translateX(-50%);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ t.t }}</span></sc-for>
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible"><path d="{{ socLine }}" stroke="var(--color-neutral-600)" stroke-width="1.5" stroke-dasharray="5 4" fill="none" vector-effect="non-scaling-stroke"></path></svg>
           <sc-for list="{{ socPts }}" as="p" hint-placeholder-count="17">
             <button onClick="{{ p.click }}" title="{{ p.tip }}" aria-label="{{ p.tip }}" style="position:absolute;left:{{ p.l }}%;bottom:{{ p.b }}%;transform:{{ p.tf }};display:flex;align-items:center;gap:5px;flex-direction:{{ p.dir }};padding:0;border:0;background:transparent;font:inherit;cursor:pointer;white-space:nowrap">
               <i style="display:block;flex:none;width:10px;height:10px;border-radius:50%;background:{{ p.c }};box-shadow:{{ p.ring }}"></i>
-              <span style="display:{{ p.lab }};font-size:12px;font-weight:{{ p.fw }};color:{{ p.c }};background:color-mix(in srgb,var(--color-bg) 80%,transparent);padding:0 2px">{{ p.name }}</span>
+              <span class="soc-lab" style="display:{{ p.lab }};font-size:13px;font-weight:{{ p.fw }};color:{{ p.c }};background:color-mix(in srgb,var(--color-bg) 80%,transparent);padding:0 2px">{{ p.name }}</span>
             </button>
           </sc-for>
         </div>
-        <div style="text-align:center;font-size:12px;color:var(--color-neutral-700)">{{ socXLabel }}</div>
+        <div style="text-align:center;font-size:13px;color:var(--color-neutral-700)">{{ socXLabel }}</div>
       </div>
       <div style="flex:0 1 380px;min-width:0">
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:6px">Fora da reta</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-bottom:6px">Fora da reta</div>
         <sc-for list="{{ socOut }}" as="r" hint-placeholder-count="4">
           <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:minmax(0,1fr) 48px 112px;gap:10px;align-items:center;width:100%;padding:9px 6px;margin:0 -6px;border:0;background:transparent;font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)">
-            <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.x }} · {{ r.y }} por 1 000 (esperado {{ r.e }})</span></span>
+            <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:13px;color:var(--color-neutral-700)">{{ r.x }} · {{ r.y }} por 1 000 (esperado {{ r.e }})</span></span>
             <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:{{ r.tc }}">{{ r.dev }}</span>
-            <span style="justify-self:end;font-size:11.5px;line-height:1.3;color:{{ r.tc }}">{{ r.tag }}</span>
+            <span style="justify-self:end;font-size:12.5px;line-height:1.3;color:{{ r.tc }}">{{ r.tag }}</span>
           </button>
         </sc-for>
       </div>
@@ -585,30 +585,30 @@ input[type=range]{accent-color:#0088b0}
   </section>
   </sc-if>
 
-  <div data-grp="quando" role="group" aria-label="Quando: Quando chegam e quando foge ao normal?" style="padding-top:64px;margin-bottom:-30px">
-    <div style="border-top:1px solid var(--color-neutral-300);padding-top:10px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
-      <span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Quando</span>
-      <span style="font-size:15px;font-style:italic;color:var(--color-neutral-700)">Quando chegam e quando foge ao normal?</span>
+  <div data-grp="quando" role="group" aria-label="Quando: Quando chegam e quando foge ao normal?" style="padding-top:72px;margin-bottom:-24px">
+    <div style="border-top:2px solid var(--color-neutral-700);padding-top:12px;display:flex;align-items:baseline;gap:6px 16px;flex-wrap:wrap">
+      <span style="font-size:15px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--color-accent-700)">Quando</span>
+      <span style="font-size:20px;line-height:1.25;font-weight:500;color:var(--color-neutral-800)">Quando chegam e quando foge ao normal?</span>
     </div>
   </div>
 
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
       <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Dias e locais atípicos · período completo</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Dias e locais atípicos · período completo</div>
         <h2 style="font-size:28px;line-height:1.15;margin:0">Fora do padrão</h2>
       </div>
     </div>
     <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.al }}</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
       <sc-for list="{{ alRows }}" as="r" hint-placeholder-count="10">
-        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:84px minmax(0,1.4fr) 44px 76px 52px 96px;gap:10px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:transparent;font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
+        <button class="al-row" onClick="{{ r.click }}" style="display:grid;grid-template-columns:84px minmax(0,1.4fr) 44px 76px 52px 96px;gap:10px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:transparent;font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
           <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ r.dt }}</span>
-          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:13px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
           <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.v }}</span>
-          <span style="text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">normal {{ r.m }}</span>
+          <span style="text-align:right;font-size:13px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">normal {{ r.m }}</span>
           <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.dev }}</span>
-          <span style="justify-self:end;font-size:12px;line-height:1.3;padding:2px 8px;border-radius:2px;white-space:nowrap;background:{{ r.tb }};color:{{ r.tc }};box-shadow:inset 0 0 0 1px {{ r.tr }}">{{ r.tag }}</span>
+          <span style="justify-self:end;font-size:13px;line-height:1.3;padding:2px 8px;border-radius:2px;white-space:nowrap;background:{{ r.tb }};color:{{ r.tc }};box-shadow:inset 0 0 0 1px {{ r.tr }}">{{ r.tag }}</span>
         </button>
       </sc-for>
     </div>
@@ -630,7 +630,7 @@ input[type=range]{accent-color:#0088b0}
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
       <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Hora × dia da semana · {{ rangeLabel }}</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Hora × dia da semana · {{ rangeLabel }}</div>
         <h2 style="font-size:28px;line-height:1.15;margin:0">Quando chegam</h2>
       </div>
     </div>
@@ -638,15 +638,15 @@ input[type=range]{accent-color:#0088b0}
     <div style="overflow-x:auto">
       <div style="display:grid;grid-template-columns:36px repeat(24,minmax(30px,1fr)) 64px;gap:3px;min-width:900px;font-variant-numeric:tabular-nums">
         <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="7">
-          <span style="font-size:13px;font-style:italic;align-self:center">{{ r.dia }}</span>
+          <span style="font-size:13px;align-self:center">{{ r.dia }}</span>
           <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="24">
-            <span title="{{ c.t }}" style="display:flex;align-items:center;justify-content:center;height:28px;font-size:12px;background:{{ c.bg }};color:{{ c.fg }};border-radius:1px">{{ c.v }}</span>
+            <span title="{{ c.t }}" style="display:flex;align-items:center;justify-content:center;height:28px;font-size:13px;background:{{ c.bg }};color:{{ c.fg }};border-radius:1px">{{ c.v }}</span>
           </sc-for>
           <span style="font-size:14px;font-weight:600;text-align:right;align-self:center">{{ r.tot }}</span>
         </sc-for>
         <span></span>
-        <sc-for list="{{ hmHours }}" as="h" hint-placeholder-count="24"><span style="font-size:12px;text-align:center;color:var(--color-neutral-700);padding-top:4px">{{ h }}</span></sc-for>
-        <span style="font-size:12px;text-align:right;font-style:italic;color:var(--color-neutral-700);padding-top:4px">total/dia</span>
+        <sc-for list="{{ hmHours }}" as="h" hint-placeholder-count="24"><span style="font-size:13px;text-align:center;color:var(--color-neutral-700);padding-top:4px">{{ h }}</span></sc-for>
+        <span style="font-size:13px;text-align:right;color:var(--color-neutral-700);padding-top:4px">total/dia</span>
       </div>
     </div>
     <div style="margin-top:8px">
@@ -659,10 +659,10 @@ input[type=range]{accent-color:#0088b0}
     </div>
   </section>
 
-  <div data-grp="quem" role="group" aria-label="Quem: Quem são e por onde passam antes?" style="padding-top:64px;margin-bottom:-30px">
-    <div style="border-top:1px solid var(--color-neutral-300);padding-top:10px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
-      <span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Quem</span>
-      <span style="font-size:15px;font-style:italic;color:var(--color-neutral-700)">Quem são e por onde passam antes?</span>
+  <div data-grp="quem" role="group" aria-label="Quem: Quem são e por onde passam antes?" style="padding-top:72px;margin-bottom:-24px">
+    <div style="border-top:2px solid var(--color-neutral-700);padding-top:12px;display:flex;align-items:baseline;gap:6px 16px;flex-wrap:wrap">
+      <span style="font-size:15px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--color-accent-700)">Quem</span>
+      <span style="font-size:20px;line-height:1.25;font-weight:500;color:var(--color-neutral-800)">Quem são e por onde passam antes?</span>
     </div>
   </div>
 
@@ -670,7 +670,7 @@ input[type=range]{accent-color:#0088b0}
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
       <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Unidades de cuidados primários · período completo</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Unidades de cuidados primários · período completo</div>
         <h2 style="font-size:28px;line-height:1.15;margin:0">Por unidade de cuidados primários</h2>
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -685,8 +685,8 @@ input[type=range]{accent-color:#0088b0}
       <sc-for list="{{ csRows }}" as="r" hint-placeholder-count="12">
         <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:{{ r.cur }};border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
           <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
-          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
-          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:13px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.n }}</span>
           <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></span>
           <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
         </button>
@@ -712,7 +712,7 @@ input[type=range]{accent-color:#0088b0}
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
       <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Utentes · período completo</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Utentes · período completo</div>
         <h2 style="font-size:28px;line-height:1.15;margin:0">Quem volta muitas vezes</h2>
       </div>
     </div>
@@ -721,8 +721,8 @@ input[type=range]{accent-color:#0088b0}
       <sc-for list="{{ fqRows }}" as="r" hint-placeholder-count="12">
         <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
           <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
-          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
-          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:13px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.n }}</span>
           <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><i title="{{ r.t }}" style="display:block;width:{{ r.w }}%;background:#0088b0"></i></span>
           <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
         </button>
@@ -748,30 +748,32 @@ input[type=range]{accent-color:#0088b0}
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
       <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Transparência SNS · mensal · ULS Amadora/Sintra</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Transparência SNS · mensal · ULS Amadora/Sintra</div>
         <h2 style="font-size:28px;line-height:1.15;margin:0">Contexto da ULS</h2>
       </div>
     </div>
     <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.sns }}</p>
     <div style="display:flex;flex-wrap:wrap;gap:28px 40px;align-items:flex-start">
-      <div style="flex:1 1 340px;max-width:520px;display:flex;flex-direction:column;gap:6px">
+      <div style="flex:1 1 340px;min-width:0;max-width:520px;display:flex;flex-direction:column;gap:6px">
         <h3 style="font-size:18px;margin:0">O CSV confere com os números oficiais?</h3>
+        <div class="sns-wrap">
         <div style="display:grid;grid-template-columns:minmax(0,1.2fr) 70px 70px 64px minmax(0,1fr);gap:0 10px;font-size:13px;align-items:center">
-          <span style="font-size:11.5px;color:var(--color-neutral-700);padding:4px 0">Mês</span><span style="font-size:11.5px;color:var(--color-neutral-700);text-align:right">CSV</span><span style="font-size:11.5px;color:var(--color-neutral-700);text-align:right">SNS</span><span style="font-size:11.5px;color:var(--color-neutral-700);text-align:right">Dif.</span><span style="font-size:11.5px;color:var(--color-neutral-700)"></span>
+          <span style="font-size:12.5px;color:var(--color-neutral-700);padding:4px 0">Mês</span><span style="font-size:12.5px;color:var(--color-neutral-700);text-align:right">CSV</span><span style="font-size:12.5px;color:var(--color-neutral-700);text-align:right">SNS</span><span style="font-size:12.5px;color:var(--color-neutral-700);text-align:right">Dif.</span><span style="font-size:12.5px;color:var(--color-neutral-700)"></span>
           <sc-for list="{{ snsVal }}" as="v" hint-placeholder-count="3">
             <span style="padding:7px 0;border-top:1px solid rgba(32,30,29,.12)">{{ v.mes }}</span>
             <span style="padding:7px 0;border-top:1px solid rgba(32,30,29,.12);text-align:right;font-variant-numeric:tabular-nums">{{ v.csv }}</span>
             <span style="padding:7px 0;border-top:1px solid rgba(32,30,29,.12);text-align:right;font-variant-numeric:tabular-nums">{{ v.sns }}</span>
             <span style="padding:7px 0;border-top:1px solid rgba(32,30,29,.12);text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ v.dif }}</span>
-            <span style="padding:7px 0;border-top:1px solid rgba(32,30,29,.12)"><span title="{{ v.t }}" style="font-size:12px;padding:2px 8px;border-radius:2px;white-space:nowrap;background:{{ v.bg }};color:{{ v.fg }};box-shadow:inset 0 0 0 1px {{ v.ring }}">{{ v.tag }}</span></span>
+            <span style="padding:7px 0;border-top:1px solid rgba(32,30,29,.12)"><span title="{{ v.t }}" style="font-size:13px;padding:2px 8px;border-radius:2px;white-space:nowrap;background:{{ v.bg }};color:{{ v.fg }};box-shadow:inset 0 0 0 1px {{ v.ring }}">{{ v.tag }}</span></span>
           </sc-for>
+        </div>
         </div>
       </div>
       <div style="flex:3 1 520px;min-width:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:22px 32px">
         <sc-for list="{{ snsCharts }}" as="c" hint-placeholder-count="6">
           <div style="display:flex;flex-direction:column;gap:3px;min-width:0">
             <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px"><span style="font-weight:600">{{ c.title }}</span><span style="font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600">{{ c.now }}</span></div>
-            <div style="display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--color-neutral-700)"><span style="font-style:italic">{{ c.sub }}</span><span style="white-space:nowrap;color:{{ c.dc }}">{{ c.delta }}</span></div>
+            <div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--color-neutral-700)"><span style="">{{ c.sub }}</span><span style="white-space:nowrap;color:{{ c.dc }}">{{ c.delta }}</span></div>
             <svg viewBox="{{ c.box }}" preserveAspectRatio="none" style="display:block;width:100%;height:64px;border-bottom:1px solid rgba(32,30,29,.25)">
               <rect x="{{ c.bx }}" y="0" width="{{ c.bw }}" height="64" fill="#0088b0" fill-opacity="0.12"></rect>
               <sc-for list="{{ c.years }}" as="y" hint-placeholder-count="0"><line x1="{{ y.x }}" x2="{{ y.x }}" y1="0" y2="64" stroke="#201e1d" stroke-opacity="0.18" stroke-width="1" vector-effect="non-scaling-stroke"></line></sc-for>
@@ -779,7 +781,7 @@ input[type=range]{accent-color:#0088b0}
               <path d="{{ c.line }}" fill="none" stroke="{{ c.color }}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"></path>
               <sc-for list="{{ c.hits }}" as="h" hint-placeholder-count="0"><rect x="{{ h.x }}" y="0" width="{{ h.w }}" height="64" fill="transparent"><title>{{ h.t }}</title></rect></sc-for>
             </svg>
-            <div style="position:relative;height:14px;font-size:10.5px;font-style:italic;color:var(--color-neutral-700)"><sc-for list="{{ c.years }}" as="y" hint-placeholder-count="0"><span style="position:absolute;left:{{ y.pct }}%;padding-left:3px">{{ y.label }}</span></sc-for></div>
+            <div style="position:relative;height:14px;font-size:11.5px;color:var(--color-neutral-700)"><sc-for list="{{ c.years }}" as="y" hint-placeholder-count="0"><span style="position:absolute;left:{{ y.pct }}%;padding-left:3px">{{ y.label }}</span></sc-for></div>
           </div>
         </sc-for>
       </div>
@@ -800,7 +802,7 @@ input[type=range]{accent-color:#0088b0}
 
   <section data-grp="dados" style="padding-top:72px">
     <div style="border-top:1px solid var(--color-neutral-300);padding-top:10px;margin-bottom:12px">
-      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Fontes e avisos</div>
+      <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Fontes e avisos</div>
       <h2 style="font-size:28px;line-height:1.15;margin:0">Sobre os dados</h2>
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:20px 48px;max-width:70em;font-size:13.5px;line-height:1.5;color:var(--color-neutral-700)">
@@ -824,7 +826,7 @@ input[type=range]{accent-color:#0088b0}
         </ul>
       </div>
     </div>
-    <div style="margin-top:12px;max-width:70em;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--color-neutral-700)">
+    <div style="margin-top:12px;max-width:70em;display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--color-neutral-700)">
     <button onClick="{{ hw.foot.toggle }}" aria-expanded="{{ hw.foot.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.foot.rot }}deg);transition:transform .2s">▸</span>{{ hw.foot.label }}</button>
     <sc-if value="{{ hw.foot.open }}" hint-placeholder-val="{{ false }}">
     <span>{{ foot2 }}</span>
@@ -926,7 +928,22 @@ const ANIM_CSS = `
 .urg-anim button, .urg-anim .seg-opt { transition: background-color .2s ease, color .2s ease, box-shadow .2s ease, opacity .2s ease; }
 .urg-fade { animation: urgFade .28s ease both; }
 @keyframes urgFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
-@media (prefers-reduced-motion: reduce) { .urg-anim *, .urg-fade { transition: none !important; animation: none !important; } }`;
+@media (prefers-reduced-motion: reduce) { .urg-anim *, .urg-fade { transition: none !important; animation: none !important; } }
+@media (max-width:600px){
+  #ctxbar .cx-part{display:none}
+  .urg-anim{padding-left:16px!important;padding-right:16px!important}
+  .opt-aside{flex:1 1 100%!important}
+  .soc-lab{display:none!important}
+  .al-row{grid-template-columns:64px 44px minmax(0,1fr) auto!important;gap:2px 8px!important}
+  .al-row>:nth-child(1){grid-column:1;grid-row:1}
+  .al-row>:nth-child(2){grid-column:2/4;grid-row:1}
+  .al-row>:nth-child(6){grid-column:4;grid-row:1}
+  .al-row>:nth-child(3){grid-column:2;grid-row:2;text-align:left!important}
+  .al-row>:nth-child(4){grid-column:3;grid-row:2;text-align:left!important}
+  .al-row>:nth-child(5){grid-column:4;grid-row:2}
+  .sns-wrap{overflow-x:auto}
+  .sns-wrap>div{min-width:440px}
+}`;
 const reduceMotion = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
 const easeIO = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const RAMP_K = ['#f1ece4', '#e0d4c2', '#cbb89c', '#b39a76', '#957a55', '#735b3b', '#523f27'];
@@ -1614,7 +1631,7 @@ class Component extends DCLogic {
     const setK = (q, w, refRate, refTxt, what, isShare) => {
       const now = isShare ? w / totW : w, d = isShare ? (now - refRate) * 100 : now / refRate - 1;
       const same = isShare ? Math.abs(d) < 1 : Math.abs(d) < 0.03, big = isShare ? Math.abs(d) >= 3 : Math.abs(d) >= 0.1;
-      kD[q] = cmpTxt(d > 0, same, refTxt, what); kC[q] = big ? ATT : NEUT; };
+      kD[q] = cmpTxt(d > 0, same, refTxt, what); kC[q] = big && d > 0 && q < 2 ? ATT : NEUT; };
     if (cmpOn) {
       const tB = sum(B.loc.map(sum)) || 1, uB = sum(B.loc.map(r => r[0] + r[1] + r[2])), nB = sum(B.loc.map(r => r[3] + r[4]));
       const what = st.cmp === 'ant' ? ['da janela anterior', 'à janela anterior'] : [`de ${cmpOff === 7 ? '1 semana' : '4 semanas'} antes`, `a ${cmpOff === 7 ? '1 semana' : '4 semanas'} antes`];
