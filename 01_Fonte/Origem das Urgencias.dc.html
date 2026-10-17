@@ -1476,18 +1476,25 @@ class Component extends DCLogic {
         hits: hitsOf(third.fmt) }
     ].map(c => ({ ...c, box: `0 0 ${W} ${CH}`, w: W, ...winBand }));
 
-    // desvios dos indicadores do topo face ao período completo (só quando há janela)
-    const sgn = r => r > 0 ? '+' : r < 0 ? '−' : '';
+    // comparação dos indicadores do topo, em linguagem simples: diz acima/abaixo e mostra o valor de referência
+    // (sem misturar % de variação com pontos percentuais)
     const kD = ['', '', ''], kC = [NEUT, NEUT, NEUT];
+    const cmpTxt = (up, same, ref, what) => same ? `≈ igual ${what[1]} (${ref})` : `${up ? '▲ acima' : '▼ abaixo'} ${what[0]} (${ref})`;
+    const setK = (q, w, refRate, refTxt, what, isShare) => {
+      const now = isShare ? w / totW : w, d = isShare ? (now - refRate) * 100 : now / refRate - 1;
+      const same = isShare ? Math.abs(d) < 1 : Math.abs(d) < 0.03, big = isShare ? Math.abs(d) >= 3 : Math.abs(d) >= 0.1;
+      kD[q] = cmpTxt(d > 0, same, refTxt, what); kC[q] = big ? ATT : NEUT; };
     if (cmpOn) {
-      const tB = sum(B.loc.map(sum)) || 1, uB = sum(B.loc.map(r => r[0] + r[1] + r[2])), nB = sum(B.loc.map(r => r[3] + r[4])), vs = st.cmp === 'ant' ? 'face à janela anterior' : `face a ${cmpOff === 7 ? '1 semana' : '4 semanas'} antes`;
-      const dp = totW / tB - 1, rp = Math.round(dp * 100); kD[0] = `${sgn(rp)}${Math.abs(rp)}% ${vs}`; kC[0] = Math.abs(dp) >= 0.1 ? ATT : NEUT;
-      [[urW, uB], [nuW, nB]].forEach(([w, b], q) => { const dd = (w / totW - b / tB) * 100, rr = Math.round(dd * 10) / 10;
-        kD[q + 1] = `${sgn(rr)}${Math.abs(dd).toLocaleString('pt-PT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} p.p. ${vs}`; kC[q + 1] = Math.abs(dd) >= 3 ? ATT : NEUT; });
+      const tB = sum(B.loc.map(sum)) || 1, uB = sum(B.loc.map(r => r[0] + r[1] + r[2])), nB = sum(B.loc.map(r => r[3] + r[4]));
+      const what = st.cmp === 'ant' ? ['da janela anterior', 'à janela anterior'] : [`de ${cmpOff === 7 ? '1 semana' : '4 semanas'} antes`, `a ${cmpOff === 7 ? '1 semana' : '4 semanas'} antes`];
+      setK(0, totW, tB, NF.format(tB), what, false);
+      setK(1, urW, uB / tB, pc(uB / tB), what, true);
+      setK(2, nuW, nB / tB, pc(nB / tB), what, true);
     } else if (st.win && totAll) {
-      const dp = (totW / nD) / (totAll / N) - 1, rp = Math.round(dp * 100); kD[0] = `${sgn(rp)}${Math.abs(rp)}% face ao período`; kC[0] = Math.abs(dp) >= 0.1 ? ATT : NEUT;
-      [[urW, sum(AF.loc.map(r => r[0] + r[1] + r[2]))], [nuW, sum(AF.loc.map(r => r[3] + r[4]))]].forEach(([w, f], q) => { const dd = (w / totW - f / totAll) * 100, rr = Math.round(dd * 10) / 10;
-        kD[q + 1] = `${sgn(rr)}${Math.abs(dd).toLocaleString('pt-PT', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} p.p. face ao período`; kC[q + 1] = Math.abs(dd) >= 3 ? ATT : NEUT; });
+      const what = ['da média do período', 'à média do período'], perDay = totAll / N, uF = sum(AF.loc.map(r => r[0] + r[1] + r[2])), nF = sum(AF.loc.map(r => r[3] + r[4]));
+      setK(0, totW / nD, perDay, `${NF.format(Math.round(perDay))} por dia`, what, false);
+      setK(1, urW, uF / totAll, pc(uF / totAll), what, true);
+      setK(2, nuW, nF / totAll, pc(nF / totAll), what, true);
     }
     // unidades de cuidados primários (coluna Centro_Saude): período completo, não segue a janela nem os filtros
     const CS = U.cs, CS_MIN = 200, CS_LINES = 12, hasCs = !!(CS && CS.rows && CS.rows.length);
@@ -1534,7 +1541,7 @@ class Component extends DCLogic {
         const lm = last >= 0 ? ms[last] : null, prevY = lm ? `${+lm.slice(0, 4) - 1}${lm.slice(4)}` : null, pv = prevY && mIx.has(prevY) ? vals[mIx.get(prevY)] : NaN;
         const dd = last >= 0 && isFinite(pv) && pv ? (pp ? vals[last] - pv : vals[last] / pv - 1) : NaN;
         return { title, sub: lm ? `${sub} · ${mLab(lm)}` : sub, now: last >= 0 ? fmt(vals[last]) : '—', color,
-          delta: isFinite(dd) ? `${dd > 0 ? '+' : dd < 0 ? '−' : ''}${Math.abs(Math.round(dd * 1000) / 10).toLocaleString('pt-PT')}${pp ? ' p.p.' : '%'} vs ${MES[+lm.slice(5) - 1]} ${prevY.slice(0, 4)}` : '', dc: NEUT,
+          delta: isFinite(dd) ? `${Math.abs(pp ? dd * 100 : dd) < (pp ? 0.5 : 0.02) ? '≈ igual a' : dd > 0 ? '▲ acima de' : '▼ abaixo de'} ${MES[+lm.slice(5) - 1]} ${prevY.slice(0, 4)} (${fmt(pv)})` : '', dc: NEUT,
           line: dOf(vals, r.lo, r.hi), line2: v2 ? dOf(v2, r.lo, r.hi) : '', box: `0 0 ${ms.length * MW} ${CHH}`, ...band, years,
           hits: ms.map((m, i) => ({ x: i * MW, w: MW, t: `${mLab(m)}: ${isFinite(vals[i]) ? fmt(vals[i]) : 'sem dados'}` + (v2 && isFinite(v2[i]) ? ` · ${name2}: ${fmt(v2[i])}` : '') })) };
       };
