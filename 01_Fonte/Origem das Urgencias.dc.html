@@ -1698,7 +1698,7 @@ class Component extends DCLogic {
         socOut = pts.filter(p => tag(p)).sort((p, q) => q.res - p.res).map(p => ({ name: nice(p.f.n), x: pc(p.x / 100, 1), y: f0(p.y), e: f0(p.e),
           dev: (p.res > 0 ? '+' : '−') + NF.format(Math.abs(Math.round(p.res))), tag: p.res > 0 ? 'acima do esperado' : 'abaixo do esperado', tc: p.res > 0 ? ATT : '#0088b0',
           click: () => set({ sel: st.sel === p.f.d ? null : p.f.d }) }));
-        const rTxt = isFinite(r) ? NF.format(Math.round(r * 100) / 100) : '—', strength = !isFinite(r) ? 'indeterminada' : Math.abs(r) < 0.3 ? 'fraca' : Math.abs(r) < 0.6 ? 'moderada' : 'forte';
+        const rTxt = isFinite(r) ? NF.format(Math.round(r * 100) / 100).replace('-', '−') : '—', strength = !isFinite(r) ? 'indeterminada' : Math.abs(r) < 0.3 ? 'fraca' : Math.abs(r) < 0.6 ? 'moderada' : 'forte';
         socConcl = Math.abs(r) >= 0.3 ? `Onde há ${b < 0 ? 'menos' : 'mais'} ${socName.toLowerCase()} vai-se mais à urgência (r = ${rTxt}).` : `A relação entre ${socName.toLowerCase()} e o recurso à urgência é ${strength}${isFinite(r) ? ` (r = ${rTxt})` : ''}.`;
         socLede = `${n} freguesias de Amadora e Sintra. A relação entre ${socName.toLowerCase()} e o recurso à urgência é ${strength}${isFinite(r) ? ` (r = ${rTxt})` : ''}${Math.abs(r) >= 0.3 ? (b > 0 ? ': onde o indicador é mais alto, vai-se mais à urgência' : ': onde o indicador é mais alto, vai-se menos à urgência') : ''}. ${socOut.length ? `${socOut.length} freguesias afastam-se da reta mais do que o habitual (lista ao lado).` : 'Nenhuma freguesia se afasta muito da reta.'}`;
       }
@@ -1805,7 +1805,7 @@ class Component extends DCLogic {
     const mapTot = sum(byN.map(r => r.n)), tp = k => sum(rk.slice(0, k).map(r => r.n));
     const cl = { map: isTx ? (rk[0] ? `${nice(rk[0].f.n)} é onde mais se recorre à urgência: ${f0(rk[0].tx)} admissões por 1 000 habitantes por ano.` : '') : isPct ? (rk[0] ? `${nice(rk[0].f.n)} é onde as ${sp ? selNames : 'urgentes'} mais pesam: ${pc(rk[0].share)} das admissões.` : '') : (byN[0] && mapTot ? `${nice(byN[0].f.n)} é a freguesia com mais admissões (${sh(byN[0].n, mapTot)} do total).` : ''),
       rank: rk.length >= 5 ? (isTx ? `As 5 primeiras têm entre ${f0(rk[4].tx)} e ${f0(rk[0].tx)} admissões por 1 000 habitantes por ano.` : isPct ? `As 5 primeiras têm entre ${pc(rk[4].share)} e ${pc(rk[0].share)} de admissões ${sp ? selNames : 'urgentes'}.` : `As 5 primeiras freguesias concentram ${sh(tp(5), mapTot)} das admissões.`) : '',
-      al: alN ? `${alPl(alN, 'dia ou caso fora', 'dias ou casos fora')} do padrão; o maior desvio foi ${alRows[0].name} em ${alRows[0].dt.replace(' · ', ', ')} (${alRows[0].dev} face ao normal).` : 'Nenhum dia fora do padrão com os filtros atuais.',
+      al: alN ? `${alPl(alN, 'alerta', 'alertas')} fora do padrão no período. O maior: ${alRows[0].name}, a ${alRows[0].dt.replace(' · ', ' (')}), ${alRows[0].dev} face ao normal.` : 'Nenhum dia fora do padrão com os filtros atuais.',
       cs: csConcl, soc: socConcl, sns: snsConcl, fq: fqConcl, hm: hmConcl,
       tri: `${pc((cur[0] + cur[1] + cur[2]) / curTot)} das admissões são urgentes (vermelho, laranja ou amarelo).` };
     return this.lastVals = { hw, cl, rankMore, rankToggle, rankToggleLabel, fqMore, fqToggle, fqToggleLabel,
