@@ -46,12 +46,11 @@ input[type=range]{accent-color:#0088b0}
     <div style="height:1px;background:var(--color-text)"></div>
   </header>
 
-  <section style="display:flex;flex-wrap:wrap;gap:30px 56px;padding:40px 0 32px;align-items:flex-end">
-    <div style="flex:1 1 560px;min-width:0">
-      <h1 style="font-size:clamp(38px,4vw,52px);line-height:1.05;letter-spacing:-.015em;margin:0 0 16px;max-width:16em;text-wrap:balance">De onde vêm os doentes da urgência, e com que prioridade chegam</h1>
-      <p style="font-size:18px;line-height:1.5;margin:0;max-width:46em;text-wrap:pretty">{{ lede }}</p>
+  <section style="display:flex;flex-wrap:wrap;gap:20px 56px;padding:28px 0 24px;align-items:flex-end">
+    <div style="flex:1 1 380px;min-width:0">
+      <h1 style="font-size:clamp(30px,3.2vw,42px);line-height:1.08;letter-spacing:-.015em;margin:0;max-width:15em;text-wrap:balance">De onde vêm os doentes da urgência, e com que prioridade chegam</h1>
     </div>
-    <div style="flex:1 1 360px;max-width:560px;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:22px 26px">
+    <div style="flex:1 1 520px;max-width:680px;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:18px 24px">
       <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
         <div style="display:flex;flex-direction:column;gap:2px">
           <span style="font-size:12px;color:var(--color-neutral-700)">{{ k.label }}</span>
@@ -59,6 +58,24 @@ input[type=range]{accent-color:#0088b0}
           <span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ k.sub }}</span>
           <span style="font-size:12px;font-weight:600;color:{{ k.dc }}">{{ k.delta }}</span>
         </div>
+      </sc-for>
+      <span style="grid-column:1/-1;font-size:12px;color:var(--color-neutral-700)">{{ kpiFoot }}</span>
+    </div>
+  </section>
+
+  <section aria-label="Em destaque" style="padding:0 0 40px">
+    <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Em destaque</div>
+      <span style="font-size:13px;color:var(--color-neutral-700)">{{ hlWhen }}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px">
+      <sc-for list="{{ hl }}" as="h" hint-placeholder-count="4">
+        <button onClick="{{ h.go }}" style="text-align:left;display:flex;flex-direction:column;gap:6px;padding:14px 16px 12px;border:0;border-left:4px solid {{ h.c }};background:var(--color-neutral-100);border-radius:var(--radius-md);font:inherit;color:var(--color-text);cursor:pointer">
+          <span style="font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--color-neutral-700)">{{ h.k }}</span>
+          <span style="font-size:21px;line-height:1.2;font-weight:600;color:{{ h.bc }}">{{ h.big }}</span>
+          <span style="font-size:13.5px;line-height:1.4;color:var(--color-neutral-800)">{{ h.sm }}</span>
+          <span style="font-size:13px;color:var(--color-accent-700);margin-top:4px">{{ h.cta }} →</span>
+        </button>
       </sc-for>
     </div>
   </section>
@@ -69,25 +86,29 @@ input[type=range]{accent-color:#0088b0}
       <div style="display:flex;flex-direction:column;gap:16px">
         <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Opções do mapa</div>
         <div style="display:flex;flex-direction:column;gap:6px">
-          <span style="font-size:13px;color:var(--color-neutral-700)">Tratamento</span>
-          <div class="seg" style="align-self:flex-start"><sc-for list="{{ modes }}" as="o" hint-placeholder-count="4"><label class="seg-opt"><input type="radio" name="modo" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
-        </div>
-        <div style="display:flex;gap:20px;flex-wrap:wrap">
-          <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Medir</span>
             <div class="seg"><sc-for list="{{ metrics }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="metrica" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            <span style="font-size:13px;color:var(--color-neutral-700)">Fundo</span>
-            <div class="seg"><sc-for list="{{ fundos }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="fundo" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
-          </div>
-        </div>
-        <div style="display:flex;gap:20px;flex-wrap:wrap">
-          <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Vista</span>
             <div class="seg"><sc-for list="{{ zooms }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="zoom" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:13px;color:var(--color-neutral-700)">Origem <span style="font-style:italic">· pode escolher várias</span></span>
+          <div class="seg" style="align-self:flex-start"><sc-for list="{{ origens }}" as="o" hint-placeholder-count="4"><label class="seg-opt"><input type="checkbox" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+        </div>
+        <button onClick="{{ moreToggle }}" aria-expanded="{{ moreOpen }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:6px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ moreRot }}deg);transition:transform .2s">▸</span>{{ moreLabel }}</button>
+        <sc-if value="{{ moreOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:16px;padding:4px 0 0 14px;border-left:2px solid var(--color-neutral-200)">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:13px;color:var(--color-neutral-700)">Tratamento</span>
+          <div class="seg" style="align-self:flex-start"><sc-for list="{{ modes }}" as="o" hint-placeholder-count="4"><label class="seg-opt"><input type="radio" name="modo" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+            <span style="font-size:13px;color:var(--color-neutral-700)">Fundo</span>
+            <div class="seg"><sc-for list="{{ fundos }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="fundo" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+          </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Camadas</span>
             <sc-for list="{{ layers }}" as="l" hint-placeholder-count="8">
               <div style="display:grid;grid-template-columns:18px 14px minmax(0,1fr) 84px 34px;gap:8px;align-items:center;font-size:13px;opacity:{{ l.dim }}" title="{{ l.note }}">
@@ -100,26 +121,23 @@ input[type=range]{accent-color:#0088b0}
             </sc-for>
             <span style="font-size:11.5px;font-style:italic;color:var(--color-neutral-700)">{{ layNote }}</span>
           </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Comparar com</span>
             <div class="seg" style="flex-wrap:wrap"><sc-for list="{{ cmpOpts }}" as="o" hint-placeholder-count="4"><label class="seg-opt" style="opacity:{{ o.op }}"><input type="radio" name="comparar" checked="{{ o.on }}" disabled="{{ o.off }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
             <span style="font-size:11.5px;font-style:italic;color:var(--color-neutral-700)">{{ cmpNote }}</span>
           </div>
-          <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;flex-direction:column;gap:6px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Escala de cor</span>
             <div class="seg"><sc-for list="{{ scales }}" as="o" hint-placeholder-count="2"><label class="seg-opt"><input type="radio" name="escala" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
           </div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <span style="font-size:13px;color:var(--color-neutral-700)">Origem <span style="font-style:italic">· pode escolher várias</span></span>
-          <div class="seg" style="align-self:flex-start"><sc-for list="{{ origens }}" as="o" hint-placeholder-count="4"><label class="seg-opt"><input type="checkbox" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
-        </div>
         <div style="display:flex;flex-direction:column;gap:8px">
           <span style="font-size:13px;color:var(--color-neutral-700)">Local de entrada</span>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 16px">
             <sc-for list="{{ locais }}" as="o" hint-placeholder-count="6"><label class="radio"><input type="radio" name="local" checked="{{ o.on }}" onChange="{{ o.pick }}"><span class="dot"></span>{{ o.label }}</label></sc-for>
           </div>
         </div>
+        </div>
+        </sc-if>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:14px">
@@ -804,7 +822,7 @@ function fitAspect(b, asp, padF) {
 
 class Component extends DCLogic {
   state = { mode: 'calor', stuck: false, sec: '', metric: 'n', local: -1, prios: [], sel: null, hover: null, zoom: 'area', fundo: 'mapa', fixed: true,
-            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, evWin: false, noteDraft: null, noteMsg: '', notesV: 0, cmp: 0, shareMsg: '', d3show: false, d3fade: false, vbTick: 0, view3d: false, d3msg: '', uni: null, uniOn: true, lay: layDefault(), socInd: 'i65' };
+            win: 7, end: null, vbC: null, orig: [], playing: false, speed: 450, grids: null, mapW: 900, alAll: false, csSort: 'n', csAll: false, evWin: false, noteDraft: null, noteMsg: '', notesV: 0, cmp: 0, moreOpen: false, shareMsg: '', d3show: false, d3fade: false, vbTick: 0, view3d: false, d3msg: '', uni: null, uniOn: true, lay: layDefault(), socInd: 'i65' };
   mapRef = React.createRef();
   map3dRef = React.createRef();
   socRef = React.createRef();
@@ -1225,7 +1243,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { kpis: [], modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], hasSoc: false, socPts: [], socTicksX: [], socTicksY: [], socLine: '', socOpts: [], socLede: '', socOut: [], socXLabel: '', socNote: '', alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', hasSnsm: false, snsCharts: [], snsVal: [], snsLede: '', snsNote: '', snsValNote: '', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3op: '0', d3pe: 'none', d3fadeMs: '0', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
+    if (!U || !this.fregs || this.state.end == null) return { kpis: [], kpiFoot: '', hl: [], hlWhen: '', moreOpen: false, moreRot: 0, moreToggle: () => {}, moreLabel: '', modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], hasSoc: false, socPts: [], socTicksX: [], socTicksY: [], socLine: '', socOpts: [], socLede: '', socOut: [], socXLabel: '', socNote: '', alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', hasSnsm: false, snsCharts: [], snsVal: [], snsLede: '', snsNote: '', snsValNote: '', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3op: '0', d3pe: 'none', d3fadeMs: '0', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -1658,6 +1676,35 @@ class Component extends DCLogic {
         return { v: f1(v), bg: s < 0 ? '#eae7e7' : RAMP_C[s], fg: s >= 4 ? '#f3f2f2' : '#201e1d', t: `${DN[w]}, ${hh}h–${hh + 1}h · média ${f1(v)}` }; }) }));
     const hmNote = `Cada quadrado é a média de admissões nessa hora, nesse dia da semana (por exemplo, numa segunda-feira típica entre as 10h e as 11h); quanto mais escuro, mais gente chega. À direita, a média do dia inteiro. Segue a janela, a origem, o local de entrada e as prioridades escolhidas${st.sel ? ' — não a freguesia selecionada' : ''}.`;
 
+    // "Em destaque": até 4 frases sobre a janela atual; cada cartão leva ao sítio onde se vê o detalhe
+    const toMap = () => this.mapRef.current && this.ctxScrollTo(this.mapRef.current);
+    const hasPrev = !!st.win && i0 - nD >= 0, AP = hasPrev ? this.agg(i0 - nD, i0 - 1) : null;
+    const relCh = (x, y) => y ? x / y - 1 : NaN, sPc = r => `${r > 0 ? '+' : r < 0 ? '−' : ''}${NF.format(Math.abs(Math.round(r * 100)))}%`;
+    const winTxt = st.win ? (nD === 1 ? `em ${fdy(U.days[i1])}` : `nos ${nD} dias até ${fdy(U.days[i1])}`) : 'no período completo';
+    const hl = []; let hlTop = null;
+    { const inA = f => f.c === 'Amadora' || f.c === 'Sintra';
+      let best = null;
+      if (hasPrev) for (const f of this.fregs.filter(inA)) { const a = sum(this.counts(A, f.d)), b = sum(this.counts(AP, f.d)), r = relCh(a, b);
+        if (b >= 3 * nD && a - b >= Math.max(8, nD) && (!best || r > best.r)) best = { f, a, b, r }; }
+      if (best) hl.push({ k: 'Freguesia que mais subiu', big: `${nice(best.f.n)} ${sPc(best.r)}`, c: ATT, bc: ATT,
+        sm: `${NF.format(best.a)} admissões, contra ${NF.format(best.b)} ${nD === 1 ? 'no dia anterior' : 'nos ' + nD + ' dias anteriores'}.`,
+        cta: 'Ver a freguesia', go: () => { set({ sel: best.f.d }); toMap(); } });
+      const top = rows.filter(r => inA(r.f) && r.pop && r.tot >= 5 * nD).sort((x, y) => y.tx - x.tx)[0];
+      if (top) hlTop = ({ k: 'Mais urgência por habitante', big: `${nice(top.f.n)}`, c: 'var(--color-neutral-400)', bc: 'var(--color-text)',
+          sm: `${f0(top.tx)} admissões por 1 000 habitantes/ano ${winTxt}, a taxa mais alta de Amadora e Sintra.`,
+          cta: 'Ver a freguesia', go: () => { set({ sel: top.f.d }); toMap(); } }); }
+    { const evW = alF.filter(x => x.i >= i0 && x.i <= i1 && x.z > 0).sort((x, y) => y.z - x.z), n = evW.length;
+      if (n) { const x = evW[0], f = x.d ? alFm.get(x.d) : null, r = x.m > 0 ? x.v / x.m - 1 : NaN;
+        hl.push({ k: 'Fora do padrão', big: `${n} ${n === 1 ? 'alerta' : 'alertas'}`, c: ATT, bc: ATT,
+          sm: `${winTxt[0].toUpperCase() + winTxt.slice(1)}. O maior: ${fdy(U.days[x.i])}, ${f ? nice(f.n) : 'toda a área'}, ${NF.format(x.v)} admissões` + (isFinite(r) ? ` (${sPc(r)} face ao normal).` : '.'),
+          cta: 'Ver os alertas', go: () => this.ctxGo('fora') }); }
+      else hl.push({ k: 'Fora do padrão', big: 'Sem alertas', c: 'var(--color-neutral-400)', bc: 'var(--color-text)',
+        sm: `Nenhum dia acima do normal ${winTxt}, com os filtros atuais.`, cta: 'Ver o histórico', go: () => this.ctxGo('fora') }); }
+    if (hlTop) hl.push(hlTop);
+    const hlWhen = st.win ? `${nD === 1 ? fdy(U.days[i1]) : fdy(U.days[i0]) + ' a ' + fdy(U.days[i1])} · muda com a janela da timeline` : 'Período completo';
+    // opções escondidas em "Mais opções" que não estão no valor por omissão
+    const LD = layDefault(), LC = this.layOf();
+    const nMore = (st.mode !== 'calor') + (st.fundo !== 'mapa') + (!st.fixed) + (st.local >= 0) + (!!st.cmp) + (Object.keys(LD).some(k => LD[k].on !== LC[k].on || LD[k].op !== LC[k].op) ? 1 : 0);
     return this.lastVals = {
       hmRows, hmHours: Array.from({ length: 24 }, (_, i) => i + 'h'), hmNote,
       totalLabel: NF.format(totAll), lede, rangeLabel,
@@ -1665,9 +1712,10 @@ class Component extends DCLogic {
         { label: 'Admissões', value: NF.format(totW), sub: `${NF.format(Math.round(totW / nD))} por dia`, delta: kD[0], dc: kC[0] },
         { label: 'Urgentes (V+L+A)', value: pc(urW / totW), sub: `${NF.format(urW)} admissões`, delta: kD[1], dc: kC[1] },
         { label: 'Não urgentes', value: pc(nuW / totW), sub: `verde + azul · ${NF.format(nuW)}`, delta: kD[2], dc: kC[2] },
-        { label: 'Sem freguesia', value: NF.format(semW), sub: `${pc(semW / totW, 1)} fora do mapa`, delta: '', dc: NEUT },
-        ...extraKpis
-      ], hasSnsm, snsCharts, snsVal, snsLede, snsNote, snsValNote, foot2, hosps, hospLayer: L.hosp.on ? React.createElement('div', { style: { position: 'absolute', inset: 0, opacity: L.hosp.op, pointerEvents: 'none' } }, hospLayer) : null, exportCsv, fqRows, fqLede, hasFq: fqRows.length > 0, hasSoc, socRef: this.socRef, socPts, socTicksX, socTicksY, socLine, socOpts, socLede, socOut, socXLabel, socNote, hasCs, csRows, csLede, csNote, csOpts, csMore, alRows, alLede, alMore, alToggleLabel, alToggle, csToggleLabel, csToggle,
+        ...extraKpis.filter(x => x.label.startsWith('Por 1 000'))
+      ], kpiFoot: semW ? `${NF.format(semW)} admissões (${pc(semW / totW, 1)}) sem freguesia não entram no mapa.` : '', hl, hlWhen,
+      moreOpen: !!st.moreOpen, moreRot: st.moreOpen ? 90 : 0, moreToggle: () => set({ moreOpen: !st.moreOpen }),
+      moreLabel: st.moreOpen ? 'Menos opções' : 'Mais opções do mapa' + (nMore ? ` · ${nMore} ${nMore === 1 ? 'alterada' : 'alteradas'}` : ''), hasSnsm, snsCharts, snsVal, snsLede, snsNote, snsValNote, foot2, hosps, hospLayer: L.hosp.on ? React.createElement('div', { style: { position: 'absolute', inset: 0, opacity: L.hosp.op, pointerEvents: 'none' } }, hospLayer) : null, exportCsv, fqRows, fqLede, hasFq: fqRows.length > 0, hasSoc, socRef: this.socRef, socPts, socTicksX, socTicksY, socLine, socOpts, socLede, socOut, socXLabel, socNote, hasCs, csRows, csLede, csNote, csOpts, csMore, alRows, alLede, alMore, alToggleLabel, alToggle, csToggleLabel, csToggle,
       mapTitle: isTx ? (sp ? `Onde se recorre mais à urgência com pulseira ${selNames}, por habitante` : 'Onde se recorre mais à urgência, por habitante') : isPct ? (sp ? `Onde pesam mais as pulseiras ${selNames}` : 'Onde pesam mais as admissões urgentes') : (sp ? `De onde vêm as admissões ${selNames}` : 'De onde vêm as admissões'),
       modes: [['calor', 'Calor'], ['freg', 'Freguesias'], ['circ', 'Círculos'], ['ret', 'Retícula']].map(([v, label]) => ({ label, on: st.mode === v, pick: () => set({ mode: v }) })),
       metrics: [['n', 'Admissões'], ['pct', 'Proporção'], ['tx', 'Por 1 000 hab.']].map(([v, label]) => ({ label, on: st.metric === v, pick: () => set({ metric: v }) })),
