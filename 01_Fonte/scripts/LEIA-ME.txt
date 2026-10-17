@@ -49,3 +49,13 @@ urgencias-data.js, e preciso voltar a embebe-los no HTML.
    reparacao. Descarrega o ficheiro do INE (ou usa um .zip/.xlsx ja descarregado), acrescenta
    window.URG.soc ao urgencias-data.js e volta a embebe-lo no HTML da raiz. Precisa de openpyxl.
    Correr a partir da raiz do repositorio.
+
+7_dados_sns.py
+   Vai buscar ao Portal da Transparencia do SNS (API publica, sem registo) as series mensais da
+   ULS desde jan. 2024: atendimentos na urgencia por tipo e por triagem, ocupacao do internamento,
+   consultas medicas e contactos de enfermagem nos CSP, inscritos e sem medico de familia, taxa
+   de utilizacao. Atualiza o indicador "Sem medico de familia" do topo para o mes mais recente e a
+   seccao "Contexto da ULS" (com o confronto mes a mes entre o CSV e os numeros oficiais).
+   Correr a partir da raiz do repositorio, com internet:
+          python 01_Fonte/scripts/7_dados_sns.py
+

@@ -35,7 +35,7 @@ AQUI = os.path.dirname(os.path.abspath(__file__))
 FONTE = os.path.join(AQUI, '..')
 DADOS = os.path.join(FONTE, 'urgencias-data.js')
 MAPA = os.path.join(AQUI, 'freguesias_csv.json')
-MARCAS = ['pop', 'sns', 'freq', 'hosp', 'cs', 'soc']
+MARCAS = ['pop', 'sns', 'freq', 'hosp', 'cs', 'snsm', 'soc']
 LOCK = ['GERAL', 'PEDIATRICA', 'BASICA', 'OBSTETRICA', 'GINECOLOGICA']
 K_FREQ = 4          # utentes com K ou mais idas = frequentes
 CS_MIN_ADM = 20     # unidades com menos admissões vão para "fora"
@@ -64,6 +64,8 @@ def escrever_dados(base, extra):
     out += ';window.URG.pop=' + j(extra['pop']) + ';window.URG.sns=' + j(extra['sns']) + ';\n'
     out += ';window.URG.freq=' + j(extra['freq']) + ';window.URG.hosp=' + j(extra['hosp']) + ';\n'
     out += ';window.URG.cs=' + j(extra['cs']) + ';\n'
+    if 'snsm' in extra:  # séries mensais do Portal da Transparência (7_dados_sns.py): não dependem do CSV, mantêm-se
+        out += ';window.URG.snsm=' + j(extra['snsm']) + ';\n'
     if 'soc' in extra:  # contexto social (6_contexto_social.py): não depende do CSV, mantém-se
         out += ';window.URG.soc=' + j(extra['soc']) + ';\n'
     return out
