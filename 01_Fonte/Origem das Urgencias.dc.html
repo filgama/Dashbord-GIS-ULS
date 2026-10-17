@@ -80,6 +80,13 @@ input[type=range]{accent-color:#0088b0}
     </div>
   </section>
 
+  <div data-grp="onde" role="group" aria-label="Onde: De onde vêm os doentes?" style="padding-top:40px;margin-bottom:0px">
+    <div style="border-top:1px solid var(--color-neutral-300);padding-top:10px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+      <span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Onde</span>
+      <span style="font-size:15px;font-style:italic;color:var(--color-neutral-700)">De onde vêm os doentes?</span>
+    </div>
+  </div>
+
   <section style="display:flex;flex-wrap:wrap;gap:40px 32px;align-items:flex-start">
 
     <aside style="flex:0 0 310px;min-width:0;display:flex;flex-direction:column;gap:34px">
@@ -526,83 +533,6 @@ input[type=range]{accent-color:#0088b0}
     </div>
   </section>
 
-  <section style="padding-top:64px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Dias e locais atípicos · período completo</div>
-        <h2 style="font-size:28px;line-height:1.15;margin:0">Fora do padrão</h2>
-      </div>
-    </div>
-    <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.al }}</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
-      <sc-for list="{{ alRows }}" as="r" hint-placeholder-count="10">
-        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:84px minmax(0,1.4fr) 44px 76px 52px 96px;gap:10px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:transparent;font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
-          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ r.dt }}</span>
-          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
-          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.v }}</span>
-          <span style="text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">normal {{ r.m }}</span>
-          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.dev }}</span>
-          <span style="justify-self:end;font-size:12px;line-height:1.3;padding:2px 8px;border-radius:2px;white-space:nowrap;background:{{ r.tb }};color:{{ r.tc }};box-shadow:inset 0 0 0 1px {{ r.tr }}">{{ r.tag }}</span>
-        </button>
-      </sc-for>
-    </div>
-    <sc-if value="{{ alMore }}" hint-placeholder-val="{{ false }}">
-    <div style="margin-top:12px"><button class="btn btn-ghost" style="font-size:13px" onClick="{{ alToggle }}">{{ alToggleLabel }}</button></div>
-    </sc-if>
-    <div style="margin-top:8px">
-    <button onClick="{{ hw.al.toggle }}" aria-expanded="{{ hw.al.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.al.rot }}deg);transition:transform .2s">▸</span>{{ hw.al.label }}</button>
-    <sc-if value="{{ hw.al.open }}" hint-placeholder-val="{{ false }}">
-    <div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 2px 14px;margin:2px 0 10px;border-left:2px solid var(--color-neutral-200);max-width:60em">
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ alLede }}</p>
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Segue a origem, o local e as prioridades, não a janela. Clique numa linha para a ver no mapa.</p>
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Por linha: dia, onde, admissões observadas, o que seria normal, desvio face ao normal e gravidade (muito acima: pelo menos 3 desvios padrão; acima ou abaixo: a partir de 2 para a área e de 2,5 para cada freguesia).</p>
-    </div>
-    </sc-if>
-    </div>
-  </section>
-
-  <sc-if value="{{ hasCs }}" hint-placeholder-val="{{ false }}">
-  <section style="padding-top:64px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Unidades de cuidados primários · período completo</div>
-        <h2 style="font-size:28px;line-height:1.15;margin:0">Por unidade de cuidados primários</h2>
-      </div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-        <div style="display:flex;align-items:center;gap:8px;font-size:13px">
-          <span style="color:var(--color-neutral-700)">Ordenar por</span>
-          <div class="seg"><sc-for list="{{ csOpts }}" as="o" hint-placeholder-count="3"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="cssort" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
-        </div>
-      </div>
-    </div>
-    <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.cs }}</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
-      <sc-for list="{{ csRows }}" as="r" hint-placeholder-count="12">
-        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:{{ r.cur }};border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
-          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
-          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
-          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
-          <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></span>
-          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
-        </button>
-      </sc-for>
-    </div>
-    <sc-if value="{{ csMore }}" hint-placeholder-val="{{ false }}">
-    <div style="margin-top:12px"><button class="btn btn-ghost" style="font-size:13px" onClick="{{ csToggle }}">{{ csToggleLabel }}</button></div>
-    </sc-if>
-    <div style="margin-top:8px">
-    <button onClick="{{ hw.cs.toggle }}" aria-expanded="{{ hw.cs.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.cs.rot }}deg);transition:transform .2s">▸</span>{{ hw.cs.label }}</button>
-    <sc-if value="{{ hw.cs.open }}" hint-placeholder-val="{{ false }}">
-    <div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 2px 14px;margin:2px 0 10px;border-left:2px solid var(--color-neutral-200);max-width:60em">
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ csLede }}</p>
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Não segue a janela nem os filtros.</p>
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ csNote }}</p>
-    </div>
-    </sc-if>
-    </div>
-  </section>
-  </sc-if>
-
   <sc-if value="{{ hasSoc }}" hint-placeholder-val="{{ false }}">
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
@@ -649,6 +579,165 @@ input[type=range]{accent-color:#0088b0}
     <div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 2px 14px;margin:2px 0 10px;border-left:2px solid var(--color-neutral-200);max-width:60em">
     <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ socLede }}</p>
     <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ socNote }}</p>
+    </div>
+    </sc-if>
+    </div>
+  </section>
+  </sc-if>
+
+  <div data-grp="quando" role="group" aria-label="Quando: Quando chegam e quando foge ao normal?" style="padding-top:64px;margin-bottom:-30px">
+    <div style="border-top:1px solid var(--color-neutral-300);padding-top:10px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+      <span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Quando</span>
+      <span style="font-size:15px;font-style:italic;color:var(--color-neutral-700)">Quando chegam e quando foge ao normal?</span>
+    </div>
+  </div>
+
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Dias e locais atípicos · período completo</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">Fora do padrão</h2>
+      </div>
+    </div>
+    <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.al }}</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
+      <sc-for list="{{ alRows }}" as="r" hint-placeholder-count="10">
+        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:84px minmax(0,1.4fr) 44px 76px 52px 96px;gap:10px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:transparent;font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
+          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ r.dt }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.v }}</span>
+          <span style="text-align:right;font-size:12px;font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">normal {{ r.m }}</span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.dev }}</span>
+          <span style="justify-self:end;font-size:12px;line-height:1.3;padding:2px 8px;border-radius:2px;white-space:nowrap;background:{{ r.tb }};color:{{ r.tc }};box-shadow:inset 0 0 0 1px {{ r.tr }}">{{ r.tag }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <sc-if value="{{ alMore }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:12px"><button class="btn btn-ghost" style="font-size:13px" onClick="{{ alToggle }}">{{ alToggleLabel }}</button></div>
+    </sc-if>
+    <div style="margin-top:8px">
+    <button onClick="{{ hw.al.toggle }}" aria-expanded="{{ hw.al.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.al.rot }}deg);transition:transform .2s">▸</span>{{ hw.al.label }}</button>
+    <sc-if value="{{ hw.al.open }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 2px 14px;margin:2px 0 10px;border-left:2px solid var(--color-neutral-200);max-width:60em">
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ alLede }}</p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Segue a origem, o local e as prioridades, não a janela. Clique numa linha para a ver no mapa.</p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Por linha: dia, onde, admissões observadas, o que seria normal, desvio face ao normal e gravidade (muito acima: pelo menos 3 desvios padrão; acima ou abaixo: a partir de 2 para a área e de 2,5 para cada freguesia).</p>
+    </div>
+    </sc-if>
+    </div>
+  </section>
+
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Hora × dia da semana · {{ rangeLabel }}</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">Quando chegam</h2>
+      </div>
+    </div>
+    <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.hm }}</p>
+    <div style="overflow-x:auto">
+      <div style="display:grid;grid-template-columns:36px repeat(24,minmax(30px,1fr)) 64px;gap:3px;min-width:900px;font-variant-numeric:tabular-nums">
+        <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="7">
+          <span style="font-size:13px;font-style:italic;align-self:center">{{ r.dia }}</span>
+          <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="24">
+            <span title="{{ c.t }}" style="display:flex;align-items:center;justify-content:center;height:28px;font-size:12px;background:{{ c.bg }};color:{{ c.fg }};border-radius:1px">{{ c.v }}</span>
+          </sc-for>
+          <span style="font-size:14px;font-weight:600;text-align:right;align-self:center">{{ r.tot }}</span>
+        </sc-for>
+        <span></span>
+        <sc-for list="{{ hmHours }}" as="h" hint-placeholder-count="24"><span style="font-size:12px;text-align:center;color:var(--color-neutral-700);padding-top:4px">{{ h }}</span></sc-for>
+        <span style="font-size:12px;text-align:right;font-style:italic;color:var(--color-neutral-700);padding-top:4px">total/dia</span>
+      </div>
+    </div>
+    <div style="margin-top:8px">
+    <button onClick="{{ hw.hm.toggle }}" aria-expanded="{{ hw.hm.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.hm.rot }}deg);transition:transform .2s">▸</span>{{ hw.hm.label }}</button>
+    <sc-if value="{{ hw.hm.open }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 2px 14px;margin:2px 0 10px;border-left:2px solid var(--color-neutral-200);max-width:60em">
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ hmNote }}</p>
+    </div>
+    </sc-if>
+    </div>
+  </section>
+
+  <div data-grp="quem" role="group" aria-label="Quem: Quem são e por onde passam antes?" style="padding-top:64px;margin-bottom:-30px">
+    <div style="border-top:1px solid var(--color-neutral-300);padding-top:10px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap">
+      <span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;color:var(--color-accent-700)">Quem</span>
+      <span style="font-size:15px;font-style:italic;color:var(--color-neutral-700)">Quem são e por onde passam antes?</span>
+    </div>
+  </div>
+
+  <sc-if value="{{ hasCs }}" hint-placeholder-val="{{ false }}">
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Unidades de cuidados primários · período completo</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">Por unidade de cuidados primários</h2>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+          <span style="color:var(--color-neutral-700)">Ordenar por</span>
+          <div class="seg"><sc-for list="{{ csOpts }}" as="o" hint-placeholder-count="3"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="cssort" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
+        </div>
+      </div>
+    </div>
+    <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.cs }}</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
+      <sc-for list="{{ csRows }}" as="r" hint-placeholder-count="12">
+        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:{{ r.cur }};border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
+          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
+          <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><sc-for list="{{ r.segs }}" as="s" hint-placeholder-count="0"><i title="{{ s.t }}" style="display:block;width:{{ s.w }}%;background:{{ s.c }}"></i></sc-for></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <sc-if value="{{ csMore }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:12px"><button class="btn btn-ghost" style="font-size:13px" onClick="{{ csToggle }}">{{ csToggleLabel }}</button></div>
+    </sc-if>
+    <div style="margin-top:8px">
+    <button onClick="{{ hw.cs.toggle }}" aria-expanded="{{ hw.cs.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.cs.rot }}deg);transition:transform .2s">▸</span>{{ hw.cs.label }}</button>
+    <sc-if value="{{ hw.cs.open }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 2px 14px;margin:2px 0 10px;border-left:2px solid var(--color-neutral-200);max-width:60em">
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ csLede }}</p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Não segue a janela nem os filtros.</p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ csNote }}</p>
+    </div>
+    </sc-if>
+    </div>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ hasFq }}" hint-placeholder-val="{{ false }}">
+  <section style="padding-top:64px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Utentes · período completo</div>
+        <h2 style="font-size:28px;line-height:1.15;margin:0">Quem volta muitas vezes</h2>
+      </div>
+    </div>
+    <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.fq }}</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
+      <sc-for list="{{ fqRows }}" as="r" hint-placeholder-count="12">
+        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
+          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
+          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
+          <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><i title="{{ r.t }}" style="display:block;width:{{ r.w }}%;background:#0088b0"></i></span>
+          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <sc-if value="{{ fqMore }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-top:12px"><button class="btn btn-ghost" style="font-size:13px" onClick="{{ fqToggle }}">{{ fqToggleLabel }}</button></div>
+    </sc-if>
+    <div style="margin-top:8px">
+    <button onClick="{{ hw.fq.toggle }}" aria-expanded="{{ hw.fq.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.fq.rot }}deg);transition:transform .2s">▸</span>{{ hw.fq.label }}</button>
+    <sc-if value="{{ hw.fq.open }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 2px 14px;margin:2px 0 10px;border-left:2px solid var(--color-neutral-200);max-width:60em">
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ fqLede }}</p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Não segue a janela nem os filtros. Clique numa linha para a ver no mapa.</p>
+    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Por linha: utentes frequentes, peso das suas idas nas admissões da freguesia (barra) e percentagem dos utentes da freguesia que são frequentes.</p>
     </div>
     </sc-if>
     </div>
@@ -709,81 +798,39 @@ input[type=range]{accent-color:#0088b0}
   </section>
   </sc-if>
 
-  <sc-if value="{{ hasFq }}" hint-placeholder-val="{{ false }}">
-  <section style="padding-top:64px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Utentes · período completo</div>
-        <h2 style="font-size:28px;line-height:1.15;margin:0">Quem volta muitas vezes</h2>
+  <section data-grp="dados" style="padding-top:72px">
+    <div style="border-top:1px solid var(--color-neutral-300);padding-top:10px;margin-bottom:12px">
+      <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Fontes e avisos</div>
+      <h2 style="font-size:28px;line-height:1.15;margin:0">Sobre os dados</h2>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:20px 48px;max-width:70em;font-size:13.5px;line-height:1.5;color:var(--color-neutral-700)">
+      <div style="flex:1 1 360px">
+        <div style="font-weight:600;color:var(--color-text);margin-bottom:4px">De onde vêm</div>
+        <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px">
+          <li>{{ foot }}</li>
+          <li>População residente: INE, Censos 2021.</li>
+          <li>Médico de família: Portal da Transparência do SNS.</li>
+          <li>Mapas: fundo Esri ou OpenStreetMap; limites de freguesia CAOP; localização dos hospitais e das unidades de saúde: OpenStreetMap.</li>
+          <li>Vista 3D: MapLibre, com relevo dos mosaicos públicos Terrarium (AWS Open Data).</li>
+        </ul>
+      </div>
+      <div style="flex:1 1 360px">
+        <div style="font-weight:600;color:var(--color-text);margin-bottom:4px">O que não mostram</div>
+        <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px">
+          <li>Associação não é causa: as comparações entre freguesias não dizem quem, dentro de cada freguesia, recorre à urgência.</li>
+          <li>Os dados são agregados por freguesia e por dia; nenhum dado de doentes sai deste computador (o mapa de fundo só descarrega imagens).</li>
+          <li>Só contam as admissões nesta ULS: quem vai a outros hospitais não aparece.</li>
+          <li>Urgentes = vermelho, laranja e amarelo. Proporções por freguesia só são coloridas com pelo menos 30 admissões no recorte.</li>
+        </ul>
       </div>
     </div>
-    <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.fq }}</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,560px),1fr));gap:0 56px">
-      <sc-for list="{{ fqRows }}" as="r" hint-placeholder-count="12">
-        <button onClick="{{ r.click }}" style="display:grid;grid-template-columns:28px minmax(0,1.4fr) 70px minmax(0,1fr) 48px;gap:12px;align-items:center;padding:10px 6px;margin:0 -6px;border:0;background:{{ r.bg }};font:inherit;font-size:14px;color:var(--color-text);text-align:left;cursor:pointer;border-radius:var(--radius-md)" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
-          <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-600)">{{ r.i }}</span>
-          <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }}</span><span style="font-size:12px;font-style:italic;color:var(--color-neutral-700)">{{ r.con }}</span></span>
-          <span style="text-align:right;font-variant-numeric:tabular-nums">{{ r.n }}</span>
-          <span style="display:flex;height:10px;border-radius:1px;overflow:hidden;background:var(--color-neutral-200)"><i title="{{ r.t }}" style="display:block;width:{{ r.w }}%;background:#0088b0"></i></span>
-          <span style="text-align:right;font-variant-numeric:tabular-nums;font-weight:600">{{ r.pct }}</span>
-        </button>
-      </sc-for>
-    </div>
-    <sc-if value="{{ fqMore }}" hint-placeholder-val="{{ false }}">
-    <div style="margin-top:12px"><button class="btn btn-ghost" style="font-size:13px" onClick="{{ fqToggle }}">{{ fqToggleLabel }}</button></div>
-    </sc-if>
-    <div style="margin-top:8px">
-    <button onClick="{{ hw.fq.toggle }}" aria-expanded="{{ hw.fq.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.fq.rot }}deg);transition:transform .2s">▸</span>{{ hw.fq.label }}</button>
-    <sc-if value="{{ hw.fq.open }}" hint-placeholder-val="{{ false }}">
-    <div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 2px 14px;margin:2px 0 10px;border-left:2px solid var(--color-neutral-200);max-width:60em">
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ fqLede }}</p>
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Não segue a janela nem os filtros. Clique numa linha para a ver no mapa.</p>
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">Por linha: utentes frequentes, peso das suas idas nas admissões da freguesia (barra) e percentagem dos utentes da freguesia que são frequentes.</p>
-    </div>
-    </sc-if>
-    </div>
-  </section>
-  </sc-if>
-
-  <section style="padding-top:64px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
-      <div>
-        <div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Hora × dia da semana · {{ rangeLabel }}</div>
-        <h2 style="font-size:28px;line-height:1.15;margin:0">Quando chegam</h2>
-      </div>
-    </div>
-    <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.hm }}</p>
-    <div style="overflow-x:auto">
-      <div style="display:grid;grid-template-columns:36px repeat(24,minmax(30px,1fr)) 64px;gap:3px;min-width:900px;font-variant-numeric:tabular-nums">
-        <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="7">
-          <span style="font-size:13px;font-style:italic;align-self:center">{{ r.dia }}</span>
-          <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="24">
-            <span title="{{ c.t }}" style="display:flex;align-items:center;justify-content:center;height:28px;font-size:12px;background:{{ c.bg }};color:{{ c.fg }};border-radius:1px">{{ c.v }}</span>
-          </sc-for>
-          <span style="font-size:14px;font-weight:600;text-align:right;align-self:center">{{ r.tot }}</span>
-        </sc-for>
-        <span></span>
-        <sc-for list="{{ hmHours }}" as="h" hint-placeholder-count="24"><span style="font-size:12px;text-align:center;color:var(--color-neutral-700);padding-top:4px">{{ h }}</span></sc-for>
-        <span style="font-size:12px;text-align:right;font-style:italic;color:var(--color-neutral-700);padding-top:4px">total/dia</span>
-      </div>
-    </div>
-    <div style="margin-top:8px">
-    <button onClick="{{ hw.hm.toggle }}" aria-expanded="{{ hw.hm.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.hm.rot }}deg);transition:transform .2s">▸</span>{{ hw.hm.label }}</button>
-    <sc-if value="{{ hw.hm.open }}" hint-placeholder-val="{{ false }}">
-    <div style="display:flex;flex-direction:column;gap:8px;padding:2px 0 2px 14px;margin:2px 0 10px;border-left:2px solid var(--color-neutral-200);max-width:60em">
-    <p style="margin:0;font-size:13px;line-height:1.5;color:var(--color-neutral-700)">{{ hmNote }}</p>
-    </div>
-    </sc-if>
-    </div>
-  </section>
-
-  <footer style="padding-top:48px;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--color-neutral-700);max-width:70em">
+    <div style="margin-top:12px;max-width:70em;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--color-neutral-700)">
     <button onClick="{{ hw.foot.toggle }}" aria-expanded="{{ hw.foot.open }}" style="align-self:flex-start;display:flex;align-items:center;gap:8px;padding:4px 0;border:0;background:transparent;font:inherit;font-size:13.5px;color:var(--color-accent-700);cursor:pointer"><span style="display:inline-block;transform:rotate({{ hw.foot.rot }}deg);transition:transform .2s">▸</span>{{ hw.foot.label }}</button>
     <sc-if value="{{ hw.foot.open }}" hint-placeholder-val="{{ false }}">
-    <span>{{ foot }}</span>
-    <span>Urgentes = vermelho, laranja e amarelo. Proporções por freguesia só são coloridas com pelo menos 30 admissões no recorte. Limites de freguesia: CAOP. {{ foot2 }} O mapa de fundo (Esri ou OpenStreetMap) só descarrega imagens; nenhum dado de doentes sai deste computador.</span>
+    <span>{{ foot2 }}</span>
     </sc-if>
-  </footer>
+    </div>
+  </section>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
@@ -959,17 +1006,19 @@ class Component extends DCLogic {
     }
     this.attach();
   }
-  // secções localizadas pelo texto dos h2 (sem depender de ids nas tags <section>)
+  // grupos da barra: separadores com data-grp; ctxSection encontra secções pelo texto do h2 (usado por "Em destaque")
   ctxTargets() {
-    const hs = [...document.querySelectorAll('h2')];
-    const sec = f => { const h = hs.find(x => f((x.textContent || '').trim())); return h ? (h.closest('section') || h) : null; };
-    return [['mapa', 'Mapa', this.mapRef.current], ['freg', 'Freguesias', sec(t => t.startsWith('Freguesias com'))], ['fora', 'Fora do padrão', sec(t => t === 'Fora do padrão')],
-      ['uni', 'Unidades', sec(t => t === 'Por unidade de cuidados primários')], ['soc', 'Contexto social', sec(t => t === 'Urgência e contexto social')], ['sns', 'SNS', sec(t => t === 'Contexto da ULS')], ['freq', 'Frequentes', sec(t => t === 'Quem volta muitas vezes')], ['horas', 'Horas', sec(t => t === 'Quando chegam')]]
-      .filter(x => x[2]).map(([k, label, el]) => ({ k, label, el }));
+    return [['onde', 'Onde'], ['quando', 'Quando'], ['quem', 'Quem'], ['dados', 'Sobre os dados']]
+      .map(([k, label]) => ({ k, label, el: document.querySelector('[data-grp="' + k + '"]') })).filter(x => x.el);
+  }
+  ctxSection(k) {
+    const f = { fora: t => t === 'Fora do padrão' }[k]; if (!f) return null;
+    const h = [...document.querySelectorAll('h2')].find(x => f((x.textContent || '').trim()));
+    return h ? (h.closest('section') || h) : null;
   }
   ctxBarH() { const b = document.getElementById('ctxbar'); return b ? b.offsetHeight : 0; }
   ctxScrollTo(el) { if (!el) return; el.style.scrollMarginTop = (this.ctxBarH() + 12) + 'px'; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  ctxGo(k) { const t = this.ctxTargets().find(x => x.k === k); t && this.ctxScrollTo(t.el); }
+  ctxGo(k) { const t = this.ctxTargets().find(x => x.k === k), el = t ? t.el : this.ctxSection(k); el && this.ctxScrollTo(el); }
   ctxMeasure() {
     const h1 = document.querySelector('h1'), stuck = !!h1 && h1.getBoundingClientRect().bottom < 0;
     let sec = this.state.sec;
@@ -1800,7 +1849,7 @@ class Component extends DCLogic {
     // opções escondidas em "Mais opções" que não estão no valor por omissão
     const LD = layDefault(), LC = this.layOf();
     const nMore = (st.mode !== 'calor') + (st.fundo !== 'mapa') + (!st.fixed) + (st.local >= 0) + (!!st.cmp) + (Object.keys(LD).some(k => LD[k].on !== LC[k].on || LD[k].op !== LC[k].op) ? 1 : 0);
-    const hw = {}; HOWK.forEach(k => { const o = !!(st.how && st.how[k]); hw[k] = { open: o, rot: o ? 90 : 0, label: k === 'foot' ? 'Fontes e notas gerais' : 'Como ler e de onde vêm os dados', toggle: () => set({ how: { ...(st.how || {}), [k]: !o } }) }; });
+    const hw = {}; HOWK.forEach(k => { const o = !!(st.how && st.how[k]); hw[k] = { open: o, rot: o ? 90 : 0, label: k === 'foot' ? 'Notas metodológicas' : 'Como ler e de onde vêm os dados', toggle: () => set({ how: { ...(st.how || {}), [k]: !o } }) }; });
     const sh = (x, tot) => tot > 0 ? pc(x / tot) : '—';
     const mapTot = sum(byN.map(r => r.n)), tp = k => sum(rk.slice(0, k).map(r => r.n));
     const cl = { map: isTx ? (rk[0] ? `${nice(rk[0].f.n)} é onde mais se recorre à urgência: ${f0(rk[0].tx)} admissões por 1 000 habitantes por ano.` : '') : isPct ? (rk[0] ? `${nice(rk[0].f.n)} é onde as ${sp ? selNames : 'urgentes'} mais pesam: ${pc(rk[0].share)} das admissões.` : '') : (byN[0] && mapTot ? `${nice(byN[0].f.n)} é a freguesia com mais admissões (${sh(byN[0].n, mapTot)} do total).` : ''),
