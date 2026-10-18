@@ -35,13 +35,13 @@ input[type=range]{accent-color:#0088b0}
   <header style="display:flex;flex-direction:column;gap:6px">
     <div style="height:4px;background:var(--color-text)"></div>
     <div style="height:1px;background:var(--color-text)"></div>
-    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;padding:10px 0 8px;flex-wrap:wrap">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:4px 20px;padding:10px 0 8px;flex-wrap:wrap">
       <span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase">ULS Amadora/Sintra · Serviço de Urgência</span>
       <span style="font-size:13px">Origem e prioridade das admissões · 1.º trimestre de 2026</span>
     </div>
     <div style="height:1px;background:var(--color-text)"></div>
-    <div style="display:flex;gap:28px;padding:7px 0;font-size:13px;flex-wrap:wrap">
-      <span>31 dez 2025 – 31 mar 2026</span><span>{{ totalLabel }} admissões</span><span>5 locais de entrada</span><span>Triagem de Manchester</span><span style="margin-left:auto">Fonte: BD_Urgencia_Admissoes.csv</span>
+    <div style="display:flex;gap:4px 28px;padding:7px 0;font-size:13px;flex-wrap:wrap">
+      <span>31 dez 2025 – 31 mar 2026</span><span>{{ totalLabel }} admissões</span><span class="hd-x">5 locais de entrada</span><span class="hd-x">Triagem de Manchester</span><span class="hd-x" style="margin-left:auto">Fonte: BD_Urgencia_Admissoes.csv</span>
     </div>
     <div style="height:1px;background:var(--color-text)"></div>
   </header>
@@ -80,7 +80,7 @@ input[type=range]{accent-color:#0088b0}
     </div>
   </section>
 
-  <div data-grp="onde" role="group" aria-label="Onde: De onde vêm os doentes?" style="padding-top:64px;margin-bottom:0px">
+  <div data-grp="onde" role="group" aria-label="Onde: De onde vêm os doentes?" style="padding-top:64px;margin-bottom:24px">
     <div style="border-top:2px solid var(--color-neutral-700);padding-top:12px;display:flex;align-items:baseline;gap:6px 16px;flex-wrap:wrap">
       <span style="font-size:15px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--color-accent-700)">Onde</span>
       <span style="font-size:20px;line-height:1.25;font-weight:500;color:var(--color-neutral-800)">De onde vêm os doentes?</span>
@@ -930,6 +930,7 @@ const ANIM_CSS = `
 @keyframes urgFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .urg-anim *, .urg-fade { transition: none !important; animation: none !important; } }
 @media (max-width:600px){
+  .hd-x{display:none}
   #ctxbar .cx-part{display:none}
   .urg-anim{padding-left:16px!important;padding-right:16px!important}
   .opt-aside{flex:1 1 100%!important}
