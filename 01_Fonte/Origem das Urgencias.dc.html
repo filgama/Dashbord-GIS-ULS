@@ -27,7 +27,7 @@ input[type=range]{accent-color:#0088b0}
         <button class="btn btn-ghost" style="padding:2px 8px;margin-left:8px;font-size:13px" onClick="{{ cxFilters }}">Alterar filtros</button>
       </div>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;min-width:0">
-        <sc-for list="{{ cxItems }}" as="s" hint-placeholder-count="6"><button onClick="{{ s.go }}" style="border:0;background:transparent;font:inherit;font-size:13px;font-weight:{{ s.fw }};color:{{ s.color }};padding:4px 6px;border-bottom:2px solid {{ s.bc }};cursor:pointer">{{ s.label }}</button></sc-for>
+        <sc-for list="{{ cxItems }}" as="s" hint-placeholder-count="6"><button onClick="{{ s.go }}" aria-current="{{ s.cur }}" style="border:0;background:transparent;font:inherit;font-size:13px;font-weight:{{ s.fw }};color:{{ s.color }};padding:4px 6px;border-bottom:2px solid {{ s.bc }};cursor:pointer">{{ s.label }}</button></sc-for>
       </div>
     </nav>
   </div>
@@ -1054,8 +1054,10 @@ class Component extends DCLogic {
     return h ? (h.closest('section') || h) : null;
   }
   ctxBarH() { const b = document.getElementById('ctxbar'); return b ? b.offsetHeight : 0; }
-  ctxScrollTo(el) { if (!el) return; el.style.scrollMarginTop = (this.ctxBarH() + 12) + 'px'; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  ctxGoMap() { const narrow = window.innerWidth <= 900, el = document.querySelector('[data-tgt="' + (narrow ? 'tri' : 'map') + '"]') || this.mapRef.current; setTimeout(() => this.ctxScrollTo(el), 90); }
+  ctxScrollTo(el, extra = 12) { if (!el) return; el.style.scrollMarginTop = (this.ctxBarH() + extra) + 'px'; const y0 = window.scrollY; el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // salvaguarda: se o browser não animar (separador em segundo plano, por exemplo), salta direto
+    setTimeout(() => { if (Math.abs(window.scrollY - y0) < 2 && Math.abs(el.getBoundingClientRect().top - parseFloat(el.style.scrollMarginTop)) > 4) el.scrollIntoView({ block: 'start' }); }, 700); }
+  ctxGoMap() { const narrow = window.innerWidth <= 900, el = document.querySelector('[data-tgt="' + (narrow ? 'tri' : 'map') + '"]') || this.mapRef.current; setTimeout(() => this.ctxScrollTo(el, narrow ? 52 : 28), 90); } // em ecrã estreito a barra cresce ao aparecer o nome da freguesia
   ctxGo(k) { const t = this.ctxTargets().find(x => x.k === k), el = t ? t.el : this.ctxSection(k); el && this.ctxScrollTo(el); }
   ctxMeasure() {
     const h1 = document.querySelector('h1'), stuck = !!h1 && h1.getBoundingClientRect().bottom < 0;
@@ -1571,7 +1573,7 @@ class Component extends DCLogic {
         tb: sev === 2 ? ATT : 'transparent', tc: sev === 2 ? '#f3f2f2' : sev === 1 ? ATT : 'var(--color-neutral-700)', tr: sev ? ATT : '#bab6b6',
         click: () => { set({ end: x.i, win: 1, sel: x.d || null, playing: false }); this.mapRef.current && this.mapRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }; });
     const alN = alF.length, alNf = alN - this.alVal.nArea, alPl = (n, s, p) => `${NF.format(n)} ${n === 1 ? s : p}`;
-    const alLede = (alN ? `Em ${alPl(this.alVal.nArea, 'dia', 'dias')} o total de admissões ficou fora do padrão e, em ${alPl(alNf, 'caso', 'casos')}, uma freguesia de Amadora ou Sintra num determinado dia (${alPl(this.alVal.nFr, 'freguesia analisada', 'freguesias analisadas')}, com pelo menos ${AL_MINF} admissões por dia).` : `Nenhum dia ficou fora do padrão com os filtros atuais, nem para o total nem para as ${alPl(this.alVal.nFr, 'freguesia analisada', 'freguesias analisadas')}.`)
+    const alLede = (alN ? `Em ${alPl(this.alVal.nArea, 'dia', 'dias')} o total de admissões ficou fora do padrão e, em ${alPl(alNf, 'caso', 'casos')}, uma freguesia de Amadora ou Sintra ficou fora do padrão num determinado dia (${alPl(this.alVal.nFr, 'freguesia analisada', 'freguesias analisadas')}, com pelo menos ${AL_MINF} admissões por dia).` : `Nenhum dia ficou fora do padrão com os filtros atuais, nem para o total nem para as ${alPl(this.alVal.nFr, 'freguesia analisada', 'freguesias analisadas')}.`)
       + ` O normal é a média dos outros dias com o mesmo dia da semana no período (por exemplo, as outras segundas-feiras), tendo em conta a variação habitual; o último dia fica de fora por estar incompleto. Com ${NF.format(this.alVal.nComp)} comparações, alguns desvios acontecem por acaso. Segue os filtros de origem, local e prioridades, mas não a janela.`;
     // marcas na timeline: dias fora do padrão da área e, com uma freguesia escolhida, os dessa freguesia; clicar leva a janela a esse dia
     const sgnP = r => `${r > 0 ? '+' : r < 0 ? '−' : ''}${Math.abs(r)}%`;
@@ -1728,7 +1730,7 @@ class Component extends DCLogic {
         chart('Urgentes (V+L+A)', '% dos triados', g('tri', r => { const t = r.slice(0, 6); return ok(t) && sum(t) ? (r[0] + r[1] + r[2]) / sum(t) : null; }), v => pc(v, 1), '#ef8a22', null, '', true),
         chart('Consultas médicas nos CSP', 'presenciais e não presenciais', g('cons', r => ok(r) ? sum(r) : null), v => NF.format(Math.round(v)), '#3a9d4a', g('cons', r => r[0]), 'presenciais'),
         chart('Contactos de enfermagem nos CSP', 'presenciais e não presenciais', g('enf', r => ok(r) ? sum(r) : null), v => NF.format(Math.round(v)), '#2f6fc6'),
-        chart('Sem médico de família', '% dos inscritos', g('insc', r => r[0] ? r[1] / r[0] : null), v => pc(v, 1), ATT, null, '', true),
+        chart('Sem médico de família', '% dos inscritos', g('insc', r => r[0] ? r[1] / r[0] : null), v => pc(v, 1), 'var(--color-neutral-800)', null, '', true),
         chart('Ocupação do internamento', 'taxa acumulada no ano', g('ocup', r => r == null ? null : r / 100), v => pc(v, 1), '#7a7676', null, '', true)
       ];
       // confronto mês a mês: admissões do CSV vs atendimentos da urgência (o portal soma geral + pediátrica + obstétrica)
@@ -1845,7 +1847,7 @@ class Component extends DCLogic {
       { txt: st.local < 0 ? 'Todos os locais' : U.LOC[st.local], fw: 400 },
       ...(st.prios.length ? [{ txt: 'Prioridades: ' + st.prios.map(i => PRIO[i][0]).join(', '), fw: 400 }] : [])].map((p, i) => ({ ...p, sep: i ? ' · ' : '' }));
     const cxItems = st.stuck ? this.ctxTargets().map(t => { const on = st.sec === t.k;
-      return { label: t.label, fw: on ? 600 : 400, color: on ? 'var(--color-accent-700)' : 'var(--color-neutral-700)', bc: on ? 'var(--color-accent-700)' : 'transparent', go: () => this.ctxGo(t.k) }; }) : [];
+      return { label: t.label, fw: on ? 600 : 400, color: on ? 'var(--color-accent-700)' : 'var(--color-neutral-700)', bc: on ? 'var(--color-accent-700)' : 'transparent', cur: on ? 'true' : 'false', go: () => this.ctxGo(t.k) }; }) : [];
 
     // hour × weekday heatmap (média por dia desse dia da semana na janela)
     const H = U.H, DOWS = [1, 2, 3, 4, 5, 6, 0], DN = ['seg', 'ter', 'qua', 'qui', 'sex', 'sáb', 'dom'];
@@ -1884,7 +1886,7 @@ class Component extends DCLogic {
     { const evW = alF.filter(x => x.i >= i0 && x.i <= i1 && x.z > 0).sort((x, y) => y.z - x.z), n = evW.length;
       if (n) { const x = evW[0], f = x.d ? alFm.get(x.d) : null, r = x.m > 0 ? x.v / x.m - 1 : NaN;
         hl.push({ k: 'Fora do padrão', big: `${n} ${n === 1 ? 'alerta' : 'alertas'}`, c: ATT, bc: ATT,
-          sm: `${winTxt[0].toUpperCase() + winTxt.slice(1)}. O maior: ${fdy(U.days[x.i])}, ${f ? nice(f.n) : 'toda a área'}, ${NF.format(x.v)} admissões` + (isFinite(r) ? ` (${sPc(r)} face ao normal).` : '.'),
+          sm: `${winTxt[0].toUpperCase() + winTxt.slice(1)}. O mais invulgar: ${fdy(U.days[x.i])}, ${f ? nice(f.n) : 'toda a área'}, ${NF.format(x.v)} admissões` + (isFinite(r) ? ` (${sPc(r)} face ao normal).` : '.'),
           cta: 'Ver os alertas', go: () => this.ctxGo('fora') }); }
       else hl.push({ k: 'Fora do padrão', big: 'Sem alertas', c: 'var(--color-neutral-400)', bc: 'var(--color-text)',
         sm: `Nenhum dia acima do normal ${winTxt}, com os filtros atuais.`, cta: 'Ver o histórico', go: () => this.ctxGo('fora') }); }
@@ -1899,7 +1901,7 @@ class Component extends DCLogic {
     const rkN = st.rkAll ? rk.length : Math.min(RK_TOP, rk.length);
     const cl = { map: isTx ? (rk[0] ? `${nice(rk[0].f.n)} é onde mais se recorre à urgência: ${f0(rk[0].tx)} admissões por 1 000 habitantes por ano.` : '') : isPct ? (rk[0] ? `${nice(rk[0].f.n)} é onde as ${sp ? selNames : 'urgentes'} mais pesam: ${pc(rk[0].share)} das admissões.` : '') : (byN[0] && mapTot ? `${nice(byN[0].f.n)} é a freguesia com mais admissões (${sh(byN[0].n, mapTot)} das admissões com freguesia).` : ''),
       rank: rk.length >= 5 ? (isTx ? `As ${rkN} primeiras têm entre ${f0(rk[rkN - 1].tx)} e ${f0(rk[0].tx)} admissões por 1 000 habitantes por ano.` : isPct ? `As ${rkN} primeiras têm entre ${pc(rk[rkN - 1].share)} e ${pc(rk[0].share)} de admissões ${sp ? selNames : 'urgentes'}.` : `As ${rkN} primeiras freguesias concentram ${sh(tp(rkN), mapTot)} das admissões com freguesia.`) : '',
-      al: alN ? `${alPl(alN, 'alerta', 'alertas')} fora do padrão no período. O maior: ${alRows[0].name}, a ${alRows[0].dt.replace(' · ', ' (')}), ${alRows[0].dev} face ao normal.` : 'Nenhum dia fora do padrão com os filtros atuais.',
+      al: alN ? `${alPl(alN, 'alerta', 'alertas')} fora do padrão no período. O mais invulgar: ${alRows[0].name}, a ${alRows[0].dt.replace(' · ', ' (')}), ${alRows[0].dev} face ao normal.` : 'Nenhum dia fora do padrão com os filtros atuais.',
       cs: csConcl, soc: socConcl, sns: snsConcl, fq: fqConcl, hm: hmConcl,
       tri: `${pc((cur[0] + cur[1] + cur[2]) / curTot)} das admissões são urgentes (vermelho, laranja ou amarelo).` };
     return this.lastVals = { hw, cl, rankMore, rankToggle, rankToggleLabel, fqMore, fqToggle, fqToggleLabel,
