@@ -23,7 +23,7 @@ input[type=range]{accent-color:#0088b0}
     <nav id="ctxbar" aria-label="Contexto e secções" style="position:absolute;left:0;right:0;top:0;box-sizing:border-box;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:2px 24px;padding:6px 0;background:#f3f2f2;border-bottom:1px solid rgba(32,30,29,.25);font-size:13px;opacity:{{ cxOp }};visibility:{{ cxVis }};transition:opacity .15s">
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:2px 0;min-width:0;flex:1 1 420px">
         <sc-for list="{{ cxParts }}" as="p" hint-placeholder-count="3"><span class="cx-part" style="white-space:pre-wrap;font-weight:{{ p.fw }}">{{ p.sep }}{{ p.txt }}</span></sc-for>
-        <sc-if value="{{ cxHasSel }}" hint-placeholder-val="{{ false }}"><span style="white-space:pre-wrap"> · {{ cxSelName }}</span><button class="btn btn-ghost" style="padding:0 6px;font-size:15px;line-height:1.2" onClick="{{ cxClear }}" aria-label="Limpar freguesia selecionada" title="Limpar freguesia selecionada">×</button></sc-if>
+        <sc-if value="{{ cxHasSel }}" hint-placeholder-val="{{ false }}"><span class="cx-part" style="white-space:pre-wrap"> · </span><span style="white-space:pre-wrap">{{ cxSelName }}</span><button class="btn btn-ghost" style="padding:0 6px;font-size:15px;line-height:1.2" onClick="{{ cxClear }}" aria-label="Limpar freguesia selecionada" title="Limpar freguesia selecionada">×</button></sc-if>
         <button class="btn btn-ghost" style="padding:2px 8px;margin-left:8px;font-size:13px" onClick="{{ cxFilters }}">Alterar filtros</button>
       </div>
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;min-width:0">
@@ -68,7 +68,7 @@ input[type=range]{accent-color:#0088b0}
       <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Em destaque</div>
       <span style="font-size:13px;color:var(--color-neutral-700)">{{ hlWhen }}</span>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px">
+    <div class="hl-grid" data-n="{{ hlCols }}" style="display:grid;grid-template-columns:repeat({{ hlCols }},minmax(0,1fr));gap:14px">
       <sc-for list="{{ hl }}" as="h" hint-placeholder-count="4">
         <button onClick="{{ h.go }}" style="text-align:left;display:flex;flex-direction:column;gap:6px;padding:14px 16px 12px;border:0;border-left:4px solid {{ h.c }};background:var(--color-neutral-100);border-radius:var(--radius-md);font:inherit;color:var(--color-text);cursor:pointer">
           <span style="font-size:13px;letter-spacing:.04em;text-transform:uppercase;color:var(--color-neutral-700)">{{ h.k }}</span>
@@ -118,11 +118,11 @@ input[type=range]{accent-color:#0088b0}
         <div style="display:flex;flex-direction:column;gap:4px">
             <span style="font-size:13px;color:var(--color-neutral-700)">Camadas</span>
             <sc-for list="{{ layers }}" as="l" hint-placeholder-count="8">
-              <div style="display:grid;grid-template-columns:18px 14px minmax(0,1fr) 84px 34px;gap:8px;align-items:center;font-size:13px;opacity:{{ l.dim }}" title="{{ l.note }}">
+              <div style="display:grid;grid-template-columns:18px 14px minmax(0,1fr) 64px 34px;gap:8px;align-items:center;font-size:13px;opacity:{{ l.dim }}" title="{{ l.note }}">
                 <input type="checkbox" checked="{{ l.on }}" onChange="{{ l.toggle }}" aria-label="{{ l.aria }}" style="margin:0;accent-color:#0088b0">
                 <i style="display:block;width:14px;height:14px;border-radius:2px;background:{{ l.sw }};box-shadow:inset 0 0 0 1px rgba(32,30,29,.25)"></i>
                 <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span>
-                <input type="range" min="0" max="100" step="5" value="{{ l.pct }}" disabled="{{ l.off }}" onChange="{{ l.slide }}" aria-label="{{ l.ariaOp }}" style="width:84px;margin:0">
+                <input type="range" min="0" max="100" step="5" value="{{ l.pct }}" disabled="{{ l.off }}" onChange="{{ l.slide }}" aria-label="{{ l.ariaOp }}" style="width:64px;margin:0">
                 <span style="text-align:right;font-variant-numeric:tabular-nums;font-size:13px;color:var(--color-neutral-700)">{{ l.pctTxt }}</span>
               </div>
             </sc-for>
@@ -147,7 +147,7 @@ input[type=range]{accent-color:#0088b0}
         </sc-if>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:14px">
+      <div data-tgt="tri" style="display:flex;flex-direction:column;gap:14px">
         <div>
           <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Triagem de Manchester</div>
           <h2 style="font-size:26px;line-height:1.15;margin:0">{{ panelTitle }}</h2>
@@ -195,7 +195,7 @@ input[type=range]{accent-color:#0088b0}
 
     </aside>
 
-    <div style="flex:1 1 420px;display:flex;flex-direction:column;gap:14px;min-width:0">
+    <div data-tgt="map" style="flex:1 1 420px;display:flex;flex-direction:column;gap:14px;min-width:0">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
         <div>
           <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Mapa · {{ rangeLabel }}</div>
@@ -290,7 +290,7 @@ input[type=range]{accent-color:#0088b0}
         {{ hospLayer }}
         <div ref="{{ map3dRef }}" role="img" aria-label="Mapa 3D das freguesias; os mesmos valores estão na lista de freguesias" style="position:absolute;inset:0;display:{{ d3disp }};opacity:{{ d3op }};pointer-events:{{ d3pe }};transition:opacity {{ d3fadeMs }}ms ease;background:#ecebea"></div>
         <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><div role="status" aria-live="polite" style="position:absolute;left:58px;top:12px;max-width:max(160px,min(300px,calc(100% - 330px)));z-index:2;font-size:13px;background:var(--color-bg);padding:6px 12px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</div></sc-if>
-        <div style="position:absolute;right:12px;bottom:26px;display:flex;align-items:center;gap:8px">
+        <div class="map-dim" style="position:absolute;right:12px;bottom:26px;display:flex;align-items:center;gap:8px">
           <div class="seg" style="background:var(--color-bg);box-shadow:var(--shadow-sm)"><sc-for list="{{ dims }}" as="o" hint-placeholder-count="2"><label class="seg-opt" style="padding:5px 10px"><input type="radio" name="dim" checked="{{ o.on }}" onChange="{{ o.pick }}">{{ o.label }}</label></sc-for></div>
         </div>
         <div style="position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:4px">
@@ -298,7 +298,7 @@ input[type=range]{accent-color:#0088b0}
           <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:20px;width:34px;height:34px" onClick="{{ zoomOut }}" aria-label="Afastar" title="Afastar">−</button>
           <button class="btn btn-secondary btn-icon" style="background:var(--color-bg);box-shadow:var(--shadow-sm);font-size:13px;width:34px;height:34px" onClick="{{ zoomReset }}" aria-label="Repor vista" title="Repor vista">⟲</button>
         </div>
-        <div style="position:absolute;right:12px;top:12px;width:min(250px,38%);background:color-mix(in srgb,var(--color-bg) 94%,transparent);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;pointer-events:none">
+        <div class="map-ov" style="position:absolute;right:12px;top:12px;width:min(250px,38%);background:color-mix(in srgb,var(--color-bg) 94%,transparent);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;pointer-events:none">
           <div style="font-size:clamp(26px,3vw,38px);line-height:1;font-weight:600;font-variant-numeric:tabular-nums;color:var(--color-accent-700)">{{ ov.n }}</div>
           <div style="font-size:13px;color:var(--color-neutral-700);margin:4px 0 12px">{{ ov.sub }}</div>
           <div style="font-size:13px;font-weight:600;margin-bottom:4px">{{ ov.topLabel }}</div>
@@ -308,7 +308,7 @@ input[type=range]{accent-color:#0088b0}
         </div>
 
         <sc-if value="{{ hasUni }}" hint-placeholder-val="{{ false }}">
-          <div class="urg-fade" style="position:absolute;right:12px;top:12px;width:min(300px,46%);max-height:calc(100% - 80px);overflow:auto;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;font-size:13px">
+          <div class="urg-fade map-uni" style="position:absolute;right:12px;top:12px;width:min(300px,46%);max-height:calc(100% - 80px);overflow:auto;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;font-size:13px">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
               <div style="min-width:0"><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Unidade de saúde · período completo</div><div style="font-weight:600;font-size:16px;line-height:1.25;margin-top:2px">{{ uniCard.title }}</div><div style="color:var(--color-neutral-700);margin-top:2px">{{ uniCard.sub }}</div></div>
               <button class="btn btn-ghost" style="padding:0 6px;font-size:18px;line-height:1.1" onClick="{{ uniCard.close }}" aria-label="Fechar unidade" title="Fechar">×</button>
@@ -341,16 +341,16 @@ input[type=range]{accent-color:#0088b0}
           </div>
         </sc-if>
 
-        <div style="position:absolute;left:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;background:color-mix(in srgb,var(--color-bg) 94%,transparent);box-shadow:var(--shadow-sm);padding:10px 12px;border-radius:var(--radius-md);font-size:13px">
-          <span>{{ legendTitle }}</span>
+        <div class="map-leg" style="position:absolute;left:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;background:color-mix(in srgb,var(--color-bg) 94%,transparent);box-shadow:var(--shadow-sm);padding:10px 12px;border-radius:var(--radius-md);font-size:13px">
+          <span class="leg-t">{{ legendTitle }}</span>
           <div style="display:flex;align-items:center;gap:8px">
             <span style="font-variant-numeric:tabular-nums">{{ legendLo }}</span>
-            <div style="display:flex;gap:2px"><sc-for list="{{ legend }}" as="l" hint-placeholder-count="7"><i style="display:block;width:22px;height:10px;background:{{ l.c }}"></i></sc-for></div>
+            <div class="leg-ramp" style="display:flex;gap:2px"><sc-for list="{{ legend }}" as="l" hint-placeholder-count="7"><i style="display:block;width:22px;height:10px;background:{{ l.c }}"></i></sc-for></div>
             <span style="font-variant-numeric:tabular-nums">{{ legendHi }}</span>
           </div>
-          <span style="color:var(--color-neutral-700)">{{ legendNote }}</span>
+          <span class="leg-x" style="color:var(--color-neutral-700)">{{ legendNote }}</span>
           <sc-if value="{{ showCtxLeg }}" hint-placeholder-val="{{ false }}">
-            <div style="border-top:1px solid rgba(32,30,29,.15);padding-top:6px;display:flex;flex-direction:column;gap:4px">
+            <div class="leg-ctx" style="border-top:1px solid rgba(32,30,29,.15);padding-top:6px;display:flex;flex-direction:column;gap:4px">
               <span>{{ ctxLeg.title }}</span>
               <div style="display:flex;align-items:center;gap:8px">
                 <span style="font-variant-numeric:tabular-nums">{{ ctxLeg.lo }}</span>
@@ -361,7 +361,7 @@ input[type=range]{accent-color:#0088b0}
           </sc-if>
         </div>
         <sc-if value="{{ showAttr }}" hint-placeholder-val="{{ false }}">
-          <div style="position:absolute;right:0;bottom:0;font-size:10px;padding:1px 6px;background:color-mix(in srgb,var(--color-bg) 85%,transparent)">{{ attr }}</div>
+          <div class="map-attr" style="position:absolute;right:0;bottom:0;font-size:10px;padding:1px 6px;background:color-mix(in srgb,var(--color-bg) 85%,transparent)">{{ attr }}</div>
         </sc-if>
       </div>
 
@@ -443,10 +443,10 @@ input[type=range]{accent-color:#0088b0}
         <div data-ev-list="1" style="position:relative;display:flex;flex-direction:column;max-height:420px;overflow:auto;border-top:1px solid rgba(32,30,29,.2)">
           <sc-for list="{{ evList }}" as="e" hint-placeholder-count="6">
             <sc-if value="{{ e.isEv }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ e.pick }}" title="{{ e.t }}" data-in="{{ e.inw }}" style="display:grid;grid-template-columns:14px 74px minmax(0,1fr) 48px;gap:8px;align-items:center;padding:7px 6px;border:0;border-bottom:1px solid rgba(32,30,29,.1);background:{{ e.bg }};font:inherit;font-size:13px;font-weight:{{ e.fw }};color:var(--color-text);text-align:left;cursor:pointer;box-shadow:inset 3px 0 0 {{ e.bar }}" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
+            <button onClick="{{ e.pick }}" title="{{ e.t }}" data-in="{{ e.inw }}" style="display:grid;grid-template-columns:14px 64px minmax(0,1fr) 42px;gap:6px;align-items:center;padding:7px 6px;border:0;border-bottom:1px solid rgba(32,30,29,.1);background:{{ e.bg }};font:inherit;font-size:13px;font-weight:{{ e.fw }};color:var(--color-text);text-align:left;cursor:pointer;box-shadow:inset 3px 0 0 {{ e.bar }}" style-hover="background:color-mix(in srgb,#201e1d 6%,transparent)">
               <svg width="12" height="11" viewBox="0 0 12 11" style="display:block"><path d="{{ e.d }}" fill="{{ e.fill }}" stroke="{{ e.stroke }}" stroke-width="1.3" stroke-linejoin="round"></path></svg>
               <span style="font-variant-numeric:tabular-nums;color:var(--color-neutral-700)">{{ e.dt }}</span>
-              <span style="display:flex;flex-direction:column;min-width:0"><span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ e.name }}</span><span style="font-size:12.5px;font-weight:400;color:var(--color-neutral-700)">{{ e.sub }}</span></span>
+              <span style="display:flex;flex-direction:column;min-width:0"><span style="display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:break-word">{{ e.name }}</span><span style="font-size:12.5px;font-weight:400;color:var(--color-neutral-700)">{{ e.sub }}</span></span>
               <span style="text-align:right;font-variant-numeric:tabular-nums">{{ e.dev }}</span>
             </button>
             </sc-if>
@@ -635,17 +635,18 @@ input[type=range]{accent-color:#0088b0}
       </div>
     </div>
     <p style="margin:0 0 10px;font-size:16px;line-height:1.4;max-width:46em;color:var(--color-text)">{{ cl.hm }}</p>
+    <p class="hm-hint" style="display:none;margin:0 0 6px;font-size:13px;color:var(--color-neutral-700)">desliza para ver as outras horas →</p>
     <div style="overflow-x:auto">
-      <div style="display:grid;grid-template-columns:36px repeat(24,minmax(30px,1fr)) 64px;gap:3px;min-width:900px;font-variant-numeric:tabular-nums">
+      <div class="hm-grid" style="display:grid;grid-template-columns:36px repeat(24,minmax(30px,1fr)) 64px;gap:3px;min-width:900px;font-variant-numeric:tabular-nums">
         <sc-for list="{{ hmRows }}" as="r" hint-placeholder-count="7">
           <span style="font-size:13px;align-self:center">{{ r.dia }}</span>
           <sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="24">
-            <span title="{{ c.t }}" style="display:flex;align-items:center;justify-content:center;height:28px;font-size:13px;background:{{ c.bg }};color:{{ c.fg }};border-radius:1px">{{ c.v }}</span>
+            <span class="hm-c" title="{{ c.t }}" style="display:flex;align-items:center;justify-content:center;height:28px;font-size:13px;background:{{ c.bg }};color:{{ c.fg }};border-radius:1px">{{ c.v }}</span>
           </sc-for>
           <span style="font-size:14px;font-weight:600;text-align:right;align-self:center">{{ r.tot }}</span>
         </sc-for>
         <span></span>
-        <sc-for list="{{ hmHours }}" as="h" hint-placeholder-count="24"><span style="font-size:13px;text-align:center;color:var(--color-neutral-700);padding-top:4px">{{ h }}</span></sc-for>
+        <sc-for list="{{ hmHours }}" as="h" hint-placeholder-count="24"><span class="hm-h" data-odd="{{ h.odd }}" style="font-size:13px;text-align:center;white-space:nowrap;color:var(--color-neutral-700);padding-top:4px">{{ h.t }}</span></sc-for>
         <span style="font-size:13px;text-align:right;color:var(--color-neutral-700);padding-top:4px">total/dia</span>
       </div>
     </div>
@@ -910,9 +911,9 @@ const UNI_LL = {
   "CS Sintra": [38.80236, -9.38141, "sem morada no ficheiro da ULS · edifício no OpenStreetMap (Centro de Saúde de Sintra)"]
 };
 // camadas do mapa: [chave, nome, cor da amostra, ligada por omissão, opacidade por omissão]
-const LAYERS = [['fundo', 'Fundo do mapa', '#d9d6d2', true, 1], ['nomes', 'Nomes de lugares', '#a8a4a0', true, 0.9], ['medida', 'Admissões (medida)', '#1186ac', true, 1],
-  ['idosos', '65 e mais anos (Censos)', '#b39a76', false, 0.8], ['freq', 'Utentes frequentes', '#957a55', false, 0.8],
-  ['limites', 'Limites dos concelhos', '#201e1d', true, 1], ['hosp', 'Hospitais', '#201e1d', true, 1], ['uni', 'Unidades de saúde', '#f3f2f2', true, 1]];
+const LAYERS = [['fundo', 'Fundo', '#d9d6d2', true, 1], ['nomes', 'Nomes', '#a8a4a0', true, 0.9], ['medida', 'Admissões', '#1186ac', true, 1],
+  ['idosos', '65+ anos', '#b39a76', false, 0.8], ['freq', 'Frequentes', '#957a55', false, 0.8],
+  ['limites', 'Concelhos', '#201e1d', true, 1], ['hosp', 'Hospitais', '#201e1d', true, 1], ['uni', 'Unidades de saúde', '#f3f2f2', true, 1]];
 const NOTES_KEY = 'urg-notas-v1', NOTE_D = 'M6,0.8L11.2,5.5L6,10.2L0.8,5.5Z';
 // comparação de períodos: azul = menos admissões que antes, vermelho = mais (escala ±50%)
 const RAMP_D = ['#2166ac', '#67a9cf', '#d1e5f0', '#f4f1ee', '#fddbc7', '#ef8a62', '#b2182b'];
@@ -929,11 +930,29 @@ const ANIM_CSS = `
 .urg-fade { animation: urgFade .28s ease both; }
 @keyframes urgFade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .urg-anim *, .urg-fade { transition: none !important; animation: none !important; } }
+@media (max-width:1100px){ .hl-grid[data-n="4"]{grid-template-columns:repeat(2,minmax(0,1fr))!important} }
+@media (max-width:900px){
+  .hl-grid{grid-template-columns:1fr!important}
+  .opt-aside{flex:1 1 100%!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px 32px!important;align-items:start}
+}
 @media (max-width:600px){
+  .opt-aside{display:flex!important}
+  .map-ov{display:none!important}
+  .map-dim{bottom:auto!important;top:22px!important}
+  .map-attr{bottom:auto!important;top:0!important}
+  .map-uni{top:62px!important;left:12px!important;right:12px!important;width:auto!important;max-height:calc(100% - 140px)!important}
+  .map-leg{left:8px!important;right:8px!important;bottom:8px!important;flex-direction:row!important;flex-wrap:wrap;align-items:center!important;gap:4px 8px!important;padding:6px 8px!important;font-size:11.5px!important;line-height:1.2}
+  .map-leg>.leg-t{flex:1 1 0;min-width:0}
+  .map-leg .leg-ramp i{width:11px!important}
+  .map-leg>.leg-x{display:none}
+  .map-leg>.leg-ctx{flex:1 1 100%}
+  .hm-hint{display:block!important}
+  .hm-grid{grid-template-columns:30px repeat(24,16px) 52px!important;gap:2px!important;min-width:0!important}
+  .hm-c,.hm-h{font-size:10px!important}
+  .hm-h[data-odd="1"]{visibility:hidden}
   .hd-x{display:none}
   #ctxbar .cx-part{display:none}
   .urg-anim{padding-left:16px!important;padding-right:16px!important}
-  .opt-aside{flex:1 1 100%!important}
   .soc-lab{display:none!important}
   .al-row{grid-template-columns:64px 44px minmax(0,1fr) auto!important;gap:2px 8px!important}
   .al-row>:nth-child(1){grid-column:1;grid-row:1}
@@ -1036,6 +1055,7 @@ class Component extends DCLogic {
   }
   ctxBarH() { const b = document.getElementById('ctxbar'); return b ? b.offsetHeight : 0; }
   ctxScrollTo(el) { if (!el) return; el.style.scrollMarginTop = (this.ctxBarH() + 12) + 'px'; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  ctxGoMap() { const narrow = window.innerWidth <= 900, el = document.querySelector('[data-tgt="' + (narrow ? 'tri' : 'map') + '"]') || this.mapRef.current; setTimeout(() => this.ctxScrollTo(el), 90); }
   ctxGo(k) { const t = this.ctxTargets().find(x => x.k === k), el = t ? t.el : this.ctxSection(k); el && this.ctxScrollTo(el); }
   ctxMeasure() {
     const h1 = document.querySelector('h1'), stuck = !!h1 && h1.getBoundingClientRect().bottom < 0;
@@ -1050,7 +1070,13 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { cancelAnimationFrame(this.hRaf); cancelAnimationFrame(this.vbRaf); clearTimeout(this.introT); clearTimeout(this.fadeT); if (this.ml) { this.ml.remove(); this.ml = null; } if (this.socRo) this.socRo.disconnect(); window.removeEventListener('scroll', this.onCtxScroll); cancelAnimationFrame(this.ctxRaf); this.ctxOn = false; clearTimeout(this.waitURG); document.removeEventListener('mousemove', this.onTT); this.ttEl && this.ttEl.remove(); clearInterval(this.timer); this.ro && this.ro.disconnect(); this.mapRef.current && this.mapRef.current.removeEventListener('wheel', this.onWheel); }
   curVB() { return this.vbAnim || this.baseVB(); }
-  baseVB() { return this.state.vbC || (this.state.zoom === 'area' ? this.vbArea : this.vbReg); }
+  baseVB() {
+    if (this.state.vbC) return this.state.vbC;
+    const b = this.state.zoom === 'area' ? this.vbArea : this.vbReg, W = (this.mapRef.current && this.mapRef.current.clientWidth) || this.state.mapW || 900;
+    if (W > 600) return b;
+    const key = this.state.zoom + W; if (this.nvbKey !== key) { const h = b[2] / (W / 420); this.nvb = [b[0], b[1] - (h - b[3]) / 2, b[2], h]; this.nvbKey = key; }
+    return this.nvb;
+  }
   motion(ms) { return reduceMotion() ? 0 : ms; }
   // desliza o enquadramento 2D do atual para o que fica depois de aplicar 'patch' ao estado
   glideVB(patch, ms = 420) {
@@ -1389,7 +1415,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { hw: Object.fromEntries(HOWK.map(k => [k, { open: false, rot: 0, label: '', toggle: () => {} }])), cl: Object.fromEntries(HOWK.map(k => [k, ''])), rankMore: false, rankToggle: () => {}, rankToggleLabel: '', fqMore: false, fqToggle: () => {}, fqToggleLabel: '', kpis: [], kpiFoot: '', hl: [], hlWhen: '', moreOpen: false, moreRot: 0, moreToggle: () => {}, moreLabel: '', modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], hasSoc: false, socPts: [], socTicksX: [], socTicksY: [], socLine: '', socOpts: [], socLede: '', socOut: [], socXLabel: '', socNote: '', alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', hasSnsm: false, snsCharts: [], snsVal: [], snsLede: '', snsNote: '', snsValNote: '', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3op: '0', d3pe: 'none', d3fadeMs: '0', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
+    if (!U || !this.fregs || this.state.end == null) return { hw: Object.fromEntries(HOWK.map(k => [k, { open: false, rot: 0, label: '', toggle: () => {} }])), cl: Object.fromEntries(HOWK.map(k => [k, ''])), hlCols: 3, rankMore: false, rankToggle: () => {}, rankToggleLabel: '', fqMore: false, fqToggle: () => {}, fqToggleLabel: '', kpis: [], kpiFoot: '', hl: [], hlWhen: '', moreOpen: false, moreRot: 0, moreToggle: () => {}, moreLabel: '', modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], hasSoc: false, socPts: [], socTicksX: [], socTicksY: [], socLine: '', socOpts: [], socLede: '', socOut: [], socXLabel: '', socNote: '', alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', hasSnsm: false, snsCharts: [], snsVal: [], snsLede: '', snsNote: '', snsValNote: '', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3op: '0', d3pe: 'none', d3fadeMs: '0', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -1658,7 +1684,7 @@ class Component extends DCLogic {
       csRows = (st.csAll ? sorted : sorted.slice(0, CS_LINES)).map((x, i) => { const si = this.siteOf ? this.siteOf.get(x.r.n) : undefined, has = si !== undefined; return { i: i + 1, name: x.r.n,
         con: `${x.r.t === 'USF' || x.r.t === 'UCSP' ? x.r.t : 'Outra unidade'} · ${U.AG[x.r.ag] || ''}${has ? ' · ver no mapa' : ''}`,
         bg: has && st.uni === si ? 'color-mix(in srgb,#0088b0 10%,transparent)' : 'transparent', cur: has ? 'pointer' : 'default',
-        click: () => { if (!has) return; set({ uni: si, uniOn: true, lay: { ...this.layOf(), uni: { ...this.layOf().uni, on: true } } }); this.ctxScrollTo(this.mapRef.current); },
+        click: () => { if (!has) return; set({ uni: si, uniOn: true, lay: { ...this.layOf(), uni: { ...this.layOf().uni, on: true } } }); this.ctxGoMap(); },
         n: NF.format(x.tot), pct: csS === 'fq' ? pc(x.fq, 1) : pc(x.nu),
         segs: x.r.c.map((v, j) => ({ w: x.tot ? v / x.tot * 100 : 0, c: PRIO[j][1], t: tt(v, x.tot, j) })) }; });
       const totCs = sum(all.map(x => x.tot)), nuCs = sum(CS.rows.map(r => r.c[3] + r.c[4]));
@@ -1765,8 +1791,8 @@ class Component extends DCLogic {
         socOut = pts.filter(p => tag(p)).sort((p, q) => q.res - p.res).map(p => ({ name: nice(p.f.n), x: pc(p.x / 100, 1), y: f0(p.y), e: f0(p.e),
           dev: (p.res > 0 ? '+' : '−') + NF.format(Math.abs(Math.round(p.res))), tag: p.res > 0 ? 'acima do esperado' : 'abaixo do esperado', tc: p.res > 0 ? ATT : '#0088b0',
           click: () => set({ sel: st.sel === p.f.d ? null : p.f.d }) }));
-        const rTxt = isFinite(r) ? NF.format(Math.round(r * 100) / 100).replace('-', '−') : '—', strength = !isFinite(r) ? 'indeterminada' : Math.abs(r) < 0.3 ? 'fraca' : Math.abs(r) < 0.6 ? 'moderada' : 'forte';
-        socConcl = Math.abs(r) >= 0.3 ? `Onde há ${b < 0 ? 'menos' : 'mais'} ${socName.toLowerCase()} vai-se mais à urgência (r = ${rTxt}).` : `A relação entre ${socName.toLowerCase()} e o recurso à urgência é ${strength}${isFinite(r) ? ` (r = ${rTxt})` : ''}.`;
+        const rTxt = isFinite(r) ? new Intl.NumberFormat('pt-PT', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Math.round(r * 100) / 100).replace('-', '−') : '—', strength = !isFinite(r) ? 'indeterminada' : Math.abs(r) < 0.3 ? 'fraca' : Math.abs(r) < 0.6 ? 'moderada' : 'forte';
+        socConcl = Math.abs(r) >= 0.3 ? `Nas freguesias com ${r < 0 ? 'menos' : 'mais'} ${{ i65: 'pessoas com 65 ou mais anos', des: 'desemprego', esc: 'pessoas com ensino superior', rep: 'edifícios a precisar de reparação' }[socK]} vai-se mais à urgência (r = ${rTxt}).` : `A relação entre ${socName.toLowerCase()} e o recurso à urgência é ${strength}${isFinite(r) ? ` (r = ${rTxt})` : ''}.`;
         socLede = `${n} freguesias de Amadora e Sintra. A relação entre ${socName.toLowerCase()} e o recurso à urgência é ${strength}${isFinite(r) ? ` (r = ${rTxt})` : ''}${Math.abs(r) >= 0.3 ? (b > 0 ? ': onde o indicador é mais alto, vai-se mais à urgência' : ': onde o indicador é mais alto, vai-se menos à urgência') : ''}. ${socOut.length ? `${socOut.length} freguesias afastam-se da reta mais do que o habitual (lista ao lado).` : 'Nenhuma freguesia se afasta muito da reta.'}`;
       }
     }
@@ -1802,7 +1828,7 @@ class Component extends DCLogic {
     const opOf = k => L[k].on ? String(L[k].op) : '0';
     const layers = LAYERS.map(([k, name, sw]) => { const ctxOnly = k === 'idosos' || k === 'freq', noData = (k === 'freq' && !FQ) || (k === 'uni' && !sites.length) || (k === 'nomes' && !BM.ref);
       const on = k === 'uni' ? L.uni.on && st.uniOn : L[k].on;
-      return { name: k === 'medida' ? (isTx ? 'Taxa por 1 000 hab. (medida)' : isPct ? 'Proporção (medida)' : name) : name, sw: k === 'medida' ? ramp[4] : sw, on, off: !on, pct: Math.round(L[k].op * 100), pctTxt: `${Math.round(L[k].op * 100)}%`,
+      return { name: k === 'medida' ? (isTx ? 'Taxa / 1 000 hab.' : isPct ? 'Proporção' : name) : name, sw: k === 'medida' ? ramp[4] : sw, on, off: !on, pct: Math.round(L[k].op * 100), pctTxt: `${Math.round(L[k].op * 100)}%`,
         dim: noData || (st.view3d && (ctxOnly || k === 'nomes')) ? 0.45 : 1, note: st.view3d && (ctxOnly || k === 'nomes') ? 'Só na vista 2D' : noData ? 'Sem dados para esta camada' : '',
         aria: `Mostrar ${name}`, ariaOp: `Opacidade de ${name}`,
         toggle: e => setLay(k, { on: e.target.checked }), slide: e => setLay(k, { op: +e.target.value / 100 }) }; });
@@ -1839,7 +1865,7 @@ class Component extends DCLogic {
     const hmNote = `Cada quadrado é a média de admissões nessa hora, nesse dia da semana (por exemplo, numa segunda-feira típica entre as 10h e as 11h); quanto mais escuro, mais gente chega. À direita, a média do dia inteiro. Segue a janela, a origem, o local de entrada e as prioridades escolhidas${st.sel ? ' — não a freguesia selecionada' : ''}.`;
 
     // "Em destaque": até 4 frases sobre a janela atual; cada cartão leva ao sítio onde se vê o detalhe
-    const toMap = () => this.mapRef.current && this.ctxScrollTo(this.mapRef.current);
+    const toMap = () => this.ctxGoMap();
     const hasPrev = !!st.win && i0 - nD >= 0, AP = hasPrev ? this.agg(i0 - nD, i0 - 1) : null;
     const relCh = (x, y) => y ? x / y - 1 : NaN, sPc = r => `${r > 0 ? '+' : r < 0 ? '−' : ''}${NF.format(Math.abs(Math.round(r * 100)))}%`;
     const winTxt = st.win ? (nD === 1 ? `em ${fdy(U.days[i1])}` : `nos ${nD} dias até ${fdy(U.days[i1])}`) : 'no período completo';
@@ -1870,20 +1896,21 @@ class Component extends DCLogic {
     const hw = {}; HOWK.forEach(k => { const o = !!(st.how && st.how[k]); hw[k] = { open: o, rot: o ? 90 : 0, label: k === 'foot' ? 'Notas metodológicas' : 'Como ler e de onde vêm os dados', toggle: () => set({ how: { ...(st.how || {}), [k]: !o } }) }; });
     const sh = (x, tot) => tot > 0 ? pc(x / tot) : '—';
     const mapTot = sum(byN.map(r => r.n)), tp = k => sum(rk.slice(0, k).map(r => r.n));
-    const cl = { map: isTx ? (rk[0] ? `${nice(rk[0].f.n)} é onde mais se recorre à urgência: ${f0(rk[0].tx)} admissões por 1 000 habitantes por ano.` : '') : isPct ? (rk[0] ? `${nice(rk[0].f.n)} é onde as ${sp ? selNames : 'urgentes'} mais pesam: ${pc(rk[0].share)} das admissões.` : '') : (byN[0] && mapTot ? `${nice(byN[0].f.n)} é a freguesia com mais admissões (${sh(byN[0].n, mapTot)} do total).` : ''),
-      rank: rk.length >= 5 ? (isTx ? `As 5 primeiras têm entre ${f0(rk[4].tx)} e ${f0(rk[0].tx)} admissões por 1 000 habitantes por ano.` : isPct ? `As 5 primeiras têm entre ${pc(rk[4].share)} e ${pc(rk[0].share)} de admissões ${sp ? selNames : 'urgentes'}.` : `As 5 primeiras freguesias concentram ${sh(tp(5), mapTot)} das admissões.`) : '',
+    const rkN = st.rkAll ? rk.length : Math.min(RK_TOP, rk.length);
+    const cl = { map: isTx ? (rk[0] ? `${nice(rk[0].f.n)} é onde mais se recorre à urgência: ${f0(rk[0].tx)} admissões por 1 000 habitantes por ano.` : '') : isPct ? (rk[0] ? `${nice(rk[0].f.n)} é onde as ${sp ? selNames : 'urgentes'} mais pesam: ${pc(rk[0].share)} das admissões.` : '') : (byN[0] && mapTot ? `${nice(byN[0].f.n)} é a freguesia com mais admissões (${sh(byN[0].n, mapTot)} das admissões com freguesia).` : ''),
+      rank: rk.length >= 5 ? (isTx ? `As ${rkN} primeiras têm entre ${f0(rk[rkN - 1].tx)} e ${f0(rk[0].tx)} admissões por 1 000 habitantes por ano.` : isPct ? `As ${rkN} primeiras têm entre ${pc(rk[rkN - 1].share)} e ${pc(rk[0].share)} de admissões ${sp ? selNames : 'urgentes'}.` : `As ${rkN} primeiras freguesias concentram ${sh(tp(rkN), mapTot)} das admissões com freguesia.`) : '',
       al: alN ? `${alPl(alN, 'alerta', 'alertas')} fora do padrão no período. O maior: ${alRows[0].name}, a ${alRows[0].dt.replace(' · ', ' (')}), ${alRows[0].dev} face ao normal.` : 'Nenhum dia fora do padrão com os filtros atuais.',
       cs: csConcl, soc: socConcl, sns: snsConcl, fq: fqConcl, hm: hmConcl,
       tri: `${pc((cur[0] + cur[1] + cur[2]) / curTot)} das admissões são urgentes (vermelho, laranja ou amarelo).` };
     return this.lastVals = { hw, cl, rankMore, rankToggle, rankToggleLabel, fqMore, fqToggle, fqToggleLabel,
-      hmRows, hmHours: Array.from({ length: 24 }, (_, i) => i + 'h'), hmNote,
+      hmRows, hmHours: Array.from({ length: 24 }, (_, i) => ({ t: i + 'h', odd: i % 2 ? '1' : '0' })), hmNote,
       totalLabel: NF.format(totAll), lede, rangeLabel,
       kpis: [
         { label: 'Admissões', value: NF.format(totW), sub: `${NF.format(Math.round(totW / nD))} por dia`, delta: kD[0], dc: kC[0] },
         { label: 'Urgentes (V+L+A)', value: pc(urW / totW), sub: `${NF.format(urW)} admissões`, delta: kD[1], dc: kC[1] },
         { label: 'Não urgentes', value: pc(nuW / totW), sub: `verde + azul · ${NF.format(nuW)}`, delta: kD[2], dc: kC[2] },
         ...extraKpis.filter(x => x.label.startsWith('Por 1 000'))
-      ], kpiFoot: semW ? `${NF.format(semW)} admissões (${pc(semW / totW, 1)}) sem freguesia não entram no mapa.` : '', hl, hlWhen,
+      ], hlCols: Math.max(1, Math.min(4, hl.length)), kpiFoot: semW ? `${NF.format(semW)} admissões (${pc(semW / totW, 1)}) sem freguesia não entram no mapa.` : '', hl, hlWhen,
       moreOpen: !!st.moreOpen, moreRot: st.moreOpen ? 90 : 0, moreToggle: () => set({ moreOpen: !st.moreOpen }),
       moreLabel: st.moreOpen ? 'Menos opções' : 'Mais opções do mapa' + (nMore ? ` · ${nMore} ${nMore === 1 ? 'alterada' : 'alteradas'}` : ''), hasSnsm, snsCharts, snsVal, snsLede, snsNote, snsValNote, foot2, hosps, hospLayer: L.hosp.on ? React.createElement('div', { style: { position: 'absolute', inset: 0, opacity: L.hosp.op, pointerEvents: 'none' } }, hospLayer) : null, exportCsv, fqRows, fqLede, hasFq: fqRows.length > 0, hasSoc, socRef: this.socRef, socPts, socTicksX, socTicksY, socLine, socOpts, socLede, socOut, socXLabel, socNote, hasCs, csRows, csLede, csNote, csOpts, csMore, alRows, alLede, alMore, alToggleLabel, alToggle, csToggleLabel, csToggle,
       mapTitle: isTx ? (sp ? `Onde se recorre mais à urgência com pulseira ${selNames}, por habitante` : 'Onde se recorre mais à urgência, por habitante') : isPct ? (sp ? `Onde pesam mais as pulseiras ${selNames}` : 'Onde pesam mais as admissões urgentes') : (sp ? `De onde vêm as admissões ${selNames}` : 'De onde vêm as admissões'),
