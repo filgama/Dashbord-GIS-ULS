@@ -1086,6 +1086,7 @@ class Component extends DCLogic {
   motion(ms) { return reduceMotion() ? 0 : ms; }
   // desliza o enquadramento 2D do atual para o que fica depois de aplicar 'patch' ao estado
   glideVB(patch, ms = 420) {
+    if (this.live) this.commitVB();
     const from = this.curVB(); cancelAnimationFrame(this.vbRaf); this.vbAnim = null;
     this.setState({ ...patch, hover: null }, () => { const to = this.baseVB(), d = this.motion(ms); if (!d) return;
       const t0 = performance.now(), step = now => { const k = Math.min(1, (now - t0) / d), e = easeIO(k);
@@ -1094,19 +1095,37 @@ class Component extends DCLogic {
       this.vbAnim = from; this.vbRaf = requestAnimationFrame(step); });
   }
   zoomAt(px, py, f, glide) {
-    const vb = this.baseVB(), nw = Math.max(30, Math.min(1400, vb[2] * f)), g = nw / vb[2], nh = vb[3] * g;
+    const vb = this.live || this.baseVB(), nw = Math.max(30, Math.min(1400, vb[2] * f)), g = nw / vb[2], nh = vb[3] * g;
     const vbC = [vb[0] + px * vb[2] - px * nw, vb[1] + py * vb[3] - py * nh, nw, nh];
-    glide ? this.glideVB({ vbC }) : this.setState({ vbC, hover: null });
+    if (glide) return this.glideVB({ vbC });
+    this.liveVB(vbC); clearTimeout(this.wheelT); this.wheelT = setTimeout(() => this.commitVB(), 160);
+  }
+  // durante o gesto (arrastar, roda do rato) só se move a imagem já desenhada, com uma transformação CSS;
+  // o enquadramento entra no estado (e o mapa é redesenhado) uma vez, no fim do gesto
+  liveVB(vb) {
+    const el = this.mapRef.current; if (!el) return;
+    if (!this.live0) { this.live0 = this.curVB(); cancelAnimationFrame(this.vbRaf); if (this.state.hover) this.setState({ hover: null }); }
+    const v0 = this.live0, r = el.getBoundingClientRect(), s = v0[2] / vb[2];
+    const tx = (v0[0] - vb[0]) / vb[2] * r.width, ty = (v0[1] - vb[1]) / vb[3] * r.height;
+    this.live = vb;
+    for (const n of el.querySelectorAll(':scope > svg, :scope > [data-pan]')) { n.style.transformOrigin = '0 0'; n.style.transform = `translate(${tx}px,${ty}px) scale(${s})`; }
+  }
+  commitVB() {
+    const vb = this.live, el = this.mapRef.current; this.live = this.live0 = null; clearTimeout(this.wheelT); if (!vb) return;
+    this.vbAnim = null;
+    this.setState({ vbC: vb, hover: null }, () => { if (el) for (const n of el.querySelectorAll(':scope > svg, :scope > [data-pan]')) n.style.transform = ''; });
   }
   onDown = e => {
     if (e.button !== 0) return;
-    const r = this.mapRef.current.getBoundingClientRect(), vb0 = this.curVB(), x0 = e.clientX, y0 = e.clientY;
+    const r = this.mapRef.current.getBoundingClientRect(), vb0 = this.live || this.curVB(), x0 = e.clientX, y0 = e.clientY;
     this.dragged = false; let raf = 0, last = null;
     const move = ev => { const dx = ev.clientX - x0, dy = ev.clientY - y0;
       if (!this.dragged && Math.hypot(dx, dy) < 4) return; this.dragged = true; last = [dx, dy];
       if (!raf) raf = requestAnimationFrame(() => { raf = 0; const [ddx, ddy] = last;
-        this.setState({ hover: null, vbC: [vb0[0] - ddx * vb0[2] / r.width, vb0[1] - ddy * vb0[3] / r.height, vb0[2], vb0[3]] }); }); };
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); setTimeout(() => { this.dragged = false; }, 0); };
+        this.liveVB([vb0[0] - ddx * vb0[2] / r.width, vb0[1] - ddy * vb0[3] / r.height, vb0[2], vb0[3]]); }); };
+    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); cancelAnimationFrame(raf);
+      if (this.dragged && last) { const [ddx, ddy] = last; this.liveVB([vb0[0] - ddx * vb0[2] / r.width, vb0[1] - ddy * vb0[3] / r.height, vb0[2], vb0[3]]); this.commitVB(); }
+      setTimeout(() => { this.dragged = false; }, 0); };
     window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
   };
   attach() {
@@ -1403,7 +1422,7 @@ class Component extends DCLogic {
 
   layer(tiles, extra) {
     const e = React.createElement;
-    return e('div', { style: { position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', filter: 'saturate(.15)', ...extra } },
+    return e('div', { 'data-pan': '', style: { position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none', filter: 'saturate(.15)', ...extra } },
       tiles.map(t => e('img', { key: t.u, src: t.u, alt: '', draggable: false, style: { position: 'absolute', left: t.l + '%', top: t.t + '%', width: t.w + '%', height: t.h + '%', display: 'block' } })));
   }
 
