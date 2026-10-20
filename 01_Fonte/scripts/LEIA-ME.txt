@@ -71,4 +71,7 @@ Os scripts 4 a 7 podem correr-se de qualquer pasta. Escrevem primeiro num fichei
    seccao "Contexto da ULS" (com o confronto mes a mes entre o CSV e os numeros oficiais).
    Precisa de internet:
           python 01_Fonte/scripts/7_dados_sns.py
+   O botao "Atualizar" na seccao "Contexto da ULS" faz o mesmo a partir do browser (snsFetch no
+   .dc.html), mas so guarda o resultado nesse browser; o ficheiro HTML so muda com este script.
+   Se mudar as contas aqui (recolher, mensal, invulgares), mudar tambem la.
 
