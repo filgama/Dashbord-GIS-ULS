@@ -310,7 +310,7 @@ input[type=range]{accent-color:#0088b0}
         <sc-if value="{{ hasUni }}" hint-placeholder-val="{{ false }}">
           <div class="urg-fade map-uni" style="position:absolute;right:12px;top:12px;width:min(300px,46%);max-height:calc(100% - 80px);overflow:auto;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:14px 16px;font-size:13px">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-              <div style="min-width:0"><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Unidade de saúde · período completo</div><div style="font-weight:600;font-size:16px;line-height:1.25;margin-top:2px">{{ uniCard.title }}</div><div style="color:var(--color-neutral-700);margin-top:2px">{{ uniCard.sub }}</div></div>
+              <div style="min-width:0"><div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700)">Unidade de saúde · {{ csWhen }}</div><div style="font-weight:600;font-size:16px;line-height:1.25;margin-top:2px">{{ uniCard.title }}</div><div style="color:var(--color-neutral-700);margin-top:2px">{{ uniCard.sub }}</div></div>
               <button class="btn btn-ghost" style="padding:0 6px;font-size:18px;line-height:1.1" onClick="{{ uniCard.close }}" aria-label="Fechar unidade" title="Fechar">×</button>
             </div>
             <sc-for list="{{ uniCard.units }}" as="r" hint-placeholder-count="1">
@@ -671,7 +671,7 @@ input[type=range]{accent-color:#0088b0}
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
       <div>
-        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Unidades de cuidados primários · período completo</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Unidades de cuidados primários · {{ csWhen }}</div>
         <h2 style="font-size:28px;line-height:1.15;margin:0">Por unidade de cuidados primários</h2>
       </div>
       <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -713,7 +713,7 @@ input[type=range]{accent-color:#0088b0}
   <section style="padding-top:64px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:8px;flex-wrap:wrap">
       <div>
-        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Utentes · período completo</div>
+        <div style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:4px">Utentes · {{ fqWhen }}</div>
         <h2 style="font-size:28px;line-height:1.15;margin:0">Quem volta muitas vezes</h2>
       </div>
     </div>
@@ -1005,6 +1005,8 @@ class Component extends DCLogic {
     for (let j = R.length - 6; j >= 0; j -= 6) this.off[R[j]] = j;
     for (let d = N - 1; d >= 0; d--) if (this.off[d] > this.off[d + 1]) this.off[d] = this.off[d + 1];
     this.cache = new Map();
+    // dias sem dados (falta o report; 5_atualizar_dados.py): não contam como dias com 0 admissões
+    this.gap = new Uint8Array(N); for (const d of (U.meta.falta || [])) { const i = U.days.indexOf(d); if (i >= 0) this.gap[i] = 1; }
     if (!document.getElementById('urg-anim-css')) { const css = document.createElement('style'); css.id = 'urg-anim-css'; css.textContent = ANIM_CSS; document.head.appendChild(css); }
     this.sites = this.buildSites();
     if (!this.ttEl) {
@@ -1029,6 +1031,8 @@ class Component extends DCLogic {
       document.addEventListener('mousemove', this.onTT);
     }
     let saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+    // o dia guarda-se como data: um índice antigo (número) apontaria para outro dia depois de atualizar os dados
+    if (saved && 'end' in saved) { const i = typeof saved.end === 'string' ? U.days.indexOf(saved.end) : -1; if (i >= 0) saved.end = i; else delete saved.end; }
     const fromHash = this.readHash();
     this.setState({ end: N - 2, ...saved, orig: Array.isArray(saved.orig) ? saved.orig : [], ...fromHash, playing: false });
     this.ro = new ResizeObserver(() => { const w = this.mapRef.current && this.mapRef.current.clientWidth; if (w && Math.abs(w - this.state.mapW) > 40) this.setState({ mapW: w }); });
@@ -1119,7 +1123,7 @@ class Component extends DCLogic {
     if (this.state.view3d) { if (!this.ml) this.init3d(); else this.sync3d(); }
     const s = this.state, ps = this._prev || {}; this._prev = { ...s };
     if (ps.mode !== s.mode || ps.metric !== s.metric || ps.zoom !== s.zoom || ps.fundo !== s.fundo || ps.win !== s.win || ps.end !== s.end || ps.local !== s.local || ps.orig !== s.orig || ps.fixed !== s.fixed || ps.speed !== s.speed || ps.lay !== s.lay)
-      try { localStorage.setItem(KEY, JSON.stringify({ mode: s.mode, metric: s.metric, zoom: s.zoom, fundo: s.fundo, win: s.win, end: s.end, local: s.local, orig: s.orig, fixed: s.fixed, speed: s.speed, lay: s.lay })); } catch (e) {}
+      try { localStorage.setItem(KEY, JSON.stringify({ mode: s.mode, metric: s.metric, zoom: s.zoom, fundo: s.fundo, win: s.win, end: this.U.days[s.end], local: s.local, orig: s.orig, fixed: s.fixed, speed: s.speed, lay: s.lay })); } catch (e) {}
     // eventos-chave: ao mudar a janela, a lista desliza até ao primeiro evento dentro dela (sem mexer na página)
     if (ps.end !== s.end || ps.win !== s.win) requestAnimationFrame(() => { const box = document.querySelector('[data-ev-list]'); if (!box) return;
       const r = box.querySelector('[data-in="1"]'); if (r && (r.offsetTop < box.scrollTop || r.offsetTop + r.offsetHeight > box.scrollTop + box.clientHeight)) box.scrollTop = Math.max(0, r.offsetTop - 8); });
@@ -1403,6 +1407,9 @@ class Component extends DCLogic {
       tiles.map(t => e('img', { key: t.u, src: t.u, alt: '', draggable: false, style: { position: 'absolute', left: t.l + '%', top: t.t + '%', width: t.w + '%', height: t.h + '%', display: 'block' } })));
   }
 
+  // guarda o último resultado de cada cálculo pesado sobre U.R; só refaz quando a chave (filtros) muda, não a cada hover
+  memo(name, key, fn) { const m = this._memo || (this._memo = {}); if (!m[name] || m[name].k !== key) m[name] = { k: key, v: fn() }; return m[name].v; }
+
   rollMax(nD, sp) { // maior soma de nD dias seguidos numa freguesia, com os filtros atuais: a escala fixa nunca corta valores
     const st = this.state, key = [nD, st.local, st.orig.join(','), (sp || []).join(',')].join('|');
     if (this.rmKey === key) return this.rmVal;
@@ -1417,11 +1424,14 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { totalLabel: '', panelTitle: '', panelSub: '', rangeLabel: '', mapTitle: '', legendTitle: '', legendLo: '', legendHi: '', legendNote: '', playLabel: '', rankTitle: '', foot: '', hw: Object.fromEntries(HOWK.map(k => [k, { open: false, rot: 0, label: '', toggle: () => {} }])), cl: Object.fromEntries(HOWK.map(k => [k, ''])), hlCols: 3, rankMore: false, rankToggle: () => {}, rankToggleLabel: '', fqMore: false, fqToggle: () => {}, fqToggleLabel: '', kpis: [], kpiFoot: '', hl: [], hlWhen: '', moreOpen: false, moreRot: 0, moreToggle: () => {}, moreLabel: '', modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], hasSoc: false, socPts: [], socTicksX: [], socTicksY: [], socLine: '', socOpts: [], socLede: '', socOut: [], socXLabel: '', socNote: '', alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', hasSnsm: false, snsCharts: [], snsVal: [], snsLede: '', snsNote: '', snsValNote: '', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3op: '0', d3pe: 'none', d3fadeMs: '0', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
+    if (!U || !this.fregs || this.state.end == null) return { totalLabel: '', panelTitle: '', panelSub: '', rangeLabel: '', mapTitle: '', legendTitle: '', legendLo: '', legendHi: '', legendNote: '', playLabel: '', rankTitle: '', foot: '', hw: Object.fromEntries(HOWK.map(k => [k, { open: false, rot: 0, label: '', toggle: () => {} }])), cl: Object.fromEntries(HOWK.map(k => [k, ''])), hlCols: 3, rankMore: false, rankToggle: () => {}, rankToggleLabel: '', fqMore: false, fqToggle: () => {}, fqToggleLabel: '', kpis: [], kpiFoot: '', hl: [], hlWhen: '', moreOpen: false, moreRot: 0, moreToggle: () => {}, moreLabel: '', modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], hasSoc: false, socPts: [], socTicksX: [], socTicksY: [], socLine: '', socOpts: [], socLede: '', socOut: [], socXLabel: '', socNote: '', alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', fqWhen: '', csWhen: '', hasSnsm: false, snsCharts: [], snsVal: [], snsLede: '', snsNote: '', snsValNote: '', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3op: '0', d3pe: 'none', d3fadeMs: '0', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
     const i1 = st.win ? end : N - 1, i0 = st.win ? Math.max(0, end - st.win + 1) : 0, nD = i1 - i0 + 1;
+    // dias com dados (sem os dias em falta): é por eles que se dividem as médias e as taxas anualizadas
+    const gap = this.gap, gapIn = (a, b) => { let n = 0; for (let i = Math.max(0, a); i <= b; i++) n += gap[i]; return n; };
+    const nDe = Math.max(1, nD - gapIn(i0, i1)), Ne = Math.max(1, N - gapIn(0, N - 1));
     const A = this.agg(i0, i1), AF = this.agg(0, N - 1), frac = nD / N;
     const sp = st.prios.length ? st.prios : null, spIdx = sp || [0, 1, 2];
     const vb = this.curVB(), k = vb[2] / 1000;
@@ -1431,10 +1441,13 @@ class Component extends DCLogic {
     // tx: admissões por 1 000 residentes, anualizadas a partir dos dias do recorte
     // utilizadores frequentes: por freguesia [utentes, frequentes, admissões dos frequentes, admissões com cartão], período completo
     const FQ = U.freq, FQ_MIN = 200, fqOf = d => FQ && FQ.by[d] && FQ.by[d][0] >= FQ_MIN ? FQ.by[d] : null;
+    // com mais de um ano de dados, frequentes e unidades contam só os últimos 12 meses (FQ.de, U.cs.de)
+    const fqWhen = FQ && FQ.de ? 'últimos 12 meses' : 'período completo', csWhen = U.cs && U.cs.de ? 'últimos 12 meses' : 'período completo';
+    const fqPer = FQ && FQ.de ? `nos 12 meses até ${fdy(U.days[N - 1])}` : `nos ${N} dias do período`;
     const mk = (AA, f, days) => { const c = this.counts(AA, f.d), tot = sum(c), n = sp ? sum(sp.map(i => c[i])) : tot, P = this.pop[f.d], pop = P ? P[0] : 0;
       return { f, c, tot, n, pop, tx: pop ? n / pop * 1000 * 365 / days : NaN, share: tot ? sum(spIdx.map(i => c[i])) / tot : NaN }; };
-    const rows = this.fregs.map(f => mk(A, f, nD));
-    const refRows = st.fixed ? this.fregs.map(f => mk(AF, f, N)) : rows;
+    const rows = this.fregs.map(f => mk(A, f, nDe));
+    const refRows = st.fixed ? this.fregs.map(f => mk(AF, f, Ne)) : rows;
     const maxT = Math.max(1e-9, ...refRows.filter(r => r.pop && r.tot >= MIN_N * (st.fixed ? 1 : Math.min(1, frac * 3))).map(r => r.tx));
     const area = f => { const b = this.bb.get(f.d); return Math.max(30, (b[2] - b[0]) * (b[3] - b[1]) * 0.6); };
     const sc = st.fixed ? frac : 1;
@@ -1448,7 +1461,7 @@ class Component extends DCLogic {
     const colorOf = t => t == null ? '#d7d3d3' : ramp[Math.min(6, Math.floor(t * 7))];
     // comparar com outra janela do mesmo tamanho (só com janela; se sair do período, fica desligado)
     const cmpOff = st.cmp === 'ant' ? nD : +st.cmp || 0, j1 = i1 - cmpOff, j0 = i0 - cmpOff, cmpOn = !!(st.win && cmpOff && j0 >= 0);
-    const B = cmpOn ? this.agg(j0, j1) : null, cmpRows = cmpOn ? this.fregs.map(f => mk(B, f, nD)) : null;
+    const B = cmpOn ? this.agg(j0, j1) : null, cmpRows = cmpOn ? this.fregs.map(f => mk(B, f, Math.max(1, nD - gapIn(j0, j1)))) : null;
     const chg = (now, ref) => ref >= 5 || now >= 5 ? (now - ref) / Math.max(ref, 1) : null;
     const dColor = r => r == null ? '#d7d3d3' : RAMP_D[Math.min(6, Math.max(0, Math.floor((Math.max(-0.5, Math.min(0.5, r)) + 0.5) * 7 - 1e-9)))];
     const cmpChg = cmpOn ? rows.map((r, i) => chg(r.n, cmpRows[i].n)) : null;
@@ -1482,11 +1495,13 @@ class Component extends DCLogic {
     const legendTitle = isTx ? 'Admissões por 1 000 residentes, ritmo anual' + (sp ? ` · só ${selNames}` : '') : isPct ? `Peso de ${sp ? selNames : 'urgentes'} no total da freguesia` : 'Admissões por freguesia' + (sp ? ` · só ${selNames}` : '');
 
     // timeline
-    const li = st.local, R = U.R, daily = new Array(N).fill(0);
-    const og = st.orig; for (let j = 0; j < R.length; j += 6) if ((li < 0 || R[j + 2] === li) && (!og.length || og.includes(R[j + 4])) && (!sp || sp.includes(R[j + 3]))) daily[R[j]] += R[j + 5];
+    const li = st.local, R = U.R, og = st.orig, fKey = [li, og.join(','), (sp || []).join(',')].join('|');
+    const daily = this.memo('daily', fKey, () => { const a = new Array(N).fill(0);
+      for (let j = 0; j < R.length; j += 6) if ((li < 0 || R[j + 2] === li) && (!og.length || og.includes(R[j + 4])) && (!sp || sp.includes(R[j + 3]))) a[R[j]] += R[j + 5];
+      return a; });
     const dMax = Math.max(...daily), BW = 10;
-    const bars = daily.map((v, i) => { const h = v / dMax * 76; const inW = i >= i0 && i <= i1;
-      return { x: i * BW + 1, w: BW - 2, y: (84 - h).toFixed(1), h: h.toFixed(1), fill: inW ? '#0088b0' : '#bab6b6', t: `${fdy(U.days[i])} · ${NF.format(v)} admissões`, pick: () => set({ end: Math.max(i, st.win ? Math.min(N - 1, i) : i), playing: false, win: st.win || 7 }) }; });
+    const bars = daily.map((v, i) => { const h = gap[i] ? 76 : v / dMax * 76; const inW = i >= i0 && i <= i1;
+      return { x: i * BW + 1, w: BW - 2, y: (84 - h).toFixed(1), h: h.toFixed(1), fill: gap[i] ? '#ebe8e8' : inW ? '#0088b0' : '#bab6b6', t: `${fdy(U.days[i])} · ` + (gap[i] ? `sem dados (falta o report)${v ? `, só ${NF.format(v)} admissões` : ''}` : `${NF.format(v)} admissões`), pick: () => set({ end: Math.max(i, st.win ? Math.min(N - 1, i) : i), playing: false, win: st.win || 7 }) }; });
     const months = U.days.map((d, i) => [d, i]).filter(([d]) => d.endsWith('-01')).map(([d, i]) => ({ x: i * BW, pct: (i / N * 100).toFixed(2), label: MES[+d.slice(5, 7) - 1] + ' ' + d.slice(2, 4) }));
 
     // panel
@@ -1516,24 +1531,24 @@ class Component extends DCLogic {
     const top = byN[0];
     const ogN = st.orig.filter(a => a < 2).map(a => U.AG[a]), ogO = st.orig.includes(2);
     const locName = (!st.orig.length ? '' : ' de ' + [ogN.length ? `residentes em ${ogN.join(' e ')}` : '', ogO ? 'fora de Amadora e Sintra' : ''].filter(Boolean).join(' ou de ')) + (st.local < 0 ? '' : ` na urgência ${U.LOC[st.local].toLowerCase()}`);
-    const lede = `${NF.format(areaTot)} admissões${locName} ${per}, ${NF.format(Math.round(areaTot / nD))} por dia. ${pc((areaC[0] + areaC[1] + areaC[2]) / areaTot)} chegaram com pulseira vermelha, laranja ou amarela; ${pc((areaC[3] + areaC[4]) / areaTot)} foram triadas verde ou azul. ${top && top.n ? `${nice(top.f.n)} é a freguesia que mais contribui, com ${NF.format(top.tot)}.` : ''}`;
+    const lede = `${NF.format(areaTot)} admissões${locName} ${per}, ${NF.format(Math.round(areaTot / nDe))} por dia. ${pc((areaC[0] + areaC[1] + areaC[2]) / areaTot)} chegaram com pulseira vermelha, laranja ou amarela; ${pc((areaC[3] + areaC[4]) / areaTot)} foram triadas verde ou azul. ${top && top.n ? `${nice(top.f.n)} é a freguesia que mais contribui, com ${NF.format(top.tot)}.` : ''}`;
 
     // taxa de recurso dos residentes (Censos 2021) e cobertura de médico de família (Transparência SNS)
     const resAdm = a => st.local < 0 ? sum(A.agl[a].map(sum)) : sum(A.agl[a][st.local]);
-    const txOf = (n, p) => p ? n / p * 1000 * 365 / nD : NaN;
+    const txOf = (n, p) => p ? n / p * 1000 * 365 / nDe : NaN;
     const pA = this.popCon.Amadora || 0, pS = this.popCon.Sintra || 0, S = U.sns;
     const extraKpis = [];
     if (pA + pS) extraKpis.push({ label: 'Por 1 000 hab./ano', value: f0(txOf(resAdm(0) + resAdm(1), pA + pS)), sub: `Amadora ${f0(txOf(resAdm(0), pA))} · Sintra ${f0(txOf(resAdm(1), pS))}`, delta: '', dc: NEUT });
     if (S) extraKpis.push({ label: 'Sem médico de família', value: pc(S.sem / S.insc, 1), sub: `${NF.format(S.sem)} inscritos · ${MES[+S.per.slice(5) - 1]} ${S.per.slice(0, 4)}`, delta: '', dc: NEUT });
     const foot2 = (pA + pS ? 'População residente: INE, Censos 2021 (indicador 0011609); as taxas por 1 000 habitantes usam a freguesia de residência registada na admissão e são anualizadas a partir dos dias do recorte (um trimestre de inverno sobrestima o ano).' : '') + (S ? ` Médico de família: Portal da Transparência do SNS, ${S.ent}, ${NF.format(S.insc)} inscritos em ${S.per.slice(5)}/${S.per.slice(0, 4)}.` : '')
-      + (FQ ? ` Utilizadores frequentes: utentes com ${FQ.k} ou mais admissões no período completo, contados pelo cartão de utente (${NF.format(FQ.sem)} admissões sem cartão ficam de fora); cada utente conta na freguesia que mais vezes indicou.` : '') + (U.cs && U.cs.rows && U.cs.rows.length ? ' Unidade de cuidados primários: coluna Centro_Saude da extração; ' + NF.format(U.cs.sem) + ' admissões não têm unidade registada.' : '') + (U.hosp ? ' Localização dos hospitais: OpenStreetMap.' : '');
+      + (FQ ? ` Utilizadores frequentes: utentes com ${FQ.k} ou mais admissões ${FQ.de ? fqPer : 'no período completo'}, contados pelo cartão de utente (${NF.format(FQ.sem)} admissões sem cartão ficam de fora); cada utente conta na freguesia que mais vezes indicou.` : '') + (U.cs && U.cs.rows && U.cs.rows.length ? ' Unidade de cuidados primários: coluna Centro_Saude da extração; ' + NF.format(U.cs.sem) + ' admissões não têm unidade registada.' : '') + (U.hosp ? ' Localização dos hospitais: OpenStreetMap.' : '');
 
     // exporta a tabela por freguesia do recorte atual (janela, origem, local); separador ; e vírgula decimal para abrir no Excel PT
     const exportCsv = () => {
       const nm = v => isFinite(v) ? String(Math.round(v * 10) / 10).replace('.', ',') : '';
       const head = ['DICOFRE', 'Freguesia', 'Concelho', 'Inicio', 'Fim', 'Admissoes', 'Vermelho', 'Laranja', 'Amarelo', 'Verde', 'Azul', 'Branco', 'Nao_triado', 'Urgentes_pct', 'Residentes_Censos2021', 'Residentes_65mais_pct', 'Admissoes_por_1000_hab_ano', 'Utentes_identificados_periodo_completo', 'Utentes_4mais_idas_periodo_completo', 'Utentes_4mais_idas_pct'];
       const lines = rows.filter(r => r.tot > 0).sort((a, b) => b.tot - a.tot).map(r => { const P = this.pop[r.f.d], q = FQ && FQ.by[r.f.d];
-        return [r.f.d, '"' + r.f.n.replace(/"/g, '""') + '"', r.f.c, U.days[i0], U.days[i1], r.tot, ...r.c, nm((r.c[0] + r.c[1] + r.c[2]) / r.tot * 100), P ? P[0] : '', P ? nm(P[2] / P[0] * 100) : '', P ? nm(r.tot / P[0] * 1000 * 365 / nD) : '', q ? q[0] : '', q ? q[1] : '', q ? nm(q[1] / q[0] * 100) : ''].join(';'); });
+        return [r.f.d, '"' + r.f.n.replace(/"/g, '""') + '"', r.f.c, U.days[i0], U.days[i1], r.tot, ...r.c, nm((r.c[0] + r.c[1] + r.c[2]) / r.tot * 100), P ? P[0] : '', P ? nm(P[2] / P[0] * 100) : '', P ? nm(r.tot / P[0] * 1000 * 365 / nDe) : '', q ? q[0] : '', q ? q[1] : '', q ? nm(q[1] / q[0] * 100) : ''].join(';'); });
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + head.join(';') + '\r\n' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' }));
       a.download = `urgencias_freguesias_${U.days[i0]}_${U.days[i1]}.csv`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     };
@@ -1545,7 +1560,7 @@ class Component extends DCLogic {
         t: `${pc(x.q[2] / x.q[3], 1)} das admissões da freguesia · ${NF.format(x.q[2])} de ${NF.format(x.q[3])}`,
         bg: st.sel === x.f.d ? 'color-mix(in srgb,#0088b0 10%,transparent)' : 'transparent', click: () => set({ sel: st.sel === x.f.d ? null : x.f.d }) }));
       fqConcl = `${pc(T[1] / T[0], 1)} dos utentes vão ${FQ.k} ou mais vezes à urgência e fazem ${pc(T[2] / T[3], 1)} das admissões.`;
-      fqLede = `${NF.format(T[1])} utentes vieram à urgência ${FQ.k} ou mais vezes nos ${N} dias do período. São ${pc(T[1] / T[0], 1)} dos ${NF.format(T[0])} utentes identificados, mas fizeram ${pc(T[2] / T[3], 1)} das admissões (${NF.format(T[2])}). Abaixo, as freguesias com pelo menos ${FQ_MIN} utentes onde essa proporção é maior.`; }
+      fqLede = `${NF.format(T[1])} utentes vieram à urgência ${FQ.k} ou mais vezes ${fqPer}. São ${pc(T[1] / T[0], 1)} dos ${NF.format(T[0])} utentes identificados, mas fizeram ${pc(T[2] / T[3], 1)} das admissões (${NF.format(T[2])}). Abaixo, as freguesias com pelo menos ${FQ_MIN} utentes onde essa proporção é maior.`; }
     // fora do padrão: cada dia face à média dos outros dias com o mesmo dia da semana; segue origem, local e prioridades, não a janela
     const AL_ZT = 2, AL_ZF = 2.5, AL_MINF = 5, AL_TOP = 6, DNS = ['dom', 'seg', 'ter', 'qua', 'qui', 'sex', 'sáb'];
     const alDow = this.dow || (this.dow = U.days.map(d => new Date(d + 'T12:00:00').getDay())), alL = N - 1;
@@ -1555,7 +1570,7 @@ class Component extends DCLogic {
       for (let j = 0; j < R.length; j += 6) { const p = R[j + 1], d = p ? U.pd[p] : null; if (!d || !cons.has(d)) continue;
         if ((li < 0 || R[j + 2] === li) && (!og.length || og.includes(R[j + 4])) && (!sp || sp.includes(R[j + 3]))) {
           let a = ser.get(d); if (!a) ser.set(d, a = new Float64Array(N)); a[R[j]] += R[j + 5]; } }
-      const scan = (a, d, thr) => { const g = [[], [], [], [], [], [], []]; for (let i = 0; i < alL; i++) g[alDow[i]].push(i);
+      const scan = (a, d, thr) => { const g = [[], [], [], [], [], [], []]; for (let i = 0; i < alL; i++) if (!gap[i]) g[alDow[i]].push(i);
         for (const ix of g) { const n = ix.length; if (n < 4) continue; let S = 0, Q = 0; for (const i of ix) { S += a[i]; Q += a[i] * a[i]; }
           for (const i of ix) { const v = a[i], m = (S - v) / (n - 1), s = Math.max(Math.sqrt(Math.max(0, (Q - v * v - (n - 1) * m * m) / (n - 2))), Math.sqrt(m));
             if (!(s > 0)) continue; const z = (v - m) / s; if (Math.abs(z) >= thr) found.push({ i, d, v, m, z }); } } };
@@ -1614,31 +1629,34 @@ class Component extends DCLogic {
     const evOpts = [[false, 'Todos'], [true, 'Na janela']].map(([v, label]) => ({ label, on: !!st.evWin === v, pick: () => set({ evWin: v }) }));
 
     // gráficos sincronizados com a timeline: mesmo eixo de dias, janela sombreada, cursor no último dia da janela
-    const totD = new Float64Array(N), urgD = new Float64Array(N), selD = new Float64Array(N);
-    for (let j = 0; j < R.length; j += 6) { if ((li >= 0 && R[j + 2] !== li) || (og.length && !og.includes(R[j + 4]))) continue;
-      const i = R[j], c = R[j + 5]; totD[i] += c; if (R[j + 3] <= 2) urgD[i] += c;
-      if (st.sel && (!sp || sp.includes(R[j + 3])) && U.pd[R[j + 1]] === st.sel) selD[i] += c; }
-    const expD = daily.map((v, i) => { let S = 0, n = 0; for (let k2 = i % 7; k2 < alL; k2 += 7) if (k2 !== i) { S += daily[k2]; n++; } return n ? S / n : NaN; });
+    const { totD, urgD, selD } = this.memo('sync', fKey + '|' + (st.sel || ''), () => {
+      const totD = new Float64Array(N), urgD = new Float64Array(N), selD = new Float64Array(N);
+      for (let j = 0; j < R.length; j += 6) { if ((li >= 0 && R[j + 2] !== li) || (og.length && !og.includes(R[j + 4]))) continue;
+        const i = R[j], c = R[j + 5]; totD[i] += c; if (R[j + 3] <= 2) urgD[i] += c;
+        if (st.sel && (!sp || sp.includes(R[j + 3])) && U.pd[R[j + 1]] === st.sel) selD[i] += c; }
+      for (let i = 0; i < N; i++) if (gap[i]) selD[i] = NaN;
+      return { totD, urgD, selD }; });
+    const expD = daily.map((v, i) => { let S = 0, n = 0; for (let k2 = i % 7; k2 < alL; k2 += 7) if (k2 !== i && !gap[k2]) { S += daily[k2]; n++; } return n ? S / n : NaN; });
     const CH = 72, PAD = 5, W = N * BW, cxOf = i => i * BW + BW / 2;
     const yOf = (v, lo, hi) => (CH - PAD - (v - lo) / ((hi - lo) || 1) * (CH - 2 * PAD)).toFixed(1);
     const lineOf = (s, lo, hi) => { let p = '', pen = false; for (let i = 0; i < N; i++) { const v = s[i]; if (!isFinite(v)) { pen = false; continue; } p += `${pen ? 'L' : 'M'}${cxOf(i)},${yOf(v, lo, hi)}`; pen = true; } return p; };
     const areaOf = (s, lo, hi) => { const ln = lineOf(s, lo, hi); return ln ? `${ln}L${cxOf(N - 1)},${CH}L${cxOf(0)},${CH}Z` : ''; };
-    const hitsOf = fmt => U.days.map((d, i) => ({ x: i * BW, w: BW, t: `${fdy(d)} · ${fmt(i)}`, pick: () => goDay(i) }));
+    const hitsOf = fmt => U.days.map((d, i) => ({ x: i * BW, w: BW, t: `${fdy(d)} · ${gap[i] ? 'sem dados (falta o report)' : fmt(i)}`, pick: () => goDay(i) }));
     const winBand = st.win ? { wx: i0 * BW, ww: nD * BW, cx: cxOf(i1), cOp: 0.7 } : { wx: 0, ww: 0, cx: -10, cOp: 0 };
     // valor do último dia da janela, com a data, para não se confundir com o total da janela
     const nowIdx = st.win ? i1 : null, atNow = (f, s) => nowIdx == null ? s : `${U.days[nowIdx].slice(8)}/${U.days[nowIdx].slice(5, 7)}: ${f(nowIdx)}`;
-    const pU = Array.from(totD, (t, i) => t ? urgD[i] / t : NaN);
+    const pU = Array.from(totD, (t, i) => t && !gap[i] ? urgD[i] / t : NaN);
     // escala pelos percentis 3–97 (dias como 1 de janeiro, quase sem triagem, não esmagam a linha); os extremos ficam encostados à margem
     const pUv = pU.filter(isFinite).sort((x, y) => x - y), pq = q => pUv[Math.min(pUv.length - 1, Math.floor(pUv.length * q))] || 0;
     const pLo = Math.max(0, Math.floor(pq(0.03) * 20) / 20), pHi = Math.min(1, Math.ceil(pq(0.97) * 20) / 20) || 1;
     const pUc = pU.map(v => isFinite(v) ? Math.min(pHi, Math.max(pLo, v)) : v);
     const pAll = sum(urgD) / (sum(totD) || 1);
-    const devD = daily.map((v, i) => i < alL && expD[i] > 0 ? v / expD[i] - 1 : NaN), devAbs = Math.max(0.1, ...devD.filter(isFinite).map(Math.abs));
+    const devD = daily.map((v, i) => i < alL && !gap[i] && expD[i] > 0 ? v / expD[i] - 1 : NaN), devAbs = Math.max(0.1, ...devD.filter(isFinite).map(Math.abs));
     const y0 = CH / 2, bh = v => Math.abs(v) / devAbs * (CH / 2 - PAD);
     let pos = '', neg = ''; devD.forEach((v, i) => { if (!isFinite(v) || !v) return; const h = bh(v).toFixed(1), x = i * BW + 1;
       if (v > 0) pos += `M${x},${(y0 - bh(v)).toFixed(1)}h${BW - 2}v${h}h-${BW - 2}Z`; else neg += `M${x},${y0}h${BW - 2}v${h}h-${BW - 2}Z`; });
     const devTxt = i => isFinite(devD[i]) ? `${NF.format(daily[i])} admissões, normal ${NF.format(Math.round(expD[i]))} (${sgnP(Math.round(devD[i] * 100))})` : `${NF.format(daily[i])} admissões (dia incompleto)`;
-    const ma7 = Array.from(daily, (v, i) => i < 6 ? NaN : sum(daily.slice(i - 6, i + 1)) / 7);
+    const ma7 = Array.from(daily, (v, i) => i < 6 || gapIn(i - 6, i) ? NaN : sum(daily.slice(i - 6, i + 1)) / 7);
     const third = selF ? { s: selD, title: `Admissões/dia · ${nice(selF.n)}`, fmt: i => `${NF.format(selD[i])} admissões de ${nice(selF.n)}`, sub: sp ? `só ${selNames}` : 'todas as prioridades' }
       : { s: ma7, title: 'Média de 7 dias', fmt: i => isFinite(ma7[i]) ? `média de 7 dias: ${NF.format(Math.round(ma7[i]))}` : 'sem 7 dias anteriores', sub: 'admissões por dia' };
     const tMax = Math.max(1, ...Array.from(third.s).filter(isFinite)) * 1.05, tLo = selF ? 0 : Math.floor(Math.min(...ma7.filter(isFinite)) * 0.95);
@@ -1735,10 +1753,12 @@ class Component extends DCLogic {
         chart('Ocupação do internamento', 'taxa acumulada no ano', g('ocup', r => r == null ? null : r / 100), v => pc(v, 1), '#7a7676', null, '', true)
       ];
       // confronto mês a mês: admissões do CSV vs atendimentos da urgência (o portal soma geral + pediátrica + obstétrica)
-      const csvByM = new Map(), csvDays = new Map(), csvTri = new Map();
-      for (let j = 0; j < R.length; j += 6) { const m = U.days[R[j]].slice(0, 7); csvByM.set(m, (csvByM.get(m) || 0) + R[j + 5]);
-        const t = csvTri.get(m) || z7(); t[R[j + 3]] += R[j + 5]; csvTri.set(m, t); }
-      U.days.forEach(d => csvDays.set(d.slice(0, 7), (csvDays.get(d.slice(0, 7)) || 0) + 1));
+      const { csvByM, csvDays, csvTri } = this.memo('csvM', '', () => { // só depende dos dados: uma vez
+        const csvByM = new Map(), csvDays = new Map(), csvTri = new Map();
+        for (let j = 0; j < R.length; j += 6) { const m = U.days[R[j]].slice(0, 7); csvByM.set(m, (csvByM.get(m) || 0) + R[j + 5]);
+          const t = csvTri.get(m) || z7(); t[R[j + 3]] += R[j + 5]; csvTri.set(m, t); }
+        U.days.forEach((d, i) => { if (!gap[i]) csvDays.set(d.slice(0, 7), (csvDays.get(d.slice(0, 7)) || 0) + 1); });
+        return { csvByM, csvDays, csvTri }; });
       const lastDay = U.days[N - 1];
       snsVal = [...csvByM.keys()].sort().filter(m => SM.urg[m]).map(m => {
         const c = csvByM.get(m), sv = SM.urg[m][3], dim = new Date(+m.slice(0, 4), +m.slice(5), 0).getDate(), full = csvDays.get(m) === dim, partialEnd = lastDay.startsWith(m);
@@ -1760,7 +1780,7 @@ class Component extends DCLogic {
     let socPts = [], socTicksX = [], socTicksY = [], socLine = '', socLede = '', socOut = [], hasSoc = false, socConcl = '';
     if (SOC && SOC.by) {
       const pts = this.fregs.filter(f => (f.c === 'Amadora' || f.c === 'Sintra') && SOC.by[f.d] && this.pop[f.d]).map(f => { const v = SOC.by[f.d], tot = sum(this.counts(AF, f.d));
-        return { f, x: v[sDen] ? v[sNum] / v[sDen] * 100 : NaN, y: tot / this.pop[f.d][0] * 1000 * 365 / N, tot }; }).filter(p => isFinite(p.x) && isFinite(p.y));
+        return { f, x: v[sDen] ? v[sNum] / v[sDen] * 100 : NaN, y: tot / this.pop[f.d][0] * 1000 * 365 / Ne, tot }; }).filter(p => isFinite(p.x) && isFinite(p.y));
       hasSoc = pts.length >= 5;
       if (hasSoc) {
         const n = pts.length, mx = sum(pts.map(p => p.x)) / n, my = sum(pts.map(p => p.y)) / n;
@@ -1960,7 +1980,7 @@ class Component extends DCLogic {
       togglePlay: () => { if (st.playing) return set({ playing: false }); const w = st.win || 7; set({ win: w, end: end >= N - 1 ? w - 1 : end, playing: true }); },
       wins: [[1, '1 dia'], [7, '7 dias'], [14, '14'], [30, '30'], [0, 'Tudo']].map(([w, label]) => ({ label, on: st.win === w, pick: () => set({ win: w, playing: w ? st.playing : false, end: Math.max(end, w ? w - 1 : end) }) })),
       speeds: [[800, 'Lenta'], [450, 'Normal'], [180, 'Rápida']].map(([v, label]) => ({ label, on: st.speed === v, pick: () => set({ speed: v }) })),
-      tlBox: `0 0 ${N * BW} 84`, bars, months, evMarks: evMarks.concat(noteMarks), evNote, syncCharts, evList, evCount, evEmpty, evOpts, nd, maxIdx: N - 1, sliderVal: st.win ? end : N - 1, sliderOff: !st.win,
+      fqWhen, csWhen, tlBox: `0 0 ${N * BW} 84`, bars, months, evMarks: evMarks.concat(noteMarks), evNote, syncCharts, evList, evCount, evEmpty, evOpts, nd, maxIdx: N - 1, sliderVal: st.win ? end : N - 1, sliderOff: !st.win,
       onSlide: e => set({ end: Math.max(+e.target.value, st.win - 1), playing: false }),
       tlNote: st.win ? 'Arraste o cursor ou clique num dia para mover a janela; Reproduzir anima o mapa dia a dia. Com a escala fixa, as cores comparam-se entre janelas.' : 'A ver o período completo. Escolha uma janela para percorrer os dias.',
       panelTitle: selF ? nice(selF.n) : 'Toda a área de influência', panelSub: selF ? `${selF.c} · ${NF.format(curTot)} admissões` + (this.pop[selF.d] ? ` · ${NF.format(this.pop[selF.d][0])} residentes` : "") : `${NF.format(areaTot)} admissões${locName}`,

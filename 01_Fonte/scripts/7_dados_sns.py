@@ -9,7 +9,7 @@ As séries de urgência vêm acumuladas no ano no portal; aqui guardam-se já co
 Atualiza também o indicador "Sem médico de família" do topo (window.URG.sns) com o mês mais recente.
 
 Grava window.URG.snsm no 01_Fonte/urgencias-data.js e volta a embeber os dados no HTML da raiz.
-Correr a partir da raiz do repositório (só precisa de internet):
+Pode correr-se de qualquer pasta (só precisa de internet):
     python 01_Fonte/scripts/7_dados_sns.py
 """
 import json
@@ -36,8 +36,12 @@ def registos(ds, onde, ordem):
             return out
 
 
-def mensal(acum):
-    """De valores acumulados no ano para valores do mês (janeiro fica igual; meses em falta ficam None)."""
+def mensal(acum, nome, avisos):
+    """De valores acumulados no ano para valores do mês (janeiro fica igual; meses em falta ficam None).
+
+    Um acumulado menor do que o do mês anterior (correção do portal, mês incompleto) daria um valor
+    negativo: fica None e entra nos avisos.
+    """
     out = {}
     for m in sorted(acum):
         y, mo = int(m[:4]), int(m[5:])
@@ -46,9 +50,24 @@ def mensal(acum):
             out[m] = acum[m]
         elif ant in acum:
             out[m] = [None if a is None or b is None else a - b for a, b in zip(acum[m], acum[ant])]
+            if any(v is not None and v < 0 for v in out[m]):
+                avisos.append(f'{nome} {m}: acumulado menor do que em {ant}; o mês fica sem valor')
+                out[m] = [None if v is not None and v < 0 else v for v in out[m]]
         else:
             out[m] = [None] * len(acum[m])
     return out
+
+
+def invulgares(serie, nome, avisos, i=None, fator=3):
+    """Avisa de meses muito longe da mediana da série (mais de 'fator' vezes acima ou abaixo)."""
+    val = {m: (v[i] if i is not None else v) for m, v in serie.items()}
+    ok = sorted(v for v in val.values() if v is not None and v > 0)
+    if len(ok) < 6:
+        return
+    med = ok[len(ok) // 2]
+    for m, v in sorted(val.items()):
+        if v is not None and (v > med * fator or v < med / fator):
+            avisos.append(f'{nome} {m}: {v} muito longe da mediana ({med}); confirmar no portal')
 
 
 def recolher():
@@ -68,18 +87,28 @@ def recolher():
               for r in registos('acesso-de-consultas-medicas-pela-populacao-inscrita', csp, 'tempo asc')}
     insc_r = registos('utentes-inscritos-em-cuidados-de-saude-primarios', f'aces like "ULS Amadora / Sintra" and periodo >= "{DESDE}"', 'periodo asc')
     insc = {r['periodo']: [r['utentes_inscritos_csp'], r['total_utentes_sem_mdf_atribuido'], r['total_utentes_sem_mdf_atribuido_por_opcao']] for r in insc_r}
-    return {'fonte': FONTE, 'obtido': date.today().isoformat(), 'desde': DESDE,
-            'urg': mensal(urg), 'tri': mensal(tri), 'ocup': ocup, 'cons': cons, 'enf': enf, 'acesso': acesso, 'insc': insc}, insc_r
+    avisos = []
+    snsm = {'fonte': FONTE, 'obtido': date.today().isoformat(), 'desde': DESDE,
+            'urg': mensal(urg, 'urgência', avisos), 'tri': mensal(tri, 'triagem', avisos), 'ocup': ocup, 'cons': cons, 'enf': enf, 'acesso': acesso, 'insc': insc}
+    invulgares(snsm['urg'], 'urgência (total)', avisos, 3)
+    invulgares(cons, 'consultas presenciais', avisos, 0)
+    invulgares(enf, 'enfermagem presencial', avisos, 0)
+    return snsm, insc_r, avisos
 
 
 def main():
     sys.path.insert(0, AQUI)
     m5 = __import__('5_atualizar_dados')
     texto, base, extra = m5.ler_dados()
-    snsm, insc_r = recolher()
+    snsm, insc_r, avisos = recolher()
     for k in ('urg', 'tri', 'cons', 'enf', 'insc'):
         meses = sorted(snsm[k])
         print(f'{k:5s} {len(meses):3d} meses  {meses[0] if meses else "-"} a {meses[-1] if meses else "-"}')
+    for a in avisos:
+        print('aviso:', a)
+    ult = max(snsm['urg'], default=None)
+    if ult:
+        print(f'nota: o último mês publicado ({ult}) pode ainda ser corrigido pelo portal; voltar a correr no mês seguinte')
     if not snsm['urg'] or not snsm['insc']:
         sys.exit('A API não devolveu dados da ULS; nada foi alterado.')
     ult = insc_r[-1]
@@ -89,9 +118,7 @@ def main():
     novo = m5.escrever_dados(base, extra)
     if novo == texto:
         print('sem alterações'); return
-    open(m5.DADOS, 'w', encoding='utf-8', newline='\n').write(novo)
-    print('escrito', os.path.relpath(m5.DADOS))
-    __import__('4_embeber_no_html').atualizar_dados()
+    m5.m4.atualizar_dados(novo)
 
 
 if __name__ == '__main__':

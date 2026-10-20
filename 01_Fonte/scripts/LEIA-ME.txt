@@ -21,15 +21,18 @@ urgencias-data.js, e preciso voltar a embebe-los no HTML.
 
 4_embeber_no_html.py
    Volta a embeber o .dc.html no "Origem das Urgencias.html" da raiz, depois de alterar o
-   dashboard. Correr a partir da raiz do repositorio. Com --verificar so confirma que o HTML
-   da raiz esta em dia. Nao atualiza os dados: se o urgencias-data.js mudar, e preciso
-   voltar a exportar o pacote.
+   dashboard. Com --verificar so confirma que o HTML da raiz esta em dia com o .dc.html.
+   Os dados (urgencias-data.js) sao embebidos pelos scripts 5, 6 e 7.
+
+Os scripts 4 a 7 podem correr-se de qualquer pasta. Escrevem primeiro num ficheiro temporario
+(uma falha a meio nao estraga nada) e guardam a versao anterior do HTML em
+"Origem das Urgencias.html.bak".
 
 5_atualizar_dados.py
    Atualiza o dashboard a partir de uma nova extracao BD_Urgencia_Admissoes.csv (separador ;).
    Recalcula dias, admissoes por freguesia, horas, utentes frequentes e unidades; mantem a
    geometria, a populacao (Censos), o SNS e os hospitais; e volta a por os dados no HTML da raiz.
-   Correr a partir da raiz do repositorio:
+   Exemplos a partir da raiz do repositorio:
 
      1. Primeira vez, com o CSV que gerou os dados atuais (cria freguesias_csv.json e confirma):
           python 01_Fonte/scripts/5_atualizar_dados.py 02_Dados/BD_Urgencia_Admissoes.csv --verificar
@@ -39,7 +42,18 @@ urgencias-data.js, e preciso voltar a embebe-los no HTML.
           python 01_Fonte/scripts/5_atualizar_dados.py 02_Dados/<novo>.csv
 
    Freguesias com nomes que o script nao conhece aparecem listadas e contam como "sem
-   freguesia": acrescentar "NOME EM MAIUSCULAS SEM ACENTOS": "dicofre" ao freguesias_csv.json.
+   freguesia": acrescentar "NOME": "dicofre" ao freguesias_csv.json, com o nome tal como
+   aparece na lista (maiusculas e acentos nao importam). Um nome que corresponde a mais de uma
+   freguesia leva uma lista, como "AGUALVA CACEM": ["111122", "111124"]: cada admissao vai para
+   a freguesia que o mesmo utente indicou noutras idas, senao para a mais comum entre os utentes
+   da mesma unidade de saude, senao reparte-se pela populacao.
+   A correspondencia criada automaticamente deve ser revista: o encaixe pode ligar uma freguesia
+   de fora a uma do mapa (em 10/2026 foram retiradas Cardigos, Colmeias e Memoria e Vila Nova
+   de Sao Bento e Vale de Vargo).
+   Dias sem report (sem admissoes, ou sem nenhuma depois das 9h) sao avisados e ficam em
+   meta.falta: o dashboard mostra-os como "sem dados" e nao os usa nas medias nem nos alertas.
+   Utentes frequentes e unidades contam so os ultimos 12 meses quando o CSV tiver mais do que
+   isso (para o indicador nao mudar de significado ao juntar historico).
    Se a coluna da hora tiver outro nome: --coluna-hora NOME. So os dados agregados vao para o
    dashboard; o cartao de utente so serve para contar utentes frequentes e por unidade.
 
@@ -48,7 +62,6 @@ urgencias-data.js, e preciso voltar a embebe-los no HTML.
    freguesia): 65+ anos, desemprego, ensino superior (25+ anos) e edificios a precisar de
    reparacao. Descarrega o ficheiro do INE (ou usa um .zip/.xlsx ja descarregado), acrescenta
    window.URG.soc ao urgencias-data.js e volta a embebe-lo no HTML da raiz. Precisa de openpyxl.
-   Correr a partir da raiz do repositorio.
 
 7_dados_sns.py
    Vai buscar ao Portal da Transparencia do SNS (API publica, sem registo) as series mensais da
@@ -56,6 +69,6 @@ urgencias-data.js, e preciso voltar a embebe-los no HTML.
    consultas medicas e contactos de enfermagem nos CSP, inscritos e sem medico de familia, taxa
    de utilizacao. Atualiza o indicador "Sem medico de familia" do topo para o mes mais recente e a
    seccao "Contexto da ULS" (com o confronto mes a mes entre o CSV e os numeros oficiais).
-   Correr a partir da raiz do repositorio, com internet:
+   Precisa de internet:
           python 01_Fonte/scripts/7_dados_sns.py
 

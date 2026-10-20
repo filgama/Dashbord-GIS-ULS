@@ -11,28 +11,25 @@ Guarda, para cada freguesia do mapa (código DICOFRE de 6 algarismos), pares num
         "sem escolaridade", por isso a escolaridade baixa confundir-se-ia com a idade)
     edifícios com necessidade de reparação / edifícios clássicos
 
-Correr a partir da raiz do repositório (precisa de openpyxl). Sem argumentos descarrega o ficheiro
+Pode correr-se de qualquer pasta (precisa de openpyxl). Sem argumentos descarrega o ficheiro
 do INE; com um argumento usa um .zip ou .xlsx já descarregado:
     python 01_Fonte/scripts/6_contexto_social.py [FS2021SeccaoTot.zip]
 Acrescenta (ou substitui) window.URG.soc no 01_Fonte/urgencias-data.js e volta a embeber esse
 ficheiro no "Origem das Urgencias.html" da raiz.
 """
-import base64
-import gzip
 import io
-import json
-import re
+import os
 import sys
 import urllib.request
 import zipfile
 
 import openpyxl
 
+AQUI = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, AQUI)
+m4 = __import__('4_embeber_no_html')
+m5 = __import__('5_atualizar_dados')
 URL = 'https://mapas.ine.pt/download/2021FicheiroSintese/FS2021SeccaoTot.zip'
-DADOS = '01_Fonte/urgencias-data.js'
-DESTINO = 'Origem das Urgencias.html'
-UUID_DADOS = '68a45299-35ec-4170-9f12-28052a2964ff'
-MARCA = ';window.URG.soc='
 FONTE = 'INE, Censos 2021, Ficheiro Síntese por secção (totais por freguesia)'
 # cada indicador: (numerador, denominador), cada um uma lista de colunas a somar
 IND = [
@@ -53,9 +50,7 @@ def livro(arg):
 
 
 def main():
-    src = open(DADOS, encoding='utf-8', newline='').read()
-    base = src[:src.index(MARCA)] if MARCA in src else src
-    U = json.JSONDecoder().raw_decode(base, base.index('{'))[0]
+    _, U, extra = m5.ler_dados()
     fregs = {f['d'] for f in U['feats'] if f['t'] == 1}
 
     linhas = livro(sys.argv[1] if len(sys.argv) > 1 else None).worksheets[0].iter_rows(values_only=True)
@@ -70,18 +65,8 @@ def main():
             by[str(d)] = [v for num, den in IND for v in (soma(num), soma(den))]
     print('freguesias com dados:', len(by), 'de', len(fregs), '| em falta:', sorted(fregs - set(by)))
 
-    soc = {'src': FONTE, 'by': by}
-    src = base.rstrip('\n') + '\n' + MARCA + json.dumps(soc, ensure_ascii=False, separators=(',', ':')) + ';\n'
-    open(DADOS, 'w', encoding='utf-8', newline='').write(src)
-
-    html = open(DESTINO, encoding='utf-8', newline='').read()
-    m = re.search(r'(<script type="__bundler/manifest">)(.*?)(</script>)', html, re.S)
-    antigo = json.loads(m.group(2))[UUID_DADOS]['data']
-    novo = base64.b64encode(gzip.compress(src.encode('utf-8'), mtime=0)).decode('ascii')
-    assert m.group(2).count(antigo) == 1
-    html = html[:m.start(2)] + m.group(2).replace(antigo, novo) + html[m.end(2):]
-    open(DESTINO, 'w', encoding='utf-8', newline='\n').write(html)
-    print('dados atualizados em', DADOS, 'e embebidos em', DESTINO)
+    extra = dict(extra, soc={'src': FONTE, 'by': by})
+    m4.atualizar_dados(m5.escrever_dados(U, extra))
 
 
 if __name__ == '__main__':
