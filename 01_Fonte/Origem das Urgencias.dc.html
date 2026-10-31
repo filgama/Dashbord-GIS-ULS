@@ -37,11 +37,11 @@ input[type=range]{accent-color:#0088b0}
     <div style="height:1px;background:var(--color-text)"></div>
     <div style="display:flex;justify-content:space-between;align-items:baseline;gap:4px 20px;padding:10px 0 8px;flex-wrap:wrap">
       <span style="font-size:13px;letter-spacing:.12em;text-transform:uppercase">ULS Amadora/Sintra · Serviço de Urgência</span>
-      <span style="font-size:13px">Origem e prioridade das admissões · 1.º trimestre de 2026</span>
+      <span style="font-size:13px">Origem e prioridade das admissões</span>
     </div>
     <div style="height:1px;background:var(--color-text)"></div>
     <div style="display:flex;gap:4px 28px;padding:7px 0;font-size:13px;flex-wrap:wrap">
-      <span>31 dez 2025 – 31 mar 2026</span><span>{{ totalLabel }} admissões</span><span class="hd-x">5 locais de entrada</span><span class="hd-x">Triagem de Manchester</span><span class="hd-x" style="margin-left:auto">Fonte: BD_Urgencia_Admissoes.csv</span>
+      <span>{{ periodoLabel }}</span><span>{{ totalLabel }} admissões</span><span class="hd-x">5 locais de entrada</span><span class="hd-x">Triagem de Manchester</span><span class="hd-x" style="margin-left:auto">Fonte: BD_Urgencia_Admissoes.csv</span>
     </div>
     <div style="height:1px;background:var(--color-text)"></div>
   </header>
@@ -1035,9 +1035,9 @@ class Component extends DCLogic {
       };
       document.addEventListener('mousemove', this.onTT);
     }
-    let saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+    let saved = {}; try { saved = this.cleanSaved(JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) {}
     // o dia guarda-se como data: um índice antigo (número) apontaria para outro dia depois de atualizar os dados
-    if (saved && 'end' in saved) { const i = typeof saved.end === 'string' ? U.days.indexOf(saved.end) : -1; if (i >= 0) saved.end = i; else delete saved.end; }
+    if ('end' in saved) { const i = typeof saved.end === 'string' ? U.days.indexOf(saved.end) : -1; if (i >= 0) saved.end = i; else delete saved.end; }
     const fromHash = this.readHash();
     this.setState({ end: N - 2, ...saved, orig: Array.isArray(saved.orig) ? saved.orig : [], ...fromHash, playing: false });
     this.ro = new ResizeObserver(() => { const w = this.mapRef.current && this.mapRef.current.clientWidth; if (w && Math.abs(w - this.state.mapW) > 40) this.setState({ mapW: w }); });
@@ -1085,10 +1085,12 @@ class Component extends DCLogic {
   // O resultado fica só neste browser (localStorage); o ficheiro HTML continua a ser atualizado pelo script.
   async snsFetch() {
     const API = 'https://transparencia.sns.gov.pt/api/explore/v2.1/catalog/datasets', DESDE = '2024-01';
-    const reg = async (ds, onde, ordem) => { const out = []; for (let off = 0; ; ) {
-      const q = new URLSearchParams({ where: onde, order_by: ordem, limit: 100, offset: off });
-      const r = await fetch(`${API}/${ds}/records?${q}`); if (!r.ok) throw new Error('HTTP ' + r.status);
-      const lote = (await r.json()).results; out.push(...lote); off += lote.length; if (lote.length < 100) return out; } };
+    const reg = async (ds, onde, ordem) => { const out = []; for (let pag = 0; pag < 20; pag++) {
+      const q = new URLSearchParams({ where: onde, order_by: ordem, limit: 100, offset: out.length });
+      const r = await fetch(`${API}/${ds}/records?${q}`, { signal: AbortSignal.timeout(30000) }); if (!r.ok) throw new Error('HTTP ' + r.status);
+      const lote = (await r.json()).results; if (!Array.isArray(lote)) throw new Error('resposta inesperada do portal');
+      out.push(...lote); if (lote.length < 100) return out; }
+      throw new Error('o portal devolveu registos a mais'); };
     const by = (rs, k, f) => Object.fromEntries(rs.map(r => [r[k], f(r)]));
     const uls = `instituicao like "Amadora/Sintra" and tempo >= "${DESDE}"`, csp = `entidade like "ULS Amadora / Sintra" and tempo >= "${DESDE}"`;
     const cores = ['vermelha', 'laranja', 'amarela', 'verde', 'azul', 'branca'];
@@ -1123,14 +1125,30 @@ class Component extends DCLogic {
     invulgares(snsm.urg, 'urgência (total)', 3); invulgares(snsm.cons, 'consultas presenciais', 0); invulgares(snsm.enf, 'enfermagem presencial', 0);
     if (!Object.keys(snsm.urg).length || !rI.length) throw new Error('a API não devolveu dados da ULS');
     const u = rI[rI.length - 1];
-    return { snsm, sns: { per: u.periodo, insc: u.utentes_inscritos_csp, sem: u.total_utentes_sem_mdf_atribuido, ent: u.aces }, avisos };
+    const d = { snsm, sns: { per: u.periodo, insc: u.utentes_inscritos_csp, sem: u.total_utentes_sem_mdf_atribuido, ent: u.aces }, avisos };
+    if (!this.snsValido(d)) throw new Error('resposta inesperada do portal');
+    const atual = Object.keys((this.U.snsm || {}).urg || {}).length;
+    if (Object.keys(snsm.urg).length < atual) throw new Error('o portal devolveu menos meses do que os atuais');
+    return d;
   }
-  snsApply(d) { this.U.snsm = d.snsm; this.U.sns = d.sns; this.snsAvisos = d.avisos || []; }
+  // formato que o dashboard espera; uma resposta ou uma cópia guardada que não o cumpra não chega a ser usada
+  snsValido(d) {
+    const M = /^\d{4}-\d{2}$/, num = v => v === null || (typeof v === 'number' && isFinite(v));
+    const S = d && d.snsm, ns = d && d.sns;
+    if (!S || !ns || !/^\d{4}-\d{2}-\d{2}$/.test(S.obtido) || S.obtido > new Date().toISOString().slice(0, 10) || typeof S.desde !== 'string') return false;
+    if (!M.test(ns.per) || !isFinite(ns.insc) || !isFinite(ns.sem) || ns.insc === null || ns.sem === null || typeof ns.ent !== 'string') return false;
+    for (const [k, n] of [['urg', 4], ['tri', 7], ['cons', 3], ['enf', 2], ['acesso', 2], ['insc', 3]]) { const e = S[k] && Object.entries(S[k]);
+      if (!e || !e.length || !e.every(([m, v]) => M.test(m) && Array.isArray(v) && v.length === n && v.every(num))) return false;
+      if (k !== 'acesso' && !e.some(([, v]) => v.some(x => x > 0))) return false; }
+    return !!S.ocup && Object.entries(S.ocup).every(([m, v]) => M.test(m) && num(v));
+  }
+  snsApply(d) { this.U.snsm = d.snsm; this.U.sns = d.sns; this.snsAvisos = Array.isArray(d.avisos) ? d.avisos : []; }
   // ao abrir: usa os dados guardados neste browser se forem mais recentes do que os embebidos
   snsCache() {
     let d = null; try { d = JSON.parse(localStorage.getItem('urg-sns') || 'null'); } catch (e) {}
     this.snsEmb = this.U.snsm && this.U.snsm.obtido;
-    if (d && d.snsm && d.sns && d.snsm.obtido > (this.snsEmb || '')) { this.snsApply(d); this.snsLocal = true; }
+    if (d && !this.snsValido(d)) { try { localStorage.removeItem('urg-sns'); } catch (e) {} return; }
+    if (d && d.snsm.obtido > (this.snsEmb || '')) { this.snsApply(d); this.snsLocal = true; }
   }
   snsGo = async () => {
     if (this.state.snsBusy) return; this.setState({ snsBusy: true, snsErr: '' });
@@ -1142,7 +1160,7 @@ class Component extends DCLogic {
   snsUpdVals() {
     const SM = this.U && this.U.snsm, st = this.state, ob = SM && SM.obtido, last = SM && SM.urg ? Object.keys(SM.urg).sort().pop() : '';
     const dt = ob ? ob.split('-').reverse().join('/') : '—', lastL = last ? `${MES[+last.slice(5) - 1]} ${last.slice(0, 4)}` : '';
-    const av = (this.snsAvisos || []).length ? ' · avisos: ' + this.snsAvisos.join('; ') : '';
+    const nav = (this.snsAvisos || []).length, av = nav ? ' · avisos: ' + this.snsAvisos.slice(0, 5).join('; ') + (nav > 5 ? `; e mais ${nav - 5}` : '') : '';
     return { busy: !!st.snsBusy, go: this.snsGo, label: st.snsBusy ? 'A atualizar…' : 'Atualizar',
       info: st.snsErr || `Dados de ${dt}${lastL ? ' · até ' + lastL : ''}${this.snsLocal ? ' (neste browser)' : ''}`,
       tip: (this.snsLocal ? 'Atualizados neste browser; o ficheiro HTML só muda ao correr 7_dados_sns.py.' : 'Dados embebidos no ficheiro.') + ' O último mês ainda pode ser corrigido pelo portal.' + av };
@@ -1158,7 +1176,7 @@ class Component extends DCLogic {
   motion(ms) { return reduceMotion() ? 0 : ms; }
   // desliza o enquadramento 2D do atual para o que fica depois de aplicar 'patch' ao estado
   glideVB(patch, ms = 420) {
-    if (this.live) this.commitVB();
+    if (this.dragEnd) this.dragEnd(); else if (this.live) this.commitVB();
     const from = this.curVB(); cancelAnimationFrame(this.vbRaf); this.vbAnim = null;
     this.setState({ ...patch, hover: null }, () => { const to = this.baseVB(), d = this.motion(ms); if (!d) return;
       const t0 = performance.now(), step = now => { const k = Math.min(1, (now - t0) / d), e = easeIO(k);
@@ -1189,16 +1207,22 @@ class Component extends DCLogic {
   }
   onDown = e => {
     if (e.button !== 0) return;
-    const r = this.mapRef.current.getBoundingClientRect(), vb0 = this.live || this.curVB(), x0 = e.clientX, y0 = e.clientY;
-    this.dragged = false; let raf = 0, last = null;
-    const move = ev => { const dx = ev.clientX - x0, dy = ev.clientY - y0;
-      if (!this.dragged && Math.hypot(dx, dy) < 4) return; this.dragged = true; last = [dx, dy];
-      if (!raf) raf = requestAnimationFrame(() => { raf = 0; const [ddx, ddy] = last;
-        this.liveVB([vb0[0] - ddx * vb0[2] / r.width, vb0[1] - ddy * vb0[3] / r.height, vb0[2], vb0[3]]); }); };
-    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); cancelAnimationFrame(raf);
-      if (this.dragged && last) { const [ddx, ddy] = last; this.liveVB([vb0[0] - ddx * vb0[2] / r.width, vb0[1] - ddy * vb0[3] / r.height, vb0[2], vb0[3]]); this.commitVB(); }
-      setTimeout(() => { this.dragged = false; }, 0); };
-    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+    // cada passo parte do enquadramento atual: a roda do rato a meio do arrasto não se perde
+    const svg = e.currentTarget, x0 = e.clientX, y0 = e.clientY; let px = x0, py = y0, lx = x0, ly = y0, raf = 0;
+    if (this.dragEnd) this.dragEnd();
+    this.dragged = false;
+    const step = () => { const el = this.mapRef.current; if (!el || (lx === px && ly === py)) return;
+      const r = el.getBoundingClientRect(), vb = this.live || this.curVB();
+      this.liveVB([vb[0] - (lx - px) * vb[2] / r.width, vb[1] - (ly - py) * vb[3] / r.height, vb[2], vb[3]]); px = lx; py = ly; };
+    const end = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', end);
+      cancelAnimationFrame(raf); raf = 0; this.dragEnd = null; if (this.dragged) this.commitVB(); setTimeout(() => { this.dragged = false; }, 0); };
+    const up = () => { if (this.dragged) step(); end(); };
+    const move = ev => { if (ev.pointerType === 'mouse' && ev.buttons === 0) return up(); // largou o botão fora da janela
+      lx = ev.clientX; ly = ev.clientY;
+      if (!this.dragged) { if (Math.hypot(lx - x0, ly - y0) < 4) return; this.dragged = true; try { svg.setPointerCapture(ev.pointerId); } catch (err) {} }
+      if (!raf) raf = requestAnimationFrame(() => { raf = 0; step(); }); };
+    this.dragEnd = end;
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', end);
   };
   attach() {
     // largura real do gráfico do contexto social (para esconder nomes que se sobrepõem)
@@ -1244,6 +1268,20 @@ class Component extends DCLogic {
       return pts; }).filter(r => r.length >= 4);
   }
   // ---- ligação partilhável ----
+  // o que vem do localStorage só entra no estado se for válido; o resto fica com o valor por omissão
+  cleanSaved(o) {
+    const U = this.U, out = {}; if (!o || typeof o !== 'object' || Array.isArray(o)) return out;
+    const ok = { mode: ['calor', 'freg', 'circ', 'ret'], metric: ['n', 'pct', 'tx'], zoom: ['area', 'regiao'], fundo: ['mapa', 'ruas', 'sat', 'papel'], win: [0, 1, 7, 14, 30], speed: [800, 450, 180] };
+    for (const k in ok) if (ok[k].includes(o[k])) out[k] = o[k];
+    if (typeof o.end === 'string') out.end = o.end;
+    if (Number.isInteger(o.local) && o.local >= -1 && o.local < U.LOC.length) out.local = o.local;
+    if (Array.isArray(o.orig)) out.orig = [...new Set(o.orig.filter(n => Number.isInteger(n) && n >= 0 && n < U.AG.length))].sort();
+    if (typeof o.fixed === 'boolean') out.fixed = o.fixed;
+    if (o.lay && typeof o.lay === 'object') { const def = layDefault(), lay = {};
+      for (const k in def) { const l = o.lay[k]; lay[k] = l && typeof l.on === 'boolean' && isFinite(l.op) ? { on: l.on, op: +l.op } : def[k]; }
+      out.lay = lay; }
+    return out;
+  }
   readHash() {
     const h = (location.hash || '').replace(/^#/, ''); if (!h.includes('v=1')) return {};
     const q = new URLSearchParams(h), U = this.U, out = {}, num = v => { const n = +v; return isFinite(n) ? n : undefined; };
@@ -1255,7 +1293,7 @@ class Component extends DCLogic {
       else if (key === 'metric') { if (['n', 'pct', 'tx'].includes(v)) out.metric = v; }
       else if (key === 'fundo') { if (['mapa', 'ruas', 'sat', 'papel'].includes(v)) out.fundo = v; }
       else if (key === 'zoom') { if (['area', 'regiao'].includes(v)) out.zoom = v; }
-      else if (key === 'local') { const n = num(v); if (n >= -1 && n < U.LOC.length) out.local = n; }
+      else if (key === 'local') { const n = num(v); if (Number.isInteger(n) && n >= -1 && n < U.LOC.length) out.local = n; }
       else if (key === 'orig' || key === 'prios') { const a = v ? v.split(',').map(Number).filter(n => Number.isInteger(n) && n >= 0 && n < (key === 'orig' ? U.AG.length : 7)) : []; out[key] = [...new Set(a)].sort(); }
       else if (key === 'fixed' || key === 'view3d') out[key] = v === '1';
       else if (key === 'cmp') { const n = num(v); out.cmp = v === 'ant' ? 'ant' : [7, 28].includes(n) ? n : 0; } }
@@ -1393,7 +1431,7 @@ class Component extends DCLogic {
     dur ? map.easeTo({ ...this.camHome, duration: dur }) : map.jumpTo(this.camHome); }
   async init3d() {
     if (this.ml || this.mlBusy) return; this.mlBusy = true; this.setState({ d3msg: 'A carregar a vista 3D…' });
-    try { await this.loadML(); } catch (e) { this.mlBusy = false; this.setState({ view3d: false, d3msg: 'Não foi possível carregar a vista 3D (sem ligação à internet?)' }); return; }
+    try { await this.loadML(); } catch (e) { this.mlBusy = false; this.setState({ view3d: false, d3msg: this.state.view3d ? 'Não foi possível carregar a vista 3D (sem ligação à internet?)' : '' }); return; }
     const el = this.map3dRef.current; if (!el || !this.state.view3d) { this.mlBusy = false; this.setState({ d3msg: '' }); return; }
     const ML = window.maplibregl, U = this.U;
     const fr = { type: 'FeatureCollection', features: this.fregs.map((f, i) => ({ type: 'Feature', id: i, properties: {}, geometry: { type: 'MultiPolygon', coordinates: this.ringsLL(f.p).map(r => [r]) } })) };
@@ -1410,7 +1448,7 @@ class Component extends DCLogic {
       pitch: PITCH3D, bearing: BEAR3D, maxPitch: 80, attributionControl: false, preserveDrawingBuffer: true, dragRotate: true, touchPitch: true });
     this.camHome = null;
     // se o mapa não chegar a carregar (estilo ou rede), desiste ao fim de 30 s e volta ao 2D com aviso, para se poder tentar de novo
-    const t3d = setTimeout(() => { if (this.mlReady) return; map.remove(); this.ml = null; this.mlBusy = false; this.setState({ view3d: false, d3msg: 'A vista 3D demorou demasiado a carregar. Tente de novo.' }); }, 30000);
+    const t3d = setTimeout(() => { if (this.mlReady) return; map.remove(); this.ml = null; this.mlBusy = false; this.setState({ view3d: false, d3msg: this.state.view3d ? 'A vista 3D demorou demasiado a carregar. Tente de novo.' : '' }); }, 30000);
     map.on('load', () => { clearTimeout(t3d); this.mlReady = true; this.home3d(0); this.v3Key = null; this.mlBusy = false; this.setState({ d3msg: '' }); this.sync3d(); });
     map.on('mousemove', 'fr-3d', e => { const f = e.features && e.features[0]; if (!f || !this.inArea3d(this.fregs[f.id])) { map.getCanvas().style.cursor = ''; if (this.state.hover) this.setState({ hover: null }); return; } map.getCanvas().style.cursor = 'pointer';
       const d = this.fregs[f.id].d, h = this.state.hover; if (!h || h.d !== d || Math.abs(h.x - e.point.x) > 4 || Math.abs(h.y - e.point.y) > 4) this.setState({ hover: { d, x: e.point.x, y: e.point.y } }); });
@@ -1515,7 +1553,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const U = this.U;
-    if (!U || !this.fregs || this.state.end == null) return { snsUpd: { info: '', tip: '', label: '', busy: true, go: () => {} }, totalLabel: '', panelTitle: '', panelSub: '', rangeLabel: '', mapTitle: '', legendTitle: '', legendLo: '', legendHi: '', legendNote: '', playLabel: '', rankTitle: '', foot: '', hw: Object.fromEntries(HOWK.map(k => [k, { open: false, rot: 0, label: '', toggle: () => {} }])), cl: Object.fromEntries(HOWK.map(k => [k, ''])), hlCols: 3, rankMore: false, rankToggle: () => {}, rankToggleLabel: '', fqMore: false, fqToggle: () => {}, fqToggleLabel: '', kpis: [], kpiFoot: '', hl: [], hlWhen: '', moreOpen: false, moreRot: 0, moreToggle: () => {}, moreLabel: '', modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], hasSoc: false, socPts: [], socTicksX: [], socTicksY: [], socLine: '', socOpts: [], socLede: '', socOut: [], socXLabel: '', socNote: '', alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', fqWhen: '', csWhen: '', hasSnsm: false, snsCharts: [], snsVal: [], snsLede: '', snsNote: '', snsValNote: '', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3op: '0', d3pe: 'none', d3fadeMs: '0', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
+    if (!U || !this.fregs || this.state.end == null) return { snsUpd: { info: '', tip: '', label: '', busy: true, go: () => {} }, periodoLabel: '', totalLabel: '', panelTitle: '', panelSub: '', rangeLabel: '', mapTitle: '', legendTitle: '', legendLo: '', legendHi: '', legendNote: '', playLabel: '', rankTitle: '', foot: '', hw: Object.fromEntries(HOWK.map(k => [k, { open: false, rot: 0, label: '', toggle: () => {} }])), cl: Object.fromEntries(HOWK.map(k => [k, ''])), hlCols: 3, rankMore: false, rankToggle: () => {}, rankToggleLabel: '', fqMore: false, fqToggle: () => {}, fqToggleLabel: '', kpis: [], kpiFoot: '', hl: [], hlWhen: '', moreOpen: false, moreRot: 0, moreToggle: () => {}, moreLabel: '', modes: [], metrics: [], fundos: [], scales: [], locais: [], origens: [], agRows: [], zooms: [], wins: [], speeds: [], parishes: [], tiles: [], labelTiles: [], heat: [], dots: [], concelhos: [], circles: [], conLabels: [], hits: [], legend: [], bar: [], barRef: [], prios: [], presets: [], locRows: [], rank: [], bars: [], months: [], ov: { n: '', sub: '', topLabel: '', top: [] }, tip: { show: false, segs: [], extra: [] }, hosps: [], hospLayer: null, attr: '', exportCsv: () => {}, fqRows: [], fqLede: '', hasFq: false, alRows: [], hasSoc: false, socPts: [], socTicksX: [], socTicksY: [], socLine: '', socOpts: [], socLede: '', socOut: [], socXLabel: '', socNote: '', alLede: '', alMore: false, alToggleLabel: '', alToggle: () => {}, hasCs: false, csRows: [], csLede: '', csNote: '', csOpts: [], csMore: false, csToggleLabel: '', csToggle: () => {}, hmRows: [], hmHours: [], tileLayer: null, labelLayer: null, rank: [], locRows: [], agRows: [], origens: [], mapRef: this.mapRef, onDown: this.onDown, viewBox: '0 0 1000 770', aspect: '1.3', cxOp: 0, cxVis: 'hidden', cxParts: [], cxItems: [], cxHasSel: false, cxSelName: '', cxClear: () => {}, cxFilters: () => {}, tlBox: '0 0 910 84', fqWhen: '', csWhen: '', hasSnsm: false, snsCharts: [], snsVal: [], snsLede: '', snsNote: '', snsValNote: '', evMarks: [], evNote: '', syncCharts: [], evList: [], evCount: '', evEmpty: '', evOpts: [], nd: { show: false, t: '', fr: false, hasFr: false, frName: '', dayLabel: '', off: true, noNotes: true, msg: '', open: () => {}, cancel: () => {}, edit: () => {}, toggleFr: () => {}, save: () => {}, exportAll: () => {}, importFile: () => {} }, map3dRef: this.map3dRef, d3disp: 'none', d3op: '0', d3pe: 'none', d3fadeMs: '0', d3msg: '', dims: [], cmpOpts: [], cmpNote: '', shareMsg: '', copyLink: () => {}, exportPng: () => {}, showUni: false, uniDots: [], hasUni: false, uniCard: { title: '', sub: '', src: '', close: () => {}, units: [] }, uniOpts: [], layers: [], layNote: '', opLand: '1', opMain: '1', opLim: '1', opHosp: '1', opUni: '1', opCtx: '1', showCtx: false, ctxPaths: [], showCtxLeg: false, ctxLeg: { title: '', lo: '', hi: '', ramp: [] } };
     const st = this.state, set = o => this.setState(o);
     const N = U.days.length;
     const end = Math.min(N - 1, Math.max(0, st.end));
@@ -1631,7 +1669,7 @@ class Component extends DCLogic {
     const extraKpis = [];
     if (pA + pS) extraKpis.push({ label: 'Por 1 000 hab./ano', value: f0(txOf(resAdm(0) + resAdm(1), pA + pS)), sub: `Amadora ${f0(txOf(resAdm(0), pA))} · Sintra ${f0(txOf(resAdm(1), pS))}`, delta: '', dc: NEUT });
     if (S) extraKpis.push({ label: 'Sem médico de família', value: pc(S.sem / S.insc, 1), sub: `${NF.format(S.sem)} inscritos · ${MES[+S.per.slice(5) - 1]} ${S.per.slice(0, 4)}`, delta: '', dc: NEUT });
-    const foot2 = (pA + pS ? 'População residente: INE, Censos 2021 (indicador 0011609); as taxas por 1 000 habitantes usam a freguesia de residência registada na admissão e são anualizadas a partir dos dias do recorte (um trimestre de inverno sobrestima o ano).' : '') + (S ? ` Médico de família: Portal da Transparência do SNS, ${S.ent}, ${NF.format(S.insc)} inscritos em ${S.per.slice(5)}/${S.per.slice(0, 4)}.` : '')
+    const foot2 = (pA + pS ? 'População residente: INE, Censos 2021 (indicador 0011609); as taxas por 1 000 habitantes usam a freguesia de residência registada na admissão e são anualizadas a partir dos dias do recorte (um período que inclua sobretudo o inverno sobrestima o ano).' : '') + (S ? ` Médico de família: Portal da Transparência do SNS, ${S.ent}, ${NF.format(S.insc)} inscritos em ${S.per.slice(5)}/${S.per.slice(0, 4)}.` : '')
       + (FQ ? ` Utilizadores frequentes: utentes com ${FQ.k} ou mais admissões ${FQ.de ? fqPer : 'no período completo'}, contados pelo cartão de utente (${NF.format(FQ.sem)} admissões sem cartão ficam de fora); cada utente conta na freguesia que mais vezes indicou.` : '') + (U.cs && U.cs.rows && U.cs.rows.length ? ' Unidade de cuidados primários: coluna Centro_Saude da extração; ' + NF.format(U.cs.sem) + ' admissões não têm unidade registada.' : '') + (U.hosp ? ' Localização dos hospitais: OpenStreetMap.' : '');
 
     // exporta a tabela por freguesia do recorte atual (janela, origem, local); separador ; e vírgula decimal para abrir no Excel PT
@@ -2003,7 +2041,10 @@ class Component extends DCLogic {
       else hl.push({ k: 'Fora do padrão', big: 'Sem alertas', c: 'var(--color-neutral-400)', bc: 'var(--color-text)',
         sm: `Nenhum dia acima do normal ${winTxt}, com os filtros atuais.`, cta: 'Ver o histórico', go: () => this.ctxGo('fora') }); }
     if (hlTop) hl.push(hlTop);
-    const hlWhen = st.win ? `${nD === 1 ? fdy(U.days[i1]) : fdy(U.days[i0]) + ' a ' + fdy(U.days[i1])} · muda com a janela da timeline` : 'Período completo';
+    // um só dia sem report, ou o último dia do CSV (incompleto): os números não representam um dia normal
+    const dayBad = nD === 1 && (gap[i1] || i1 === N - 1) ? (gap[i1] ? 'sem dados completos (falta o report)' : 'incompleto (último dia da extração)') : '';
+    if (dayBad) hl.length = 0;
+    const hlWhen = dayBad ? `${fdy(U.days[i1])}: dia ${dayBad}; sem destaques` : st.win ? `${nD === 1 ? fdy(U.days[i1]) : fdy(U.days[i0]) + ' a ' + fdy(U.days[i1])} · muda com a janela da timeline` : 'Período completo';
     // opções escondidas em "Mais opções" que não estão no valor por omissão
     const LD = layDefault(), LC = this.layOf();
     const nMore = (st.mode !== 'calor') + (st.fundo !== 'mapa') + (!st.fixed) + (st.local >= 0) + (!!st.cmp) + (Object.keys(LD).some(k => LD[k].on !== LC[k].on || LD[k].op !== LC[k].op) ? 1 : 0);
@@ -2018,13 +2059,13 @@ class Component extends DCLogic {
       tri: `${pc((cur[0] + cur[1] + cur[2]) / curTot)} das admissões são urgentes (vermelho, laranja ou amarelo).` };
     return this.lastVals = { hw, cl, rankMore, rankToggle, rankToggleLabel, fqMore, fqToggle, fqToggleLabel,
       hmRows, hmHours: Array.from({ length: 24 }, (_, i) => ({ t: i + 'h', odd: i % 2 ? '1' : '0' })), hmNote,
-      totalLabel: NF.format(totAll), lede, rangeLabel,
+      totalLabel: NF.format(totAll), lede, rangeLabel, periodoLabel: [U.days[0], U.days[N - 1]].map(d => `${+d.slice(8)} ${MES[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}`).join(' – '),
       kpis: [
-        { label: 'Admissões', value: NF.format(totW), sub: `${NF.format(Math.round(totW / nD))} por dia`, delta: kD[0], dc: kC[0] },
-        { label: 'Urgentes (V+L+A)', value: pc(urW / totW), sub: `${NF.format(urW)} admissões`, delta: kD[1], dc: kC[1] },
-        { label: 'Não urgentes', value: pc(nuW / totW), sub: `verde + azul · ${NF.format(nuW)}`, delta: kD[2], dc: kC[2] },
+        { label: 'Admissões', value: NF.format(totW), sub: `${NF.format(Math.round(totW / nD))} por dia`, delta: dayBad ? '' : kD[0], dc: kC[0] },
+        { label: 'Urgentes (V+L+A)', value: pc(urW / totW), sub: `${NF.format(urW)} admissões`, delta: dayBad ? '' : kD[1], dc: kC[1] },
+        { label: 'Não urgentes', value: pc(nuW / totW), sub: `verde + azul · ${NF.format(nuW)}`, delta: dayBad ? '' : kD[2], dc: kC[2] },
         ...extraKpis.filter(x => x.label.startsWith('Por 1 000'))
-      ], hlCols: Math.max(1, Math.min(4, hl.length)), kpiFoot: semW ? `${NF.format(semW)} admissões (${pc(semW / totW, 1)}) sem freguesia não entram no mapa.` : '', hl, hlWhen,
+      ], hlCols: Math.max(1, Math.min(4, hl.length)), kpiFoot: dayBad ? `Atenção: ${fdy(U.days[i1])} é um dia ${dayBad}. Estes valores não são comparáveis com um dia normal.` : semW ? `${NF.format(semW)} admissões (${pc(semW / totW, 1)}) sem freguesia não entram no mapa.` : '', hl, hlWhen,
       moreOpen: !!st.moreOpen, moreRot: st.moreOpen ? 90 : 0, moreToggle: () => set({ moreOpen: !st.moreOpen }),
       moreLabel: st.moreOpen ? 'Menos opções' : 'Mais opções do mapa' + (nMore ? ` · ${nMore} ${nMore === 1 ? 'alterada' : 'alteradas'}` : ''), hasSnsm, snsCharts, snsVal, snsLede, snsNote, snsValNote, foot2, hosps, hospLayer: L.hosp.on ? React.createElement('div', { style: { position: 'absolute', inset: 0, opacity: L.hosp.op, pointerEvents: 'none' } }, hospLayer) : null, exportCsv, fqRows, fqLede, hasFq: fqRows.length > 0, hasSoc, socRef: this.socRef, socPts, socTicksX, socTicksY, socLine, socOpts, socLede, socOut, socXLabel, socNote, hasCs, csRows, csLede, csNote, csOpts, csMore, alRows, alLede, alMore, alToggleLabel, alToggle, csToggleLabel, csToggle,
       mapTitle: isTx ? (sp ? `Onde se recorre mais à urgência com pulseira ${selNames}, por habitante` : 'Onde se recorre mais à urgência, por habitante') : isPct ? (sp ? `Onde pesam mais as pulseiras ${selNames}` : 'Onde pesam mais as admissões urgentes') : (sp ? `De onde vêm as admissões ${selNames}` : 'De onde vêm as admissões'),
@@ -2075,7 +2116,7 @@ class Component extends DCLogic {
       fqWhen, csWhen, tlBox: `0 0 ${N * BW} 84`, bars, months, evMarks: evMarks.concat(noteMarks), evNote, syncCharts, evList, evCount, evEmpty, evOpts, nd, maxIdx: N - 1, sliderVal: st.win ? end : N - 1, sliderOff: !st.win,
       onSlide: e => set({ end: Math.max(+e.target.value, st.win - 1), playing: false }),
       tlNote: st.win ? 'Arraste o cursor ou clique num dia para mover a janela; Reproduzir anima o mapa dia a dia. Com a escala fixa, as cores comparam-se entre janelas.' : 'A ver o período completo. Escolha uma janela para percorrer os dias.',
-      panelTitle: selF ? nice(selF.n) : 'Toda a área de influência', panelSub: selF ? `${selF.c} · ${NF.format(curTot)} admissões` + (this.pop[selF.d] ? ` · ${NF.format(this.pop[selF.d][0])} residentes` : "") : `${NF.format(areaTot)} admissões${locName}`,
+      panelTitle: selF ? nice(selF.n) : 'Toda a área de influência', panelSub: selF ? `${selF.c} · ${NF.format(sum(cur))} ${sum(cur) === 1 ? 'admissão' : 'admissões'}` + (this.pop[selF.d] ? ` · ${NF.format(this.pop[selF.d][0])} residentes` : "") : `${NF.format(areaTot)} admissões${locName}`,
       hasSel: !!selF, clearSel: () => set({ sel: null }),
       bar: cur.map((v, i) => ({ w: v / curTot * 100, c: PRIO[i][1], t: tt(v, sum(cur), i), op: !sp || sp.includes(i) ? 1 : 0.3 })),
       barRef: areaC.map((v, i) => ({ w: v / areaTot * 100, c: PRIO[i][1], t: tt(v, sum(areaC), i) })),
