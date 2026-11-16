@@ -210,6 +210,7 @@ input[type=range]{accent-color:#0088b0}
       </div>
 
       <div ref="{{ mapRef }}" style="position:relative;background:var(--color-surface);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm)">
+        <div data-stage style="position:relative;background:var(--color-surface);isolation:isolate;will-change:transform;transform-origin:0 0">
         {{ tileLayer }}
         <svg viewBox="{{ viewBox }}" style="position:relative;display:block;width:100%;height:auto;aspect-ratio:{{ aspect }};cursor:grab;touch-action:none;user-select:none" preserveAspectRatio="xMidYMid slice" onMouseLeave="{{ clearHover }}" onPointerDown="{{ onDown }}">
           <defs>
@@ -288,6 +289,7 @@ input[type=range]{accent-color:#0088b0}
 
         {{ labelLayer }}
         {{ hospLayer }}
+        </div>
         <div ref="{{ map3dRef }}" role="img" aria-label="Mapa 3D das freguesias; os mesmos valores estão na lista de freguesias" style="position:absolute;inset:0;display:{{ d3disp }};opacity:{{ d3op }};pointer-events:{{ d3pe }};transition:opacity {{ d3fadeMs }}ms ease;background:#ecebea"></div>
         <sc-if value="{{ d3msg }}" hint-placeholder-val="{{ false }}"><div role="status" aria-live="polite" style="position:absolute;left:58px;top:12px;max-width:max(160px,min(300px,calc(100% - 330px)));z-index:2;font-size:0.8125rem;background:var(--color-bg);padding:6px 12px;border-radius:2px;box-shadow:var(--shadow-sm)">{{ d3msg }}</div></sc-if>
         <div class="map-dim" style="position:absolute;right:12px;bottom:26px;display:flex;align-items:center;gap:8px">
@@ -329,7 +331,7 @@ input[type=range]{accent-color:#0088b0}
         </sc-if>
 
         <sc-if value="{{ tip.show }}" hint-placeholder-val="{{ false }}">
-          <div style="position:absolute;left:{{ tip.x }}px;top:{{ tip.y }}px;transform:translate(14px,-50%);pointer-events:none;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:10px 12px;min-width:190px;max-width:260px;font-size:0.8125rem;line-height:1.35">
+          <div data-tip style="position:absolute;left:0;top:0;transform:translate({{ tip.x }}px,{{ tip.y }}px) translate(14px,-50%);will-change:transform;pointer-events:none;background:var(--color-bg);box-shadow:var(--shadow-md);border-radius:var(--radius-md);padding:10px 12px;min-width:190px;max-width:260px;font-size:0.8125rem;line-height:1.35">
             <div style="font-weight:600;font-size:0.9375rem;margin-bottom:2px">{{ tip.name }}</div>
             <div style="color:var(--color-neutral-700);margin-bottom:6px">{{ tip.con }}</div>
             <div style="display:flex;justify-content:space-between;gap:12px"><span>Admissões</span><span style="font-variant-numeric:tabular-nums">{{ tip.n }}</span></div>
@@ -1042,7 +1044,7 @@ class Component extends DCLogic {
     this.setState({ end: N - 2, ...saved, orig: Array.isArray(saved.orig) ? saved.orig : [], ...fromHash, playing: false });
     this.ro = new ResizeObserver(() => { const w = this.mapRef.current && this.mapRef.current.clientWidth; if (w && Math.abs(w - this.state.mapW) > 40) this.setState({ mapW: w }); });
     setTimeout(() => this.setState({ grids: { area: this.grid(3.4, this.vbReg), regiao: this.grid(6.5, this.vbReg) } }), 0);
-    this.onWheel = e => { if (this.state.view3d) return; e.preventDefault(); const r = this.mapRef.current.getBoundingClientRect();
+    this.onWheel = e => { if (this.state.view3d) return; e.preventDefault(); const r = this.liveR || this.mapRef.current.getBoundingClientRect();
       this.zoomAt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height, e.deltaY > 0 ? 1.18 : 1 / 1.18); };
     if (!this.ctxOn) { // barra de contexto: um só listener, limitado por rAF
       this.ctxOn = true;
@@ -1191,20 +1193,23 @@ class Component extends DCLogic {
     this.liveVB(vbC); clearTimeout(this.wheelT); this.wheelT = setTimeout(() => this.commitVB(), 160);
   }
   // durante o gesto (arrastar, roda do rato) só se move a imagem já desenhada, com uma transformação CSS;
-  // o enquadramento entra no estado (e o mapa é redesenhado) uma vez, no fim do gesto
+  // o enquadramento entra no estado (e o mapa é redesenhado) uma vez, no fim do gesto.
+  // Move-se um só elemento (data-stage) numa camada própria do browser (will-change), para o desfoque
+  // do mapa de calor não ser pintado de novo a cada frame; as medidas do mapa leem-se uma vez por gesto.
   liveVB(vb) {
     const el = this.mapRef.current; if (!el) return;
     const R = this.vbReg; if (R) { const c = (v, w, a, l) => Math.max(a - w / 2, Math.min(a + l - w / 2, v)); vb = [c(vb[0], vb[2], R[0], R[2]), c(vb[1], vb[3], R[1], R[3]), vb[2], vb[3]]; }
-    if (!this.live0) { this.live0 = this.curVB(); cancelAnimationFrame(this.vbRaf); if (this.state.hover) this.setState({ hover: null }); }
-    const v0 = this.live0, r = el.getBoundingClientRect(), s = v0[2] / vb[2];
+    const st = el.querySelector(':scope > [data-stage]'); if (!st) return;
+    if (!this.live0) { this.live0 = this.curVB(); this.liveR = el.getBoundingClientRect(); cancelAnimationFrame(this.vbRaf); if (this.state.hover) this.setState({ hover: null }); }
+    const v0 = this.live0, r = this.liveR, s = v0[2] / vb[2];
     const tx = (v0[0] - vb[0]) / vb[2] * r.width, ty = (v0[1] - vb[1]) / vb[3] * r.height;
     this.live = vb;
-    for (const n of el.querySelectorAll(':scope > svg, :scope > [data-pan]')) { n.style.transformOrigin = '0 0'; n.style.transform = `translate(${tx}px,${ty}px) scale(${s})`; }
+    st.style.transform = `translate(${tx.toFixed(1)}px,${ty.toFixed(1)}px) scale(${s.toFixed(4)})`;
   }
   commitVB() {
-    const vb = this.live, el = this.mapRef.current; this.live = this.live0 = null; clearTimeout(this.wheelT); if (!vb) return;
+    const vb = this.live, el = this.mapRef.current; this.live = this.live0 = this.liveR = null; clearTimeout(this.wheelT); if (!vb) return;
     this.vbAnim = null;
-    this.setState({ vbC: vb, hover: null }, () => { if (el) for (const n of el.querySelectorAll(':scope > svg, :scope > [data-pan]')) n.style.transform = ''; });
+    this.setState({ vbC: vb, hover: null }, () => { const st = el && el.querySelector(':scope > [data-stage]'); if (st) st.style.transform = ''; });
   }
   onDown = e => {
     if (e.button !== 0) return;
@@ -1213,7 +1218,7 @@ class Component extends DCLogic {
     if (this.dragEnd) this.dragEnd();
     this.dragged = false;
     const step = () => { const el = this.mapRef.current; if (!el || (lx === px && ly === py)) return;
-      const r = el.getBoundingClientRect(), vb = this.live || this.curVB();
+      const r = this.liveR || el.getBoundingClientRect(), vb = this.live || this.curVB();
       this.liveVB([vb[0] - (lx - px) * vb[2] / r.width, vb[1] - (ly - py) * vb[3] / r.height, vb[2], vb[3]]); px = lx; py = ly; };
     const end = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', end);
       cancelAnimationFrame(raf); raf = 0; this.dragEnd = null; if (this.dragged) this.commitVB(); setTimeout(() => { this.dragged = false; }, 0); };
@@ -1329,12 +1334,12 @@ class Component extends DCLogic {
     if (this.state.view3d && this.ml) { try { this.ml.triggerRepaint(); await new Promise(r => this.ml.once('render', r)); ctx.drawImage(this.ml.getCanvas(), 0, 0, W, H); } catch (e) { semFundo = true; } }
     else {
       // mosaicos do fundo e dos nomes, com a mesma opacidade e mistura do ecrã (pedidos de novo com CORS)
-      for (const lay of box.querySelectorAll(':scope > div')) { const imgs = [...lay.querySelectorAll(':scope > img')]; if (!imgs.length) continue;
+      for (const lay of box.querySelectorAll(':scope > [data-stage] > div')) { const imgs = [...lay.querySelectorAll(':scope > img')]; if (!imgs.length) continue;
         const cs = getComputedStyle(lay); ctx.save(); ctx.globalAlpha = +cs.opacity || 1; ctx.filter = cs.filter && cs.filter !== 'none' ? cs.filter : 'none';
         if (cs.mixBlendMode === 'multiply') ctx.globalCompositeOperation = 'multiply';
         await Promise.all(imgs.map(async im => { const r = im.getBoundingClientRect(); try { const t = await load(im.src + (im.src.includes('?') ? '&' : '?') + 'png=1', true); ctx.drawImage(t, r.left - R.left, r.top - R.top, r.width, r.height); } catch (e) { semFundo = true; } }));
         ctx.restore(); }
-      const svg = box.querySelector(':scope > svg'); if (svg) { const c = svg.cloneNode(true), r = svg.getBoundingClientRect();
+      const svg = box.querySelector(':scope > [data-stage] > svg'); if (svg) { const c = svg.cloneNode(true), r = svg.getBoundingClientRect();
         c.setAttribute('width', r.width); c.setAttribute('height', r.height); c.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); c.querySelectorAll('title').forEach(t => t.remove());
         const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(c)], { type: 'image/svg+xml' }));
         try { ctx.drawImage(await load(url), r.left - R.left, r.top - R.top, r.width, r.height); } catch (e) {} URL.revokeObjectURL(url); }
@@ -1613,11 +1618,15 @@ class Component extends DCLogic {
     const hover = st.hover;
     const hits = rows.map(r => { const on = st.sel === r.f.d, hv = hover && hover.d === r.f.d;
       return { p: r.f.p, stroke: on || hv ? '#201e1d' : 'transparent', sw: (on ? 2.4 : 1.2) * k,
-        move: e => { if (this.dragged) return; const bx = this.mapRef.current.getBoundingClientRect(); this.setState({ hover: { d: r.f.d, x: e.clientX - bx.left, y: e.clientY - bx.top } }); },
+        // a página só é redesenhada quando o rato muda de freguesia; dentro da mesma, a etiqueta move-se diretamente
+        move: e => { if (this.dragged || this.live) return; const bx = this.mapRef.current.getBoundingClientRect(), x = e.clientX - bx.left, y = e.clientY - bx.top, h = this.state.hover; this.tipXY = { x, y };
+          if (!h || h.d !== r.f.d) return this.setState({ hover: { d: r.f.d, x, y } });
+          const t = this.mapRef.current.querySelector('[data-tip]'); if (t) t.style.transform = `translate(${Math.min(x, bx.width - 290).toFixed(0)}px,${y.toFixed(0)}px) translate(14px,-50%)`; },
         click: () => { if (!this.dragged) set({ sel: st.sel === r.f.d ? null : r.f.d }); } }; });
     let tip = { show: false };
     if (hover) { const r = rows.find(x => x.f.d === hover.d); if (r) { const bw = this.mapRef.current ? this.mapRef.current.clientWidth : 900;
-      tip = { show: true, x: Math.min(hover.x, bw - 290), y: hover.y, name: nice(r.f.n), con: r.f.c, n: NF.format(r.n), pctLabel: sp ? 'Peso no total' : 'Urgentes (V+L+A)', pct: pc(r.share, 1),
+      const hp = (!st.view3d && this.tipXY) || hover;
+      tip = { show: true, x: Math.min(hp.x, bw - 290), y: hp.y, name: nice(r.f.n), con: r.f.c, n: NF.format(r.n), pctLabel: sp ? 'Peso no total' : 'Urgentes (V+L+A)', pct: pc(r.share, 1),
         extra: (cmpOn ? [{ k: `Antes (${fdy(U.days[j0])} → ${fdy(U.days[j1])})`, v: (() => { const b = cmpRows[rows.indexOf(r)].n, c = chg(r.n, b); return NF.format(b) + (c == null ? '' : ` · ${c > 0 ? '+' : c < 0 ? '−' : ''}${Math.abs(Math.round(c * 100))}%`); })() }] : []).concat(r.pop ? [{ k: 'Residentes (Censos 2021)', v: NF.format(r.pop) }, { k: 'Por 1 000 hab./ano', v: f0(r.tx) }, { k: '65 e mais anos', v: pc(this.pop[r.f.d][2] / r.pop, 1) }].concat(fqOf(r.f.d) ? [{ k: `Utentes com ${FQ.k}+ idas`, v: `${NF.format(fqOf(r.f.d)[1])} · ${pc(fqOf(r.f.d)[1] / fqOf(r.f.d)[0], 1)}` }] : []) : []),
         segs: r.c.map((v, i) => ({ w: r.tot ? v / r.tot * 100 : 0, c: PRIO[i][1], t: tt(v, r.tot, i) })) }; } }
 
